@@ -77,18 +77,25 @@ jobs:
       - name: 🧹 Static Analysis & Lint (Ruff)
         run: ruff check src tests --fix
 
-      - name: 🚀 Commit & Push Hygiene Changes
+      - name: 🚀 Commit & Push Hygiene Changes + Sync Notes
         if: always()
         run: |
           git add .
           if [ -n "$(git status --porcelain)" ]; then
             git commit -m "🤖 robot: auto-clean hygiene update [Engine]"
+            TARGET_COMMIT=$(git rev-parse HEAD)
 
-            # Inline Git Notes
-            git notes add -m "robot: true" || true
-            git push origin refs/notes/* || true
+            # 1️⃣ Fetch remote notes FIRST
+            git fetch origin refs/notes/commits:refs/notes/commits || true
 
+            # 2️⃣ Add note locally
+            git notes add -f -m "robot: true" "$TARGET_COMMIT"
+
+            # 3️⃣ Push commit
             git push origin HEAD
+
+            # 4️⃣ Force-push notes
+            git push --force origin refs/notes/commits
           else
             echo "No hygiene changes detected."
           fi
@@ -140,18 +147,25 @@ jobs:
             exit 1
           fi
       
-      - name: 🧹 Sync Forensic Reset
+      - name: 🧹 Sync Forensic Reset + Sync Notes
         if: success()
         run: |
           git add src/debug/forensic_audit.sh
           if [ -n "$(git status --porcelain src/debug/forensic_audit.sh)" ]; then
             git commit -m "🤖 robot: forensic reset [PASS]"
+            TARGET_COMMIT=$(git rev-parse HEAD)
 
-            # Inline Git Notes
-            git notes add -m "robot: true" || true
-            git push origin refs/notes/* || true
+            # 1️⃣ Fetch remote notes FIRST
+            git fetch origin refs/notes/commits:refs/notes/commits || true
 
+            # 2️⃣ Add note locally
+            git notes add -f -m "robot: true" "$TARGET_COMMIT"
+
+            # 3️⃣ Push commit
             git push origin HEAD
+
+            # 4️⃣ Force-push notes
+            git push --force origin refs/notes/commits
           else
             echo "Forensic script already dormant."
           fi
@@ -170,6 +184,8 @@ jobs:
     steps:
       - name: 🗂️ Checkout Engine
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # 🔧 GLOBAL ROBOT IDENTITY + NOTES INITIALIZATION
       - name: 🤖 Initialize Robot Identity & Notes
@@ -198,7 +214,7 @@ jobs:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: python3 src/main_engine.py
 
-      - name: 📊 Sync Audit, Ledger & Dormancy State
+      - name: 📊 Sync Audit, Ledger & Dormancy State + Sync Notes
         if: always()
         run: |
           git add performance_audit.md config/dormant.flag config/orchestration_ledger.json
@@ -212,12 +228,19 @@ jobs:
             # Re-add after rebase to ensure clean state
             git add performance_audit.md config/dormant.flag config/orchestration_ledger.json
             git commit -m "🤖 robot: audit cycle complete | status=${{ job.status }}"
+            TARGET_COMMIT=$(git rev-parse HEAD)
 
-            # Inline Git Notes
-            git notes add -m "robot: true" || true
-            git push origin refs/notes/* || true
+            # 1️⃣ Fetch remote notes FIRST
+            git fetch origin refs/notes/commits:refs/notes/commits || true
 
+            # 2️⃣ Add note locally
+            git notes add -f -m "robot: true" "$TARGET_COMMIT"
+
+            # 3️⃣ Push commit
             git push origin HEAD
+
+            # 4️⃣ Force-push notes
+            git push --force origin refs/notes/commits
           else
             echo "No core state changes detected."
           fi
