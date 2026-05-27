@@ -9,7 +9,7 @@ if [[ -z "${APP_KEY}" || -z "${APP_SECRET}" || -z "${REFRESH_TOKEN}" ]]; then
 fi
 
 # 2. Path Definition (SSoT)
-export DROPBOX_FOLDER="/engineering_simulations_pipeline"
+export DROPBOX_FOLDER="/simulators"
 export LOCAL_FOLDER="./data/testing-input-output"
 export LOG_FILE="./dropbox_download_log.txt"
 
