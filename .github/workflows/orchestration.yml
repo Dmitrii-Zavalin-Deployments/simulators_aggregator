@@ -61,6 +61,16 @@ jobs:
           git config --global user.email "automation@yourdomain"
           git config --global notes.rewriteRef "refs/notes/*"
 
+      - name: ♻️ Install Universal Robot Note Hook
+        run: |
+          mkdir -p .git/hooks
+          cat <<'EOF' > .git/hooks/post-commit
+          #!/bin/sh
+          git notes add -m "robot: true" || true
+          git push origin refs/notes/* || true
+          EOF
+          chmod +x .git/hooks/post-commit
+
       - name: 🐍 Setup Python 3.11
         uses: actions/setup-python@v5
         with:
@@ -83,18 +93,14 @@ jobs:
           git add .
           if [ -n "$(git status --porcelain)" ]; then
             git commit -m "🤖 robot: auto-clean hygiene update [Engine]"
-            git notes add -m "robot: true"
             git push origin HEAD
-            git push origin refs/notes/* || true
           else
             echo "No hygiene changes detected."
           fi
 
       - name: 💀 Dead Code Audit (Vulture)
         id: vulture
-        run: |
-          # Rule 2: Zero-Debt Mandate. Detect unreachable code.
-          vulture src --min-confidence 70
+        run: vulture src --min-confidence 70
 
       - name: 🧪 Quality Gate Check (Rule 2)
         if: failure() && steps.vulture.outcome == 'failure'
@@ -145,9 +151,7 @@ jobs:
           git add src/debug/forensic_audit.sh
           if [ -n "$(git status --porcelain src/debug/forensic_audit.sh)" ]; then
             git commit -m "🤖 robot: forensic reset [PASS]"
-            git notes add -m "robot: true"
             git push origin HEAD
-            git push origin refs/notes/* || true
           else
             echo "Forensic script already dormant."
           fi
@@ -173,6 +177,16 @@ jobs:
           git config --global user.name "Automation Engine"
           git config --global user.email "automation@yourdomain"
           git config --global notes.rewriteRef "refs/notes/*"
+
+      - name: ♻️ Install Universal Robot Note Hook
+        run: |
+          mkdir -p .git/hooks
+          cat <<'EOF' > .git/hooks/post-commit
+          #!/bin/sh
+          git notes add -m "robot: true" || true
+          git push origin refs/notes/* || true
+          EOF
+          chmod +x .git/hooks/post-commit
 
       - name: 🐍 Setup Python 3.11
         uses: actions/setup-python@v5
@@ -208,9 +222,7 @@ jobs:
             # Re-add after rebase to ensure clean state
             git add performance_audit.md config/dormant.flag config/orchestration_ledger.json
             git commit -m "🤖 robot: audit cycle complete | status=${{ job.status }}"
-            git notes add -m "robot: true"
             git push origin HEAD
-            git push origin refs/notes/* || true
           else
             echo "No core state changes detected."
           fi
