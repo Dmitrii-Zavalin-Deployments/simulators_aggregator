@@ -5,7 +5,7 @@
   },
   "steps": {
     "navier_stokes_execution": {
-      "status": "COMPLETED",
+      "status": "WAITING",
       "last_triggered": "2026-05-09T16:01:09.154912+00:00",
       "timeout_hours": 6,
       "target_repo": "Dmitrii-Zavalin-Deployments/navier_stokes_solver"
