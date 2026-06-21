@@ -35,6 +35,7 @@
 • LICENSE
 • data/testing-input-output/.gitkeep
 • performance_audit.md
+• merged_content.txt
 • requirements.txt
 • config/orchestration_ledger.json
 • config/active_disk.json
@@ -3384,6 +3385,576 @@ Public License instead of this License.  But first, please read
 ========== START OF FILE: performance_audit.md ==========
 # 🛰️ Simulation Engine Performance Audit
 
+## [2026-06-21 13:05:24 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-21 10:33:26 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-21 06:57:17 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-21 01:58:04 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-20 23:08:15 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-20 21:47:05 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-20 20:03:59 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-20 18:21:38 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-20 17:00:24 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-20 15:02:46 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-20 12:53:48 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-20 10:57:41 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-20 08:21:10 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-20 04:51:26 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-20 00:12:59 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-19 22:57:23 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-19 21:43:45 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-19 20:14:23 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-19 18:16:06 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-19 16:10:50 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-19 12:58:39 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-19 09:19:03 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-19 04:16:07 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-18 23:44:49 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-18 21:34:19 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-18 19:27:56 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-18 16:31:22 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-18 12:52:18 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-18 09:53:37 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-18 05:16:58 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-18 00:18:57 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-17 22:57:47 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-17 21:05:48 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-17 18:41:23 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-17 16:11:42 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-17 12:16:04 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-17 07:33:07 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-17 02:01:48 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-16 23:03:44 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-16 21:25:53 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-16 18:15:17 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-16 13:12:09 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-16 08:26:38 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-16 02:07:16 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-15 23:02:43 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-15 20:38:44 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-15 17:30:11 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-15 12:12:51 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-15 05:36:51 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-15 00:08:46 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-14 22:40:25 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-14 21:12:13 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-14 19:40:44 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-14 17:57:01 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-14 16:21:42 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-14 14:40:29 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-14 12:22:39 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-14 10:24:41 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-14 06:40:22 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-14 01:43:20 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-13 23:04:06 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-13 21:46:09 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-13 20:01:02 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-13 18:08:04 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-13 16:55:41 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-13 15:16:58 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-13 13:05:13 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-13 11:13:51 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-13 08:36:53 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-13 05:01:37 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-13 00:21:37 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-12 22:57:07 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-12 21:16:38 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-12 19:29:42 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-12 17:21:53 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-12 14:19:19 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-12 11:01:01 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-12 06:44:58 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-12 01:56:49 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-11 23:09:43 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-11 21:20:30 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-11 18:52:13 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-11 16:00:20 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-11 11:42:59 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-11 06:59:25 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-11 02:00:17 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-10 23:25:16 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-10 21:35:10 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-10 19:10:17 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-10 16:20:56 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-10 12:20:39 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-10 08:52:42 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-10 04:57:38 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-10 00:19:48 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-09 22:58:05 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-09 21:17:56 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-09 19:12:58 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-09 16:31:31 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-09 13:44:15 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-09 10:45:48 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-09 07:03:27 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-09 03:28:50 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-08 23:46:13 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-08 22:09:48 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-08 20:14:38 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-08 17:52:46 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-08 14:34:13 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-08 10:03:11 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-08 05:12:37 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-08 00:07:42 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-07 22:37:06 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-07 21:12:26 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-07 19:54:38 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
+## [2026-06-07 19:41:45 UTC] 📥 HYDRATION
+- **Message:** State synchronized for Project: navier_stokes_alpha_01
+
+---
+
 ## [2026-05-27 16:29:39 UTC] 💤 DORMANCY_LOCK
 - **Message:** All steps saturated. Engine entering hibernation.
 
@@ -4246,6 +4817,9 @@ Public License instead of this License.  But first, please read
 
 ========== END OF FILE: performance_audit.md ==========
 
+========== START OF FILE: merged_content.txt ==========
+========== END OF FILE: merged_content.txt ==========
+
 ========== START OF FILE: requirements.txt ==========
 # --- Core Orchestration & Logic ---
 # Phase C, Rule 0: Law of Performance (Minimal I/O)
@@ -4279,7 +4853,7 @@ responses==0.24.1         # Mocking Network I/O for Forensic Integrity Checks===
   },
   "steps": {
     "navier_stokes_execution": {
-      "status": "COMPLETED",
+      "status": "WAITING",
       "last_triggered": "2026-05-09T16:01:09.154912+00:00",
       "timeout_hours": 6,
       "target_repo": "Dmitrii-Zavalin-Deployments/navier_stokes_solver"
@@ -4295,7 +4869,7 @@ responses==0.24.1         # Mocking Network I/O for Forensic Integrity Checks===
 }========== END OF FILE: config/active_disk.json ==========
 
 ========== START OF FILE: config/dormant.flag ==========
-STATUS: DORMANT========== END OF FILE: config/dormant.flag ==========
+STATUS: ACTIVE========== END OF FILE: config/dormant.flag ==========
 
 ========== START OF FILE: src/api/github_trigger.py ==========
 # src/api/github_trigger.py
