@@ -33,7 +33,8 @@ jobs:
                   return self
           EOF
 
-      - name: Clone Mesh Generator Repo (Public)
+      - name: Clone Mesh Generator Repo
+        id: clone_repo
         run: |
           git clone https://github.com/Dmitrii-Zavalin-Deployments/mesh_generator.git
           cd mesh_generator
@@ -43,6 +44,12 @@ jobs:
             echo "ERROR: mesh_generator.yml missing!"
             exit 1
           fi
+
+      - name: Run Forensic Audit on Failure
+        if: failure()
+        run: |
+          chmod +x debug/forensic_audit.sh
+          ./debug/forensic_audit.sh
 
       - name: Run Test Logic (solve function)
         shell: python
