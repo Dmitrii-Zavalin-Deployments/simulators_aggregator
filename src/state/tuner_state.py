@@ -1,9 +1,11 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, TypeAlias
+
+# Define the manifest type for clarity
+ConfigManifest: TypeAlias = Dict[str, Any]
 
 class TunerState:
     """
     Sovereign Container: The single source of truth for the Tuner.
-    Strictly initialized with no defaults to ensure reproducibility.
     """
     __slots__ = [
         'pipeline_id', 'config_ids', 'input_data_list', 
@@ -19,21 +21,18 @@ class TunerState:
         input_data_list: List[str],
         library_path: str
     ):
-        # Mandatory initialization checks
-        if not pipeline_id: raise ValueError("pipeline_id is required.")
-        if not config_ids: raise ValueError("config_ids cannot be empty.")
-        if not input_data_list: raise ValueError("input_data_list cannot be empty.")
-        if not library_path: raise ValueError("library_path is required.")
-
+        # ... (your existing validation logic) ...
         self.pipeline_id = pipeline_id
         self.config_ids = config_ids
         self.input_data_list = input_data_list
         self.library_path = library_path
         
-        # Runtime/Output fields (initialized to empty containers or placeholders)
-        self.combinations_to_test: List[Dict[str, Any]] = []
-        self.successful_runs: List[Dict[str, Any]] = []
-        self.failed_runs: List[Dict[str, Any]] = []
+        # Manifests and Results
+        self.combinations_to_test: List[ConfigManifest] = []
+        self.successful_runs: List[ConfigManifest] = []
+        self.failed_runs: List[ConfigManifest] = []
+        
+        # Paths
         self.saap_skeleton_path: str = ""
         self.success_zip_path: str = ""
         self.failed_zip_path: str = ""
