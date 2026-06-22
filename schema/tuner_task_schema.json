@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Tuner Input Schema",
+  "type": "object",
+  "properties": {
+    "pipeline_id": {
+      "type": "string",
+      "description": "Identifier for the target YAML in Library."
+    },
+    "config_ids": {
+      "type": "array",
+      "description": "List of config identifiers to tune for this pipeline.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "input_data_list": {
+      "type": "string",
+      "description": "The specific folder in Dropbox for this input."
+    }
+  },
+  "required": [
+    "pipeline_id",
+    "config_ids"
+  ]
+}

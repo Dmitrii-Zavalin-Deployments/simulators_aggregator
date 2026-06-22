@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Tuner Results Schema",
+  "type": "object",
+  "properties": {
+    "run_id": { "type": "string" },
+    "status": { "type": "string", "enum": ["success", "failed"] },
+    "execution_time_seconds": { "type": "number" },
+    "module_output": { 
+      "type": "string",
+      "description": "The filename of the resulting ZIP archive containing the run artifacts."
+    },
+    "error_log": { "type": ["string", "null"] }
+  },
+  "required": ["run_id", "status", "execution_time_seconds", "module_output"]
+}
