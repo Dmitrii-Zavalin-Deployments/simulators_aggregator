@@ -1,0 +1,85 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Tuner Output Schema",
+    "type": "object",
+    "properties": {
+        "task": {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "title": "Tuner Execution Task Schema",
+            "type": "object",
+            "properties": {
+                "pipeline_id": {
+                    "type": "string",
+                    "description": "Identifier for the target YAML in Library."
+                },
+                "config_ids": {
+                    "type": "array",
+                    "description": "List of config identifiers to tune for this pipeline.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "input_data_list": {
+                    "type": "array",
+                    "description": "The list of names of the input files for this run.",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "pipeline_id",
+                "config_ids",
+                "input_data_list"
+            ]
+        },
+        "results": {
+            "type": "array",
+            "description": "List of individual run results from the config sweep.",
+            "items": {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+                "title": "Tuner Results Schema",
+                "type": "object",
+                "properties": {
+                    "run_id": {
+                        "type": "string",
+                        "description": "Unique identifier for this specific execution instance (e.g., hash or CI job ID)."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "success",
+                            "failed"
+                        ],
+                        "description": "The outcome of the tuning run. Used for sorting successful runs from failed ones."
+                    },
+                    "execution_time_seconds": {
+                        "type": "number",
+                        "description": "Total duration of the pipeline execution in seconds; used for performance monitoring."
+                    },
+                    "module_output": {
+                        "type": "string",
+                        "description": "The exact filename of the resulting ZIP archive uploaded to Dropbox (e.g., 'run_001.zip')."
+                    },
+                    "error_log": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Capture of standard error output or stack trace if status is 'failed'; null if successful."
+                    }
+                },
+                "required": [
+                    "run_id",
+                    "status",
+                    "execution_time_seconds",
+                    "module_output"
+                ]
+            }
+        }
+    },
+    "required": [
+        "task",
+        "results"
+    ]
+}

@@ -3,14 +3,27 @@
   "title": "Tuner Results Schema",
   "type": "object",
   "properties": {
-    "run_id": { "type": "string" },
-    "status": { "type": "string", "enum": ["success", "failed"] },
-    "execution_time_seconds": { "type": "number" },
+    "run_id": { 
+      "type": "string", 
+      "description": "Unique identifier for this specific execution instance (e.g., hash or CI job ID)." 
+    },
+    "status": { 
+      "type": "string", 
+      "enum": ["success", "failed"],
+      "description": "The outcome of the tuning run. Used for sorting successful runs from failed ones."
+    },
+    "execution_time_seconds": { 
+      "type": "number", 
+      "description": "Total duration of the pipeline execution in seconds; used for performance monitoring." 
+    },
     "module_output": { 
       "type": "string",
-      "description": "The filename of the resulting ZIP archive containing the run artifacts."
+      "description": "The exact filename of the resulting ZIP archive uploaded to Dropbox (e.g., 'run_001.zip')."
     },
-    "error_log": { "type": ["string", "null"] }
+    "error_log": { 
+      "type": ["string", "null"], 
+      "description": "Capture of standard error output or stack trace if status is 'failed'; null if successful." 
+    }
   },
   "required": ["run_id", "status", "execution_time_seconds", "module_output"]
 }
