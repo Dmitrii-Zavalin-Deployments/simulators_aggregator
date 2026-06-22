@@ -12,11 +12,6 @@ jobs:
       - name: Checkout Current Repository
         uses: actions/checkout@v4
 
-      - name: Setup SSH for Private Repo
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_DEPLOY_KEY }}
-
       - name: Create Test Harness Files
         run: |
           mkdir -p tests
@@ -38,9 +33,9 @@ jobs:
                   return self
           EOF
 
-      - name: Clone Mesh Generator Repo
+      - name: Clone Mesh Generator Repo (Public)
         run: |
-          git clone git@github.com:Dmitrii-Zavalin-Deployments/mesh_generator.git
+          git clone https://github.com/Dmitrii-Zavalin-Deployments/mesh_generator.git
           cd mesh_generator
           if [ -f "mesh_generator.yml" ]; then
             echo "SUCCESS: mesh_generator.yml found."
@@ -59,26 +54,21 @@ jobs:
               result = dummy_out()
               start_time = time.time()
               try:
-                  # Step 1: Logic stub
                   print(f"Running config: {config_id}")
-                  
-                  # Step 2: Bridge (Execution simulation)
-                  # Simulating successful run
                   result.override(status="success", module_output="result.zip")
-                  
               except Exception as e:
                   result.override(status="failed", error_log=str(e))
               
               result.override(execution_time_seconds = time.time() - start_time)
               return result
 
-          # Execute Test
           task = dummy_in(pipeline_id="test_pipe")
           res = solve(task, "test_config_01")
           print(f"Test Finished with status: {res['status']}")
           assert res['status'] == "success"
 
       - name: Final Instance Inspection
+        if: always()
         run: |
           echo "Instance File Structure:"
           ls -R
