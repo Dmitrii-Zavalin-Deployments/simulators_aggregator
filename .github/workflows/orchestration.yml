@@ -38,10 +38,11 @@ jobs:
         run: |
           git clone https://github.com/Dmitrii-Zavalin-Deployments/mesh_generator.git
           cd mesh_generator
-          if [ -f "mesh_generator.yml" ]; then
-            echo "SUCCESS: mesh_generator.yml found."
+          # Update the path to look inside the subdirectory
+          if [ -f ".github/workflows/mesh_generator.yml" ]; then
+            echo "SUCCESS: mesh_generator.yml found in subfolder."
           else
-            echo "ERROR: mesh_generator.yml missing!"
+            echo "ERROR: mesh_generator.yml still missing!"
             exit 1
           fi
 
