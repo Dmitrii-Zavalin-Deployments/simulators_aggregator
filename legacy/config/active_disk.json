@@ -1,5 +1,0 @@
-{
-    "project_id": "navier_stokes_alpha_01",
-    "manifest_url": "https://raw.githubusercontent.com/Dmitrii-Zavalin-Deployments/fluid_dynamics_simulator/refs/heads/main/manifests/fluid_test_01.json",
-    "description": "Active simulation for coastal thermal analysis."
-}
