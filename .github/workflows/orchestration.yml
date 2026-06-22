@@ -12,37 +12,13 @@ jobs:
       - name: Checkout Current Repository
         uses: actions/checkout@v4
 
-      - name: Create Test Harness Files
-        run: |
-          mkdir -p tests
-          cat <<EOF > tests/dummies.py
-          class dummy_in(dict):
-              def __init__(self, **kwargs):
-                  super().__init__({'pipeline_id': 'default', 'config_ids': ['cfg1'], 'input_data_list': ['data.in']})
-                  self.update(kwargs)
-              def override(self, **kwargs):
-                  self.update(kwargs)
-                  return self
-
-          class dummy_out(dict):
-              def __init__(self, **kwargs):
-                  super().__init__({'run_id': 'run_0', 'status': 'success', 'execution_time_seconds': 0.0, 'module_output': 'out.zip', 'error_log': None})
-                  self.update(kwargs)
-              def override(self, **kwargs):
-                  self.update(kwargs)
-                  return self
-          EOF
-
       - name: Clone Mesh Generator Repo
-        id: clone_repo
         run: |
           git clone https://github.com/Dmitrii-Zavalin-Deployments/mesh_generator.git
-          cd mesh_generator
-          # Update the path to look inside the subdirectory
-          if [ -f ".github/workflows/mesh_generator.yml" ]; then
+          if [ -f "mesh_generator/.github/workflows/mesh_generator.yml" ]; then
             echo "SUCCESS: mesh_generator.yml found in subfolder."
           else
-            echo "ERROR: mesh_generator.yml still missing!"
+            echo "ERROR: mesh_generator.yml missing!"
             exit 1
           fi
 
@@ -53,8 +29,12 @@ jobs:
           ./debug/forensic_audit.sh
 
       - name: Run Test Logic (solve function)
-        shell: python
+        shell: bash
         run: |
+          # Ensure current directory is in the path for module imports
+          export PYTHONPATH=$PYTHONPATH:.
+          
+          python3 -c "
           from tests.dummies import dummy_in, dummy_out
           import time
 
@@ -62,18 +42,21 @@ jobs:
               result = dummy_out()
               start_time = time.time()
               try:
-                  print(f"Running config: {config_id}")
-                  result.override(status="success", module_output="result.zip")
+                  print(f'Running config: {config_id}')
+                  # Simulate logic
+                  result.override(status='success', module_output='result.zip')
               except Exception as e:
-                  result.override(status="failed", error_log=str(e))
+                  result.override(status='failed', error_log=str(e))
               
               result.override(execution_time_seconds = time.time() - start_time)
               return result
 
-          task = dummy_in(pipeline_id="test_pipe")
-          res = solve(task, "test_config_01")
-          print(f"Test Finished with status: {res['status']}")
-          assert res['status'] == "success"
+          # Execute Test
+          task = dummy_in(pipeline_id='test_pipe')
+          res = solve(task, 'test_config_01')
+          print(f'Test Finished with status: {res[\"status\"]}')
+          assert res['status'] == 'success'
+          "
 
       - name: Final Instance Inspection
         if: always()

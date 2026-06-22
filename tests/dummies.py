@@ -8,7 +8,6 @@ class dummy_in(dict):
             "config_ids": config_ids or ["default_config"],
             "input_data_list": input_data_list or ["default_input.json"]
         })
-        # Instance attributes for non-schema meta-data
         self.validation_flag = False
         self.is_ready_to_run = True
 
@@ -30,7 +29,6 @@ class dummy_out(dict):
             "module_output": output,
             "error_log": error
         })
-        # Instance attributes for non-schema meta-data
         self.debug_mode = False
         self.log_path = "/tmp/run_log.txt"
 
