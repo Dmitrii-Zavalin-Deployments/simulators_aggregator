@@ -6,6 +6,7 @@ ConfigManifest: TypeAlias = Dict[str, Any]
 class TunerState:
     """
     Sovereign Container: The single source of truth for the Tuner.
+    Strictly initialized with no defaults to ensure reproducibility.
     """
     __slots__ = [
         'pipeline_id', 'config_ids', 'input_data_list', 
@@ -21,7 +22,12 @@ class TunerState:
         input_data_list: List[str],
         library_path: str
     ):
-        # ... (your existing validation logic) ...
+        # Mandatory initialization checks
+        if not pipeline_id: raise ValueError("pipeline_id is required.")
+        if not config_ids: raise ValueError("config_ids cannot be empty.")
+        if not input_data_list: raise ValueError("input_data_list cannot be empty.")
+        if not library_path: raise ValueError("library_path is required.")
+
         self.pipeline_id = pipeline_id
         self.config_ids = config_ids
         self.input_data_list = input_data_list
