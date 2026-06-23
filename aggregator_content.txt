@@ -12,15 +12,18 @@
 • performance_audit.md
 • interfaces/step_interface.py
 • interfaces/pipeline_interface.py
+• merged_content.txt
 • requirements.txt
+• src/main.py
 • src/state/tuner_state.py
+• src/pipeline/steps/deliverable_assembly.py
+• src/pipeline/steps/execution_engine.py
 • debug/forensic_audit.sh
 -------------------------------------------
 
 ========== START OF FILE: tests/test_integrations.py ==========
 import json
 import os
-import shutil
 import time
 from tests.dummies import dummy_in, dummy_out
 
@@ -104,7 +107,6 @@ if __name__ == "__main__":
 ========== END OF FILE: tests/__init__.py ==========
 
 ========== START OF FILE: tests/dummies.py ==========
-from typing import List, Optional
 
 class dummy_in(dict):
     """Maps 1:1 to Tuner Execution Task Schema."""
@@ -2492,6 +2494,9 @@ class PipelineInterface(Protocol):
         """Exposes the routing absolute target values mapped for local compression handling and staging layers."""
         ...========== END OF FILE: interfaces/pipeline_interface.py ==========
 
+========== START OF FILE: merged_content.txt ==========
+========== END OF FILE: merged_content.txt ==========
+
 ========== START OF FILE: requirements.txt ==========
 # --- Core Orchestration & Logic ---
 # Phase C, Rule 0: Law of Performance (Minimal I/O)
@@ -2516,6 +2521,67 @@ vulture==2.10             # Dead-code elimination for "Lean Wiring"
 pytest==7.4.3             # Real-disk I/O validation
 pytest-cov==4.1.0         # Enforces 100% coverage mandate
 responses==0.24.1         # Mocking Network I/O for Forensic Integrity Checks========== END OF FILE: requirements.txt ==========
+
+========== START OF FILE: src/main.py ==========
+import os
+from src.state.tuner_state import TunerState
+from src.pipeline.steps.execution_engine import ExecutionEngineStep
+from src.pipeline.steps.deliverable_assembly import DeliverableAssemblyStep
+
+# --- Configuration Paths ---
+STATE_FILE_PATH = "tuner_state.json"
+DORMANCY_FLAG_PATH = "config/dormant.flag"
+
+def check_dormancy() -> bool:
+    """Evaluates the Isolation Mandate."""
+    if not os.path.exists(DORMANCY_FLAG_PATH):
+        return False # Active by default
+    with open(DORMANCY_FLAG_PATH, 'r') as f:
+        return "STATUS: DORMANT" in f.read()
+
+def enforce_dormancy():
+    """Locks the engine into hibernation."""
+    os.makedirs(os.path.dirname(DORMANCY_FLAG_PATH), exist_ok=True)
+    with open(DORMANCY_FLAG_PATH, 'w') as f:
+        f.write("STATUS: DORMANT\n")
+
+def run_pulse():
+    """
+    The Master Entrypoint.
+    Executes a single hourly pulse of the ACE pipeline.
+    """
+    # 1. Gatekeeper Verification
+    if check_dormancy():
+        print("🛑 ENGINE DORMANT: Halting pulse. No active targets.")
+        return
+
+    print("🚀 ENGINE ACTIVE: Initiating Hydration...")
+
+    # 2. Strict Hydration
+    if not os.path.exists(STATE_FILE_PATH):
+        raise FileNotFoundError(f"CRITICAL: {STATE_FILE_PATH} missing. Initial state generation required.")
+    
+    state = TunerState.load_from_disk(STATE_FILE_PATH)
+    
+    # 3. Execution Engine (ACE Loop)
+    ExecutionEngineStep().execute(state)
+
+    # 4. Exit Gate & Lifecycle Management
+    if state.batch_cursor >= len(state.combinations_to_test):
+        print("✅ Super-Matrix saturated. Assembling SaaP Deliverables...")
+        DeliverableAssemblyStep().execute(state)
+        enforce_dormancy()
+    
+    # 5. Dehydration (Atomic Persistence)
+    state.save_to_disk(STATE_FILE_PATH)
+    
+    # 6. Audit Logging
+    print(f"💾 Dehydration complete. Cursor position: [{state.batch_cursor} / {len(state.combinations_to_test)}]")
+
+
+if __name__ == "__main__":
+    # pragma: no cover (Forensic Deletion Rule: Boilerplate ignored by coverage)
+    run_pulse()========== END OF FILE: src/main.py ==========
 
 ========== START OF FILE: src/state/tuner_state.py ==========
 import json
@@ -2668,6 +2734,131 @@ class TunerState:
     def advance_cursor(self, batch_size: int):
         """Advances pointer cleanly upon conclusion of automated batch cycle."""
         self.batch_cursor += batch_size========== END OF FILE: src/state/tuner_state.py ==========
+
+========== START OF FILE: src/pipeline/steps/deliverable_assembly.py ==========
+import os
+import json
+from interfaces.step_interface import StepInterface
+from src.state.tuner_state import TunerState
+
+class DeliverableAssemblyStep(StepInterface):
+    """
+    The Zero-Logic Packager. 
+    Constructs the final SaaP deliverables strictly from the Sovereign Container.
+    """
+
+    def execute(self, container: TunerState) -> None:
+        # 1. Read-Only Schema Extraction
+        deliverable_payload = container.to_saap_deliverable()
+
+        # 2. Physical Directory Scaffolding (Refactored from package_output)
+        os.makedirs(container.saap_skeleton_path, exist_ok=True)
+        
+        # 3. Write SaaP Pipeline Skeleton
+        pipeline_yml_path = os.path.join(container.saap_skeleton_path, 'pipeline.yml')
+        with open(pipeline_yml_path, 'w') as f:
+            f.write("# Final ACE Pipeline Config Extracted from Tuner\n")
+        
+        # 4. Generate Output Manifests (representing the ZIP staging)
+        with open(f"{container.success_zip_path}_manifest.json", 'w') as f:
+            json.dump(container.successful_runs, f, indent=4)
+            
+        with open(f"{container.failed_zip_path}_manifest.json", 'w') as f:
+            json.dump(container.failed_runs, f, indent=4)
+            
+        # 5. Write the final Deliverable Schema
+        final_schema_path = os.path.join(container.saap_skeleton_path, "deliverable.json")
+        with open(final_schema_path, "w") as f:
+            json.dump(deliverable_payload, f, indent=4)========== END OF FILE: src/pipeline/steps/deliverable_assembly.py ==========
+
+========== START OF FILE: src/pipeline/steps/execution_engine.py ==========
+import time
+from typing import Dict, Any
+from interfaces.step_interface import StepInterface
+from src.state.tuner_state import TunerState
+
+# --- External Helper (Preserves Class Constitution) ---
+def run_module_simulation(module_name: str, config_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Refactored from the 'solve()' dummy in test_integrations.py.
+    Executes a single step in the pipeline.
+    """
+    start_time = time.time()
+    try:
+        # Explicit Zero-Default check
+        if not config_data:
+            raise ValueError(f"CRITICAL: No config provided for module '{module_name}'")
+        
+        # [Simulated Physics Execution Time]
+        time.sleep(0.1) 
+        
+        return {
+            "status": "SUCCESS", 
+            "execution_time": time.time() - start_time
+        }
+    except Exception as e:
+        return {
+            "status": "FAILED", 
+            "error_log": str(e), 
+            "execution_time": time.time() - start_time
+        }
+
+
+class ExecutionEngineStep(StepInterface):
+    """
+    Executes the ACE (Automated Cumulative Execution) Loop.
+    Pulls a batch from the Sovereign Container and applies depth-first branch pruning.
+    """
+    
+    def execute(self, container: TunerState) -> None:
+        # Configure the hourly pulse limit (e.g., 10 permutations per run)
+        BATCH_LIMIT = 10 
+        
+        # 1. Retrieve the exact slice from the Super-Matrix using the bookmark cursor
+        batch = container.get_next_batch(BATCH_LIMIT)
+        if not batch:
+            return 
+
+        # 2. The ACE Loop
+        for permutation in batch:
+            pipeline_status = "SUCCESS"
+            total_time = 0.0
+            failed_at = None
+            error_message = None
+
+            # Execute modules sequentially (Depth-First)
+            for module_name, config_data in permutation.items():
+                result = run_module_simulation(module_name, config_data)
+                total_time += result["execution_time"]
+
+                # Branch Pruning (Fail-Fast)
+                if result["status"] == "FAILED":
+                    pipeline_status = "FAILED"
+                    failed_at = module_name
+                    error_message = result.get("error_log")
+                    break 
+
+            # 3. Log Results deterministically to the Sovereign Container
+            permutation_id = f"run_{hash(str(permutation))}" # Unique ID
+
+            if pipeline_status == "SUCCESS":
+                container.successful_runs.append({
+                    "permutation_id": permutation_id,
+                    "status": "SUCCESS",
+                    "pipeline_configs": permutation,
+                    "execution_time_total": total_time
+                })
+            else:
+                container.failed_runs.append({
+                    "permutation_id": permutation_id,
+                    "status": "FAILED",
+                    "failed_at": failed_at,
+                    "pipeline_configs": permutation,
+                    "error_log": error_message
+                })
+        
+        # 4. Advance the State Machine cursor
+        container.advance_cursor(len(batch))========== END OF FILE: src/pipeline/steps/execution_engine.py ==========
 
 ========== START OF FILE: debug/forensic_audit.sh ==========
 #!/bin/bash
