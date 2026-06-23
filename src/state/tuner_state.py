@@ -1,18 +1,32 @@
-from typing import List, Dict, Any, TypeAlias
-
-# Define the manifest type for clarity
-ConfigManifest: TypeAlias = Dict[str, Any]
+import json
+from typing import List, Dict, Any
 
 class TunerState:
     """
-    Sovereign Container: The single source of truth for the Tuner.
-    Strictly initialized with no defaults to ensure reproducibility.
+    Sovereign Container: The single source of truth for the ACE Pipeline.
+    Enforces a strict Zero-Default Policy with structural initialization.
     """
     __slots__ = [
-        'pipeline_id', 'config_ids', 'input_data_list', 
-        'library_path', 'combinations_to_test', 
-        'successful_runs', 'failed_runs',
-        'saap_skeleton_path', 'success_zip_path', 'failed_zip_path'
+        # --- Unified Fields (Input Schema & Output Task Schema) ---
+        'pipeline_id',              # Identifier for the target YAML in Library
+        'config_ids',               # List of config identifiers to tune for this pipeline
+        'input_data_list',          # The list of names of the input files for this run
+        
+        # --- Output Schema Deliverables ---
+        'successful_runs_archive',  # Filename of the successful runs ZIP (e.g., successful_runs_<branch>.zip)
+        'failed_runs_archive',      # Filename of the failed runs ZIP (e.g., failed_runs_<branch>.zip)
+        'saap_skeleton',            # Path to the root of the generated saap_skeleton folder structure
+        
+        # --- Explicitly Requested Path Routing Slots ---
+        'saap_skeleton_path',       # Explicit absolute/relative path to the saap skeleton workspace
+        'success_zip_path',         # Explicit path routing for local compression handling of successful runs
+        'failed_zip_path',          # Explicit path routing for local compression handling of failed runs
+        
+        # --- Operational Automated Cumulative Execution (ACE) Tracking State ---
+        'combinations_to_test',     # The complete multi-module structural search space (Super-Matrix)
+        'successful_runs',          # Collection of individual run data payloads matching Tuner Results Schema
+        'failed_runs',              # Collection of individual run error payloads matching Tuner Results Schema
+        'batch_cursor'              # Tracks progress for the Pulsed Batch execution; this is the cursor to the index in the combinations_to_test list where the current run should start.
     ]
 
     def __init__(
@@ -20,25 +34,117 @@ class TunerState:
         pipeline_id: str, 
         config_ids: List[str], 
         input_data_list: List[str],
-        library_path: str
+        successful_runs_archive: str,
+        failed_runs_archive: str,
+        saap_skeleton: str,
+        saap_skeleton_path: str,
+        success_zip_path: str,
+        failed_zip_path: str,
+        combinations_to_test: List[Dict[str, Any]],
+        successful_runs: List[Dict[str, Any]],
+        failed_runs: List[Dict[str, Any]],
+        batch_cursor: int
     ):
-        # Mandatory initialization checks
-        if not pipeline_id: raise ValueError("pipeline_id is required.")
-        if not config_ids: raise ValueError("config_ids cannot be empty.")
-        if not input_data_list: raise ValueError("input_data_list cannot be empty.")
-        if not library_path: raise ValueError("library_path is required.")
+        # --- Zero-Default Policy Verification ---
+        # Immediate error raising ensures missing initialization fields fail-fast at runtime.
+        if pipeline_id is None: raise ValueError("Missing structural parameter: pipeline_id")
+        if config_ids is None: raise ValueError("Missing structural parameter: config_ids")
+        if input_data_list is None: raise ValueError("Missing structural parameter: input_data_list")
+        if successful_runs_archive is None: raise ValueError("Missing structural parameter: successful_runs_archive")
+        if failed_runs_archive is None: raise ValueError("Missing structural parameter: failed_runs_archive")
+        if saap_skeleton is None: raise ValueError("Missing structural parameter: saap_skeleton")
+        if saap_skeleton_path is None: raise ValueError("Missing structural parameter: saap_skeleton_path")
+        if success_zip_path is None: raise ValueError("Missing structural parameter: success_zip_path")
+        if failed_zip_path is None: raise ValueError("Missing structural parameter: failed_zip_path")
+        if combinations_to_test is None: raise ValueError("Missing structural parameter: combinations_to_test")
+        if successful_runs is None: raise ValueError("Missing structural parameter: successful_runs")
+        if failed_runs is None: raise ValueError("Missing structural parameter: failed_runs")
+        if batch_cursor is None: raise ValueError("Missing structural parameter: batch_cursor")
 
+        # Assign properties to state container instance
         self.pipeline_id = pipeline_id
         self.config_ids = config_ids
         self.input_data_list = input_data_list
-        self.library_path = library_path
+        self.successful_runs_archive = successful_runs_archive
+        self.failed_runs_archive = failed_runs_archive
+        self.saap_skeleton = saap_skeleton
+        self.saap_skeleton_path = saap_skeleton_path
+        self.success_zip_path = success_zip_path
+        self.failed_zip_path = failed_zip_path
+        self.combinations_to_test = combinations_to_test
+        self.successful_runs = successful_runs
+        self.failed_runs = failed_runs
+        self.batch_cursor = batch_cursor
+
+    # --- Dehydration & Hydration Logic (Dropbox Pulse Layer) ---
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Converts state to flat dictionary schema mapping for persistent serialization."""
+        return {slot: getattr(self, slot) for slot in self.__slots__}
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'TunerState':
+        """Reconstructs state with validation checks ensuring no optional fallbacks exist."""
+        for slot in cls.__slots__:
+            if slot not in data:
+                raise KeyError(f"Critical State Corruption: Missing mandated state property '{slot}' during Hydration.")
         
-        # Manifests and Results
-        self.combinations_to_test: List[ConfigManifest] = []
-        self.successful_runs: List[ConfigManifest] = []
-        self.failed_runs: List[ConfigManifest] = []
-        
-        # Paths
-        self.saap_skeleton_path: str = ""
-        self.success_zip_path: str = ""
-        self.failed_zip_path: str = ""
+        return cls(
+            pipeline_id=data['pipeline_id'],
+            config_ids=data['config_ids'],
+            input_data_list=data['input_data_list'],
+            successful_runs_archive=data['successful_runs_archive'],
+            failed_runs_archive=data['failed_runs_archive'],
+            saap_skeleton=data['saap_skeleton'],
+            saap_skeleton_path=data['saap_skeleton_path'],
+            success_zip_path=data['success_zip_path'],
+            failed_zip_path=data['failed_zip_path'],
+            combinations_to_test=data['combinations_to_test'],
+            successful_runs=data['successful_runs'],
+            failed_runs=data['failed_runs'],
+            batch_cursor=data['batch_cursor']
+        )
+
+    def save_to_disk(self, path: str):
+        """Atomic write step to serialize State Machine data plane parameters to disk."""
+        with open(path, 'w') as f:
+            json.dump(self.to_dict(), f, indent=4)
+
+    @classmethod
+    def load_from_disk(cls, path: str) -> 'TunerState':
+        """Hydration entrypoint reading strictly from state configuration outputs."""
+        with open(path, 'r') as f:
+            data = json.load(f)
+        return cls.from_dict(data)
+
+    # --- Output Compliance (SaaP Deliverable Validation) ---
+
+    def to_saap_deliverable(self) -> Dict[str, Any]:
+        """
+        Transforms Sovereign Container properties into a nested dictionary
+        perfectly matching the structural constraints of Tuner Output Schema.
+        """
+        return {
+            "task": {
+                "pipeline_id": self.pipeline_id,
+                "config_ids": self.config_ids,
+                "input_data_list": self.input_data_list
+            },
+            "deliverables": {
+                "successful_runs_archive": self.successful_runs_archive,
+                "failed_runs_archive": self.failed_runs_archive,
+                "saap_skeleton": self.saap_skeleton
+            }
+        }
+
+    # --- Pulsed Batch Utilities ---
+
+    def get_next_batch(self, limit: int) -> List[Dict[str, Any]]:
+        """Slices the search space from the bookmark array pointer location."""
+        start = self.batch_cursor
+        end = min(start + limit, len(self.combinations_to_test))
+        return self.combinations_to_test[start:end]
+
+    def advance_cursor(self, batch_size: int):
+        """Advances pointer cleanly upon conclusion of automated batch cycle."""
+        self.batch_cursor += batch_size
