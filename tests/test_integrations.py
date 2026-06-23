@@ -1,6 +1,5 @@
 import json
 import os
-import shutil
 import time
 from tests.dummies import dummy_in, dummy_out
 
