@@ -7,11 +7,6 @@
       "type": "string",
       "description": "Identifier for the target YAML in Library."
     },
-    "config_ids": {
-      "type": "array",
-      "description": "List of config identifiers to tune for this pipeline.",
-      "items": { "type": "string" }
-    },
     "input_data_list": {
       "type": "array",
       "description": "The list of names of the input files for this run.",
@@ -20,7 +15,6 @@
   },
   "required": [
     "pipeline_id",
-    "config_ids",
     "input_data_list"
   ]
 }

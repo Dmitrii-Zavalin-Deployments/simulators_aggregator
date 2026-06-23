@@ -9,7 +9,6 @@ class TunerState:
     __slots__ = [
         # --- Unified Fields (Input Schema & Output Task Schema) ---
         'pipeline_id',              # Identifier for the target YAML in Library
-        'config_ids',               # List of config identifiers to tune for this pipeline
         'input_data_list',          # The list of names of the input files for this run
         
         # --- Output Schema Deliverables ---
@@ -32,7 +31,6 @@ class TunerState:
     def __init__(
         self, 
         pipeline_id: str, 
-        config_ids: List[str], 
         input_data_list: List[str],
         successful_runs_archive: str,
         failed_runs_archive: str,
@@ -48,7 +46,6 @@ class TunerState:
         # --- Zero-Default Policy Verification ---
         # Immediate error raising ensures missing initialization fields fail-fast at runtime.
         if pipeline_id is None: raise ValueError("Missing structural parameter: pipeline_id")
-        if config_ids is None: raise ValueError("Missing structural parameter: config_ids")
         if input_data_list is None: raise ValueError("Missing structural parameter: input_data_list")
         if successful_runs_archive is None: raise ValueError("Missing structural parameter: successful_runs_archive")
         if failed_runs_archive is None: raise ValueError("Missing structural parameter: failed_runs_archive")
@@ -63,7 +60,6 @@ class TunerState:
 
         # Assign properties to state container instance
         self.pipeline_id = pipeline_id
-        self.config_ids = config_ids
         self.input_data_list = input_data_list
         self.successful_runs_archive = successful_runs_archive
         self.failed_runs_archive = failed_runs_archive
@@ -91,7 +87,6 @@ class TunerState:
         
         return cls(
             pipeline_id=data['pipeline_id'],
-            config_ids=data['config_ids'],
             input_data_list=data['input_data_list'],
             successful_runs_archive=data['successful_runs_archive'],
             failed_runs_archive=data['failed_runs_archive'],
@@ -127,7 +122,6 @@ class TunerState:
         return {
             "task": {
                 "pipeline_id": self.pipeline_id,
-                "config_ids": self.config_ids,
                 "input_data_list": self.input_data_list
             },
             "deliverables": {

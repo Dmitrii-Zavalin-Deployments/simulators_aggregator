@@ -6,11 +6,22 @@
     "task": {
       "type": "object",
       "properties": {
-        "pipeline_id": { "type": "string" },
-        "config_ids": { "type": "array", "items": { "type": "string" } },
-        "input_data_list": { "type": "array", "items": { "type": "string" } }
+        "pipeline_id": {
+          "type": "string",
+          "description": "Identifier for the target execution logic in the Library."
+        },
+        "input_data_list": {
+          "type": "array",
+          "description": "List of input filenames. The system assumes these are located in 'data/testing-input-output/'.",
+          "items": {
+            "type": "string"
+          }
+        }
       },
-      "required": ["pipeline_id", "config_ids", "input_data_list"]
+      "required": [
+        "pipeline_id",
+        "input_data_list"
+      ]
     },
     "deliverables": {
       "type": "object",
@@ -36,5 +47,8 @@
       ]
     }
   },
-  "required": ["task", "deliverables"]
+  "required": [
+    "task",
+    "deliverables"
+  ]
 }
