@@ -225,7 +225,7 @@ jobs:
             exit 1
           fi
 
-      # - name: 📥 Hydrate Control Plane (Dropbox Sync)
+      # - name: 📥 Import Control Plane (Dropbox Sync)
       #   env:
       #     APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
       #     APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
