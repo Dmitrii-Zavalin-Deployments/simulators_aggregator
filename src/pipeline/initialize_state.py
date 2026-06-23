@@ -5,6 +5,7 @@ import json
 import shutil
 import logging
 import argparse
+import subprocess
 from pathlib import Path
 from src.state.tuner_state import TunerState
 
@@ -26,19 +27,18 @@ def parse_arguments():
     return parser.parse_args()
 
 def discover_task_file() -> dict:
-    """Scans the local 'tasks/' directory to locate and validate a task JSON."""
+    """Scans the local 'tasks/' directory to locate and validate a lean task JSON."""
     tasks_dir = Path("tasks")
     logger.info(f"Scanning {tasks_dir} for an ACE execution task payload...")
     
-    # Required keys according to tuner_task_schema.json
-    required_keys = {"pipeline_id", "config_ids", "input_data_list"}
+    # Required keys according to the NEW Tuner Task Schema (Intent only)
+    required_keys = {"pipeline_id", "input_data_list"}
     
     task_files = list(tasks_dir.glob("*.json"))
     
     if not task_files:
         raise FileNotFoundError("❌ CRITICAL: No JSON files found in tasks/ directory.")
 
-    # Validate the first found task file (or implement loop logic to select)
     for task_file in task_files:
         with open(task_file, 'r') as f:
             try:
@@ -51,6 +51,61 @@ def discover_task_file() -> dict:
                         
     raise ValueError("❌ CRITICAL: No JSON matching Tuner Task Schema found in tasks/ directory.")
 
+def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
+    """
+    Simulated Dropbox integration layer.
+    Iterates through the input_data_list and downloads them to the target_dir.
+    """
+    logger.info("Initiating Dropbox synchronization for input data...")
+    target_dir.mkdir(parents=True, exist_ok=True)
+    
+    for filename in input_data_list:
+        target_path = target_dir / filename
+        logger.info(f"   ↳ Downloading from Dropbox: {filename} -> {target_path}")
+        # TODO: Insert actual Dropbox API SDK logic here:
+        # dropbox_client.files_download_to_file(str(target_path), f"/SaaP_Inputs/{filename}")
+        
+        # Mocking file creation for structural integrity
+        with open(target_path, 'w') as f:
+            f.write("Mock CAD/Step Data")
+
+def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
+    """Finds and parses the target YAML/JSON manifest from the Library."""
+    # Assuming the library stores manifests in a known directory, e.g., 'manifests/'
+    manifest_path = repo_path / "manifests" / f"{pipeline_id}.json"
+    
+    if not manifest_path.exists():
+        raise FileNotFoundError(f"❌ CRITICAL: Manifest for '{pipeline_id}' not found in library at {manifest_path}")
+        
+    with open(manifest_path, 'r') as f:
+        manifest_data = json.load(f)
+        
+    logger.info(f"✅ Discovered Library Manifest: {pipeline_id} ({len(manifest_data)} execution steps)")
+    return manifest_data
+
+def execute_setup_script(repo_path: Path, script_path: str):
+    """Runs the environment provisioning script defined in the library manifest."""
+    full_script_path = repo_path / script_path
+    
+    if not full_script_path.exists():
+        logger.warning(f"⚠️ Setup script not found at {full_script_path}. Skipping.")
+        return
+
+    logger.info(f"⚙️ Executing provisioning script: {script_path}")
+    try:
+        # Execute script with the repo_path as the working directory
+        subprocess.run(
+            ["bash", str(full_script_path)], 
+            cwd=str(repo_path), 
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        logger.info("   ↳ Provisioning completed successfully.")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"❌ Provisioning script failed!\nSTDOUT: {e.stdout}\nSTDERR: {e.stderr}")
+        raise
+
 def stage_dependency_files(repo_path: Path, workspace_dir: Path, file_names: list, category: str):
     """Locates and stages required files from the repo into the workspace."""
     staging_target = workspace_dir / category
@@ -58,23 +113,16 @@ def stage_dependency_files(repo_path: Path, workspace_dir: Path, file_names: lis
     
     for target_name in file_names:
         file_found = False
-        base_name = target_name.split('.')[0]
-        
         for root, _, files in os.walk(repo_path):
-            for f in files:
-                if f == target_name or f.startswith(base_name):
-                    source_file = Path(root) / f
-                    shutil.copy2(source_file, staging_target / f)
-                    logger.info(f"   ↳ Staged {category[:-1]}: {f} -> {category}/")
-                    file_found = True
-                    break
-            if file_found:
+            if target_name in files:
+                source_file = Path(root) / target_name
+                shutil.copy2(source_file, staging_target / target_name)
+                logger.info(f"   ↳ Staged {category[:-1]}: {target_name} -> {category}/")
+                file_found = True
                 break
         
         if not file_found:
-            logger.warning(f"⚠️ Variable tracking notice: Asset '{target_name}' not found. Creating placeholder.")
-            with open(staging_target / f"{target_name}.json", 'w') as placeholder:
-                json.dump({"id": target_name, "status": "placeholder"}, placeholder)
+            logger.warning(f"⚠️ Asset '{target_name}' not found in repo.")
 
 def main():
     args = parse_arguments()
@@ -84,45 +132,65 @@ def main():
         logger.error(f"Provided repository path does not exist: {repo_path}")
         sys.exit(1)
         
-    # 1. Resolve Environment Parameters
     branch_name = os.environ.get("GITHUB_REF_NAME", "default_branch")
-    logger.info(f"Initializing state machine environment for isolation branch: [{branch_name}]")
+    logger.info(f"Initializing state machine for branch: [{branch_name}]")
     
-    # 2. Discover and Validate Task Schema (Now targeting tasks/ directory)
+    # 1. Discover Task Schema
     try:
         task_data = discover_task_file()
     except Exception as e:
         logger.error(str(e))
         sys.exit(1)
         
-    # 3. Create Clean-Room Isolated Workspace Sandbox Structures
-    base_output_dir = Path("data/testing-input-output")
-    workspace_dir = base_output_dir / f"tuning_{branch_name}"
+    # 2. Create Clean-Room Isolated Workspace
+    workspace_dir = Path("data/testing-input-output") / f"tuning_{branch_name}"
     workspace_dir.mkdir(parents=True, exist_ok=True)
+    inputs_dir = workspace_dir / "inputs"
     
-    # 4. Execute Defensive Staging (Isolate files from repo)
-    logger.info("Starting structural environment staging...")
-    stage_dependency_files(repo_path, workspace_dir, task_data["config_ids"], "configs")
-    stage_dependency_files(repo_path, workspace_dir, task_data["input_data_list"], "inputs")
+    # 3. Download Inputs from Dropbox
+    fetch_inputs_from_dropbox(task_data["input_data_list"], inputs_dir)
     
-    # 5. Dynamically Generate the Search-Space Super-Matrix
+    # 4. Discover Library Manifest & Extract Configurations
+    manifest_steps = load_pipeline_manifest(repo_path, task_data["pipeline_id"])
+    
+    all_config_ids = []
+    
+    # 5. Process Manifest Steps (Setup Scripts & Config Extraction)
+    for step in sorted(manifest_steps, key=lambda x: x.get("order", 0)):
+        logger.info(f"Processing Step {step.get('order')} for repository: {step.get('repository_url')}")
+        
+        # Execute provisioning
+        if "setup_script" in step:
+            execute_setup_script(repo_path, step["setup_script"])
+            
+        # Aggregate configs
+        if "config_ids" in step:
+            all_config_ids.extend(step["config_ids"])
+            
+    # Remove duplicates if any configs overlap between steps
+    unique_config_ids = list(set(all_config_ids))
+    
+    # 6. Stage Configs to Workspace
+    stage_dependency_files(repo_path, workspace_dir, unique_config_ids, "configs")
+    
+    # 7. Dynamically Generate the Search-Space Super-Matrix
     logger.info("Compiling hyperparameter execution super-matrix search space...")
     combinations_to_test = []
-    for config_id in task_data["config_ids"]:
-        for input_data in task_data["input_data_list"]:
+    for config_id in unique_config_ids:
+        for input_file in task_data["input_data_list"]:
             combinations_to_test.append({
                 "config_id": config_id,
-                "input_data": input_data,
+                "input_data": str(inputs_dir / input_file), # Explicit path resolving to the downloaded file
                 "status": "pending",
                 "execution_summary": {}
             })
+            
     logger.info(f"Matrix built. Total distinct experimental permutations: {len(combinations_to_test)}")
 
-    # 6. Instantiate Sovereign State Container
+    # 8. Instantiate Sovereign State Container
     try:
         state_container = TunerState(
             pipeline_id=task_data["pipeline_id"],
-            config_ids=task_data["config_ids"],
             input_data_list=task_data["input_data_list"],
             successful_runs_archive=f"successful_runs_{branch_name}.zip",
             failed_runs_archive=f"failed_runs_{branch_name}.zip",
@@ -136,7 +204,7 @@ def main():
             batch_cursor=0
         )
         
-        # 7. Serialize State Document
+        # 9. Serialize State Document
         target_state_json = workspace_dir / "state.json"
         state_container.save_to_disk(str(target_state_json))
         logger.info(f"✅ SUCCESS: Cold start completed. Sovereign state written to: {target_state_json}")
