@@ -1,0 +1,6 @@
+{
+  "pipeline_id": "mesh_pipeline",
+  "config_ids": ["mesh_config_01"],
+  "input_data": "data/testing-input-output/sample_geometry.step",
+  "output_dir": "data/testing-input-output/results"
+}
