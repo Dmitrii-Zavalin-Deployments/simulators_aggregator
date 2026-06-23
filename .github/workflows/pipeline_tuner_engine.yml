@@ -235,6 +235,13 @@ jobs:
           # The Python script writes logs to stderr and the signal to stdout
           STATUS=$(python3 src/io/state_manager.py --action import)
           echo "status=$STATUS" >> $GITHUB_OUTPUT
+      
+      # STEP: Conditional Initialization (Cold Start)
+      - name: ⚙️ Initialize Pipeline State
+        if: steps.import_state.outputs.status == 'initialized'
+        run: |
+          echo "Performing Cold Start initialization..."
+          python3 src/pipeline/initialize_state.py
 
       # - name: 📥 Import Control Plane (Dropbox Sync)
       #   env:
