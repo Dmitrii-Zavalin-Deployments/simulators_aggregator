@@ -202,29 +202,6 @@ jobs:
       - name: 📦 Install Dependencies
         run: pip install -r requirements.txt
       
-      - name: 🧬 Clone Simulator Library
-        run: |
-          # Ensure target directory exists and clear old artifacts if necessary
-          mkdir -p repositories
-          
-          # Perform the clone
-          git clone https://github.com/Dmitrii-Zavalin-Deployments/fluid_dynamics_simulator.git repositories/fluid_dynamics_simulator
-          
-          # Explicit verification check
-          if [ -d "repositories/fluid_dynamics_simulator" ]; then
-            echo "✅ SUCCESS: Simulator library verified at: repositories/fluid_dynamics_simulator"
-            # Optional: verify that it is actually a git repo by checking for .git folder
-            if [ -d "repositories/fluid_dynamics_simulator/.git" ]; then
-                echo "✅ Git integrity confirmed."
-            else
-                echo "❌ Error: Directory exists but is not a valid git repository!"
-                exit 1
-            fi
-          else
-            echo "❌ ERROR: Clone failed. Directory 'repositories/fluid_dynamics_simulator' not found."
-            exit 1
-          fi
-      
       - name: 📥 Import Pipeline State
         id: import_state
         env:
@@ -237,11 +214,27 @@ jobs:
           echo "status=$STATUS" >> $GITHUB_OUTPUT
       
       # STEP: Conditional Initialization (Cold Start)
-      - name: ⚙️ Initialize Pipeline State
+      - name: ⚙️ Initialize Pipeline State (Cold Start)
         if: steps.import_state.outputs.status == 'initialized'
         run: |
-          echo "Performing Cold Start initialization..."
-          python3 src/pipeline/initialize_state.py
+          echo "📥 Performing Cold Start: Cloning simulator library..."
+          
+          # 1. Clone logic (Merged here)
+          mkdir -p repositories
+          # Remove old dir if it exists to ensure a clean state
+          rm -rf repositories/fluid_dynamics_simulator
+          git clone https://github.com/Dmitrii-Zavalin-Deployments/fluid_dynamics_simulator.git repositories/fluid_dynamics_simulator
+          
+          # 2. Verification
+          if [ ! -d "repositories/fluid_dynamics_simulator/.git" ]; then
+              echo "❌ ERROR: Repository clone failed or is not a valid git repo."
+              exit 1
+          fi
+          echo "✅ Repository staged successfully."
+
+          # 3. Initialization Logic
+          echo "🚀 Running state initialization..."
+          python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator
 
       # - name: 📥 Import Control Plane (Dropbox Sync)
       #   env:
