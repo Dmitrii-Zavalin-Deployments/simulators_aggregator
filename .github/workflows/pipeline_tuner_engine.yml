@@ -224,6 +224,12 @@ jobs:
             echo "❌ ERROR: Clone failed. Directory 'repositories/fluid_dynamics_simulator' not found."
             exit 1
           fi
+      
+      - name: 📥 Import Pipeline State
+        id: import_state
+        run: |
+          STATUS=$(python3 src/io/state_manager.py --action import)
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
 
       # - name: 📥 Import Control Plane (Dropbox Sync)
       #   env:
