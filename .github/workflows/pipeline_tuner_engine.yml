@@ -23,7 +23,7 @@ jobs:
       - name: 🔍 Check Dormancy Flag
         id: check
         run: |
-          FLAG_PATH="config/dormant.flag"
+          FLAG_PATH="dormant.flag"
           
           if [[ "${{ github.event_name }}" == "schedule" ]]; then
             if [ -f "$FLAG_PATH" ] && grep -q "STATUS: DORMANT" "$FLAG_PATH"; then
@@ -250,7 +250,7 @@ jobs:
       # - name: 📊 Sync Audit, Ledger & Dormancy State + Sync Notes
       #   if: always()
       #   run: |
-      #     git add performance_audit.md config/dormant.flag config/orchestration_ledger.json
+      #     git add performance_audit.md dormant.flag config/orchestration_ledger.json
           
       #     # CHECK IF THESE SPECIFIC FILES HAVE CHANGES
       #     if ! git diff --cached --exit-code; then
@@ -259,7 +259,7 @@ jobs:
       #       git stash pop
             
       #       # Re-add after rebase to ensure clean state
-      #       git add performance_audit.md config/dormant.flag config/orchestration_ledger.json
+      #       git add performance_audit.md dormant.flag config/orchestration_ledger.json
       #       git commit -m "🤖 robot: ACE cycle complete | status=${{ job.status }}"
       #       TARGET_COMMIT=$(git rev-parse HEAD)
 
