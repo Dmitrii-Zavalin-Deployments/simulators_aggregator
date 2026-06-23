@@ -17,11 +17,12 @@ logging.basicConfig(
 logger = logging.getLogger("StateManager")
 
 def get_config():
-    """Retrieves environment configuration."""
+    """Retrieves environment configuration with defensive stripping."""
+    # .strip() prevents errors from hidden newlines in GitHub Secrets
     return {
-        "app_key": os.environ.get("DROPBOX_APP_KEY"),
-        "app_secret": os.environ.get("DROPBOX_APP_SECRET"),
-        "refresh_token": os.environ.get("DROPBOX_REFRESH_TOKEN"),
+        "app_key": os.environ.get("DROPBOX_APP_KEY", "").strip(),
+        "app_secret": os.environ.get("DROPBOX_APP_SECRET", "").strip(),
+        "refresh_token": os.environ.get("DROPBOX_REFRESH_TOKEN", "").strip(),
         "branch": os.environ.get("GITHUB_REF_NAME", "default"),
     }
 
@@ -37,6 +38,10 @@ def check_exists(ingestor, remote_path):
 
 def run_import():
     cfg = get_config()
+    # Validate keys are not empty strings after stripping
+    if not cfg["app_key"] or not cfg["app_secret"] or not cfg["refresh_token"]:
+        raise ValueError("Missing or malformed Dropbox credentials in environment.")
+
     tm = TokenManager(cfg["app_key"], cfg["app_secret"])
     ingestor = CloudIngestor(tm, cfg["refresh_token"], Path("sync_log.txt"))
     
@@ -60,7 +65,6 @@ def run_export():
     tm = TokenManager(cfg["app_key"], cfg["app_secret"])
     uploader = CloudUploader(tm, cfg["refresh_token"])
     
-    # Path to the zip we created in the workflow
     local_zip = Path(f"checkpoint_{cfg['branch']}.zip")
     
     logger.info(f"Exporting {local_zip} to Dropbox...")

@@ -227,7 +227,12 @@ jobs:
       
       - name: 📥 Import Pipeline State
         id: import_state
+        env:
+          DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
+          DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
+          DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
         run: |
+          # The Python script writes logs to stderr and the signal to stdout
           STATUS=$(python3 src/io/state_manager.py --action import)
           echo "status=$STATUS" >> $GITHUB_OUTPUT
 
