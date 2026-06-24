@@ -199,9 +199,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: 📦 Install Dependencies
+      - name: 📦 Install Engine Pip Dependencies
         run: pip install -r requirements.txt
       
+      # 📥 STATE IMPORT: Check if we are "initialized"
       - name: 📥 Import Pipeline State
         id: import_state
         env:
@@ -212,28 +213,46 @@ jobs:
           # The Python script writes logs to stderr and the signal to stdout
           STATUS=$(python3 src/io/state_manager.py --action import)
           echo "status=$STATUS" >> $GITHUB_OUTPUT
-      
-      # STEP: Conditional Initialization (Cold Start)
+
+      # 🐍 ENV CAPABILITY: Creates the environment
+      - name: 🐍 Set up Conda Environment
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: "3.10"
+          channels: conda-forge
+          channel-priority: strict
+          activate-environment: tuner-env
+
+      # 📦 CACHE: Saves the environment state for the next run
+      - name: 📦 Cache Conda Environment
+        uses: actions/cache@v4
+        with:
+          path: /usr/share/miniconda/envs/tuner-env
+          key: ${{ runner.os }}-conda-v1-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-conda-v1-
+
+      # ⚙️ INITIALIZATION (Cold Start Only)
+      # This step now handles everything: cloning + invoking the Python logic + provisioning
       - name: ⚙️ Initialize Pipeline State (Cold Start)
         if: steps.import_state.outputs.status == 'initialized'
+        shell: bash -el {0}
         run: |
-          echo "📥 Performing Cold Start: Cloning simulator library..."
-          
-          # 1. Clone logic (Merged here)
+          echo "📥 Cold Start Detected: Staging simulator library..."
           mkdir -p repositories
-          # Remove old dir if it exists to ensure a clean state
           rm -rf repositories/fluid_dynamics_simulator
           git clone https://github.com/Dmitrii-Zavalin-Deployments/fluid_dynamics_simulator.git repositories/fluid_dynamics_simulator
           
-          # 2. Verification
           if [ ! -d "repositories/fluid_dynamics_simulator/.git" ]; then
-              echo "❌ ERROR: Repository clone failed or is not a valid git repo."
+              echo "❌ ERROR: Repository clone failed."
               exit 1
           fi
           echo "✅ Repository staged successfully."
 
-          # 3. Initialization Logic
-          echo "🚀 Running state initialization..."
+          echo "🚀 Running state initialization logic..."
+          # Crucial: Activate env and run the script within it
+          conda activate tuner-env
           python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator
       
       - name: Run debug script
