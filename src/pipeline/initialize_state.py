@@ -123,8 +123,7 @@ def stage_dependency_files(repo_path: Path, workspace_dir: Path, config_ids: lis
     target_dir = workspace_dir / subfolder
     target_dir.mkdir(parents=True, exist_ok=True)
     for config_id in config_ids:
-        filename = f"{config_id}.json"
-        matches = list(repo_path.rglob(filename))
+        matches = list(repo_path.rglob(config_id))
         if matches:
             shutil.copy2(matches[0], target_dir / filename)
             logger.info(f"✅ Successfully staged asset: {filename}")
