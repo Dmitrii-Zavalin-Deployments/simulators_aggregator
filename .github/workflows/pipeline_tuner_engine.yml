@@ -255,10 +255,12 @@ jobs:
           conda activate tuner-env
           python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator
       
-      - name: Run debug script
-        if: always()
-        run:
-          bash debug/forensic_audit.sh
+      - name: 🔍 Run Forensic Audit on Failure
+        if: failure()
+        shell: bash -el {0}
+        run: |
+          chmod +x src/debug/forensic_audit.sh
+          bash src/debug/forensic_audit.sh
 
       # - name: 📥 Import Control Plane (Dropbox Sync)
       #   env:
