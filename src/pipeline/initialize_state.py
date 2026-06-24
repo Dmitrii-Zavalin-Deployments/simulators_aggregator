@@ -93,24 +93,18 @@ def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
     return manifest_data
 
 def execute_setup_script(repo_path: Path, script_path: str):
-    """Runs the environment provisioning script, sanitizing line endings first."""
+    """Runs the environment provisioning script defined in the library manifest."""
     full_script_path = repo_path / script_path
     
     if not full_script_path.exists():
         logger.warning(f"⚠️ Setup script not found at {full_script_path}. Skipping.")
         return
 
-    # --- NEW SANITIZATION STEP ---
-    # Strip Windows CRLF line endings to prevent 'No such file' bash errors
-    logger.info(f"🧼 Sanitizing line endings for: {script_path}")
-    subprocess.run(["sed", "-i", "s/\r$//", str(full_script_path)], check=True)
-    # -----------------------------
-
     logger.info(f"⚙️ Executing provisioning script: {script_path}")
     try:
-        # Execute script with the repo_path as the working directory
+        # full_script_path.resolve() makes the path absolute so cwd doesn't break it
         subprocess.run(
-            ["bash", str(full_script_path)], 
+            ["bash", str(full_script_path.resolve())], 
             cwd=str(repo_path), 
             check=True,
             capture_output=True,
