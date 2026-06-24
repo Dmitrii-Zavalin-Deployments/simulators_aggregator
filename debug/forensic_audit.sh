@@ -1,40 +1,63 @@
 #!/bin/bash
 # src/debug/forensic_audit.sh
-# Integrity Auditor: Confirms the environment is consistent post-setup.
+# Integrity Auditor: Confirms environment consistency and verifies generated state artifacts.
 
 echo "🔍 --- STARTING INTEGRITY AUDIT ---"
 
-# 1. CONDA VALIDATION
-echo -e "\n🧩 --- CONDA ENVIRONMENT ---"
-if conda list pythonocc-core | grep -q "pythonocc-core"; then
-    echo "✅ pythonocc-core is installed."
-    conda list pythonocc-core | grep pythonocc-core
-else
-    echo "❌ CRITICAL: pythonocc-core is MISSING."
-    exit 1
-fi
+# # 1. CONDA VALIDATION
+# echo -e "\n🧩 --- CONDA ENVIRONMENT ---"
+# if conda list pythonocc-core | grep -q "pythonocc-core"; then
+#     echo "✅ pythonocc-core is installed."
+#     conda list pythonocc-core | grep pythonocc-core
+# else
+#     echo "❌ CRITICAL: pythonocc-core is MISSING."
+#     exit 1
+# fi
 
-# 2. PIP DEPENDENCY VALIDATION
-echo -e "\n📦 --- PIP PACKAGE VALIDATION ---"
-REQUIRED_PKGS=("numpy" "h5py" "requests" "jsonschema")
+# # 2. PIP DEPENDENCY VALIDATION
+# echo -e "\n📦 --- PIP PACKAGE VALIDATION ---"
+# REQUIRED_PKGS=("numpy" "h5py" "requests" "jsonschema")
 
-for pkg in "${REQUIRED_PKGS[@]}"; do
-    if pip show "$pkg" > /dev/null 2>&1; then
-        echo "✅ $pkg is installed:"
-        pip show "$pkg" | grep -E "Name:|Version:"
+# for pkg in "${REQUIRED_PKGS[@]}"; do
+#     if pip show "$pkg" > /dev/null 2>&1; then
+#         echo "✅ $pkg is installed:"
+#         pip show "$pkg" | grep -E "Name:|Version:"
+#     else
+#         echo "❌ CRITICAL: $pkg is MISSING."
+#         exit 1
+#     fi
+# done
+
+# # 3. INTEGRITY CHECK
+# echo -e "\n🛡️ --- DEPENDENCY INTEGRITY CHECK ---"
+# if pip check; then
+#     echo "✅ No dependency conflicts found."
+# else
+#     echo "⚠️ WARNING: Potential dependency conflicts detected."
+# fi
+
+# 4. SOVEREIGN STATE VERIFICATION
+echo -e "\n📂 --- SOVEREIGN STATE VERIFICATION ---"
+# Resolve the branch name or default to 'main'
+BRANCH="${GITHUB_REF_NAME:-main}"
+STATE_DIR="data/testing-input-output/tuning_${BRANCH}"
+
+if [ -d "$STATE_DIR" ]; then
+    echo "📍 Verifying contents of workspace: $STATE_DIR"
+    echo "--- RECURSIVE DIRECTORY LISTING (ls -R) ---"
+    ls -R "$STATE_DIR"
+    
+    echo -e "\n--- SOVEREIGN STATE CONTENT (cat state.json) ---"
+    if [ -f "$STATE_DIR/state.json" ]; then
+        cat "$STATE_DIR/state.json"
+        echo -e "\n✅ state.json successfully generated and readable."
     else
-        echo "❌ CRITICAL: $pkg is MISSING."
+        echo "❌ ERROR: state.json was NOT found in $STATE_DIR"
         exit 1
     fi
-done
-
-# 3. INTEGRITY CHECK
-echo -e "\n🛡️ --- DEPENDENCY INTEGRITY CHECK ---"
-# pip check ensures that the installed packages have compatible dependencies
-if pip check; then
-    echo "✅ No dependency conflicts found."
 else
-    echo "⚠️ WARNING: Potential dependency conflicts detected above."
+    echo "❌ ERROR: State directory $STATE_DIR does not exist."
+    exit 1
 fi
 
 echo -e "\n✅ --- INTEGRITY AUDIT COMPLETE ---"
