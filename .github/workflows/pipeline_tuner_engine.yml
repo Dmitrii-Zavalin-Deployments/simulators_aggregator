@@ -235,6 +235,10 @@ jobs:
           # 3. Initialization Logic
           echo "🚀 Running state initialization..."
           python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator
+      
+      - name: Run debug script
+        run:
+          bash debug/forensic_audit.sh
 
       # - name: 📥 Import Control Plane (Dropbox Sync)
       #   env:
