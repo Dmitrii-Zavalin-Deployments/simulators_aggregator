@@ -69,16 +69,20 @@ def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
     manifest_matches = list(repo_path.rglob(search_pattern))
     
     if not manifest_matches:
-        # HUMAN-READABLE DIAGNOSTIC HINT
-        logger.error("="*80)
-        logger.error(f"🚨 CRITICAL: Manifest '{search_pattern}' could not be found.")
-        logger.error(f"💡 HINT: Files in the Library Repository have been version-locked.")
-        logger.error("   It is highly likely this file was renamed (e.g., added a git-hash suffix).")
-        logger.error("   1. Check the 'pipelines/' folder in your 'fluid_dynamics_simulator' repo.")
-        logger.error("   2. Identify the new filename (e.g., 'mesh_pipeline_<hash>.json').")
-        logger.error("   3. Update your task file in 'tasks/' to point to the new filename.")
-        logger.error("="*80)
+        error_msg = (
+            f"\n{'='*80}\n"
+            f"🚨 CRITICAL: Manifest '{search_pattern}' could not be found.\n"
+            f"💡 HINT: Files in the Library Repository have been version-locked.\n"
+            "   It is highly likely this file was renamed (e.g., added a git-hash suffix).\n"
+            "   1. Check the 'pipelines/' folder in your 'fluid_dynamics_simulator' repo.\n"
+            "   2. Identify the new filename (e.g., 'mesh_pipeline_<hash>.json').\n"
+            "   3. Update your task file in 'tasks/' to point to the new filename.\n"
+            f"{'='*80}"
+        )
         
+        logger.error(error_msg)
+        sys.stderr.flush()
+
         raise FileNotFoundError(f"Manifest '{search_pattern}' not found in {repo_path}")
         
     with open(manifest_matches[0], 'r') as f:
