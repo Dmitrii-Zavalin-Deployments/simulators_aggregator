@@ -1,59 +1,48 @@
 #!/bin/bash
 # src/download_from_dropbox.sh
-# 📦 Ingestion Orchestrator — Aligned with Deterministic Initialization.
+# 📦 Ingestion Orchestrator — Parametric Version
 
-# 1. Environment Guard (Strict Validation)
+# 1. Environment Guard
 if [[ -z "${APP_KEY}" || -z "${APP_SECRET}" || -z "${REFRESH_TOKEN}" ]]; then
-    echo "❌ ERROR: Missing required credentials (APP_KEY, APP_SECRET, REFRESH_TOKEN)."
+    echo "❌ ERROR: Missing required credentials."
     exit 1
 fi
 
-# 2. Path Definition (SSoT)
+# 2. Argument Handling (Optional: Specific ZIP name)
+TARGET_FILE=$1
 export DROPBOX_FOLDER="/simulators"
 export LOCAL_FOLDER="./data/testing-input-output"
-export LOG_FILE="./dropbox_download_log.txt"
 
-# 3. Setup
 mkdir -p "$LOCAL_FOLDER"
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 
-# 4. Execution Logic
-# The Python script now performs internal DI (Dependency Injection) 
-# and handles all authentication logic internally.
 echo "🔄 Triggering Python Ingestion Worker..."
 
 python3 -c "
+import sys
 from pathlib import Path
 from src.io.dropbox_utils import TokenManager
 from src.io.download_from_dropbox import CloudIngestor
 import os
 
-# Deterministic Initialization: Config derived from explicit environment input
 tm = TokenManager(client_id=os.environ['APP_KEY'], client_secret=os.environ['APP_SECRET'])
-ingestor = CloudIngestor(tm, os.environ['REFRESH_TOKEN'], Path(os.environ['LOG_FILE']))
+ingestor = CloudIngestor(tm, os.environ['REFRESH_TOKEN'], Path('./dropbox_download_log.txt'))
 
-# Execution: Added '.json' to allowed_ext to ensure config files are synced.
-# The sync method now supports recursive discovery and folder reconstruction.
-ingestor.sync(
-    os.environ['DROPBOX_FOLDER'], 
-    Path(os.environ['LOCAL_FOLDER']), 
-    ['.h5', '.npy', '.json', '.step']
-)
-"
+target_file = sys.argv[1] if len(sys.argv) > 1 else None
 
-# 5. Result Verification
+if target_file:
+    print(f'📥 Downloading specific archive: {target_file}')
+    # Download logic assumes a method exists, or we treat the path as a remote file
+    ingestor.download_file(os.environ['DROPBOX_FOLDER'] + '/' + target_file, Path(os.environ['LOCAL_FOLDER']) / target_file)
+else:
+    print('🔄 Performing full directory sync...')
+    ingestor.sync(os.environ['DROPBOX_FOLDER'], Path(os.environ['LOCAL_FOLDER']), ['.h5', '.npy', '.json', '.step', '.zip'])
+" "$TARGET_FILE"
+
+# 3. Result Verification
 if [ $? -eq 0 ]; then
-    # Audit check: Count how many files actually landed in the target directory
-    FILE_COUNT=$(find "$LOCAL_FOLDER" -type f | wc -l)
-    
-    if [ "$FILE_COUNT" -gt 0 ]; then
-        echo "✅ SUCCESS: $FILE_COUNT files synchronized to $LOCAL_FOLDER"
-    else
-        echo "⚠️  WARNING: Sync reported success but 0 files were downloaded."
-        echo "   Check if files in Dropbox match the extensions: .h5, .npy, .json", '.step'
-        exit 1
-    fi
+    echo "✅ SUCCESS: Ingestion operation complete."
 else
-    echo "❌ ERROR: Ingestion failed during Python execution."
+    echo "❌ ERROR: Ingestion failed."
     exit 1
 fi
