@@ -2,43 +2,45 @@
 set -euo pipefail
 
 echo "========================================================================"
-echo "🕵️‍♂️ BEGINNING ACE PIPELINE FORENSIC AUDIT (PROVISIONING FAILURE)"
+echo "🕵️‍♂️ BEGINNING ACE PIPELINE FORENSIC AUDIT (CODE 127 DIAGNOSTICS)"
 echo "========================================================================"
 
-# --- 1. FILE EXISTENCE & PATH SEARCH ---
-echo -e "\n📁 [1/4] LOCATING MISSING SETUP SCRIPT..."
-REPO_PATH="repositories/fluid_dynamics_simulator"
-# The script reported missing by the error:
-TARGET_SCRIPT_NAME="mesh_gen_setup.sh"
+TARGET="repositories/fluid_dynamics_simulator/setup_scripts/mesh_gen_setup.sh"
 
-echo "Searching for '${TARGET_SCRIPT_NAME}' recursively starting from ${REPO_PATH}..."
-find "${REPO_PATH}" -name "${TARGET_SCRIPT_NAME}" || echo "❌ Script not found anywhere in repo."
+# --- 1. FILE INTEGRITY & HIDDEN CHAR DIAGNOSIS ---
+echo -e "\n📁 [1/4] AUDITING FILE ENDINGS (LOOK FOR 'CRLF')..."
+if [ -f "$TARGET" ]; then
+    echo "Checking file format:"
+    file "$TARGET"
+    
+    echo -e "\nChecking for hidden Carriage Return (^M) characters (cat -A):"
+    cat -A "$TARGET" | head -n 2
+else
+    echo "❌ File not found at expected path."
+fi
 
-# --- 2. DIAGNOSTIC SOURCE AUDIT ---
-echo -e "\n🔍 [2/4] AUDITING EXECUTION LOGIC..."
+# --- 2. SMOKING-GUN SOURCE AUDIT (cat -n) ---
+echo -e "\n🔍 [2/4] AUDITING EXECUTION SOURCE (initialize_state.py)..."
 FILE="src/pipeline/initialize_state.py"
-echo "Printing 'execute_setup_script' logic (lines 86-110):"
-cat -n "$FILE" | sed -n '86,110p'
+echo "Printing lines 105-115 of ${FILE}:"
+cat -n "$FILE" | sed -n '105,115p'
 
-# --- 3. PATH CONSTRUCTION VERIFICATION ---
-echo -e "\n🛠️ [3/4] SIMULATING PATH RESOLUTION..."
-# This mirrors your Python logic
-script_path_in_manifest="setup_scripts/mesh_gen_setup.sh"
-echo "Constructed Path: ${REPO_PATH}/${script_path_in_manifest}"
-[ -f "${REPO_PATH}/${script_path_in_manifest}" ] && echo "✅ Path resolves to file." || echo "❌ Path is broken."
+# --- 3. PERMISSIONS AUDIT ---
+echo -e "\n🔒 [3/4] AUDITING EXECUTION BITS..."
+ls -l "$TARGET"
 
 # --- 4. PREPARED SED INJECTIONS FOR AUTOMATED REPAIRS ---
-echo -e "\n🩹 [4/4] REMEDIATION SUGGESTIONS (UNCOMMENT TO APPLY)..."
+echo -e "\n🛠️ [4/4] REMEDIATION SUGGESTIONS (UNCOMMENT TO APPLY)..."
 
-# 1. Inject diagnostic print to see EXACT path Python thinks it is building
-# sed -i '/logger.info(f"⚙️ Executing provisioning script:/i \        logger.info(f"DEBUG: Attempting to run {full_script_path}")' src/pipeline/initialize_state.py
+# Repair 1: Convert Windows CRLF (\r\n) to Unix LF (\n)
+# sed -i 's/\r$//' repositories/fluid_dynamics_simulator/setup_scripts/mesh_gen_setup.sh
 
-# 2. If the file is actually in the root, remove the 'setup_scripts/' prefix logic
-# sed -i 's|full_script_path = repo_path / script_path|full_script_path = repo_path / script_path.split("/")[-1]|g' src/pipeline/initialize_state.py
+# Repair 2: Force execution permissions
+# chmod +x repositories/fluid_dynamics_simulator/setup_scripts/mesh_gen_setup.sh
 
-# 3. If the directory is named incorrectly (e.g., 'scripts/' instead of 'setup_scripts/'), fix the string here:
-# sed -i 's|setup_scripts/|scripts/|g' src/pipeline/initialize_state.py
+# Repair 3: Remove Byte Order Mark (BOM) if present
+# sed -i '1s/^\xef\xbb\xbf//' repositories/fluid_dynamics_simulator/setup_scripts/mesh_gen_setup.sh
 
 echo "========================================================================"
-echo "🏁 AUDIT COMPLETED. CHECK FIND RESULTS ABOVE. 🏁"
+echo "🏁 AUDIT COMPLETED. IF OUTPUT ABOVE SHOWS 'CRLF' OR '^M', USE REPAIR 1. 🏁"
 echo "========================================================================"
