@@ -70,17 +70,26 @@ def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
             f.write("Mock CAD/Step Data")
 
 def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
-    """Finds and parses the target YAML/JSON manifest from the Library."""
-    # Assuming the library stores manifests in a known directory, e.g., 'manifests/'
-    manifest_path = repo_path / "manifests" / f"{pipeline_id}.json"
+    """Finds and parses the target JSON manifest recursively within the Library."""
+    # Use rglob to search recursively for the manifest file anywhere in the repo
+    search_pattern = f"{pipeline_id}.json"
+    manifest_matches = list(repo_path.rglob(search_pattern))
     
-    if not manifest_path.exists():
-        raise FileNotFoundError(f"❌ CRITICAL: Manifest for '{pipeline_id}' not found in library at {manifest_path}")
-        
+    if not manifest_matches:
+        # If we can't find it, we print a directory tree snippet to help you debug the next time
+        dir_content = [str(x.relative_to(repo_path)) for x in repo_path.rglob("*.json")]
+        raise FileNotFoundError(
+            f"❌ CRITICAL: Manifest '{search_pattern}' not found in library at {repo_path}.\n"
+            f"Available JSON files found: {dir_content}"
+        )
+    
+    # Use the first match found
+    manifest_path = manifest_matches[0]
+    
     with open(manifest_path, 'r') as f:
         manifest_data = json.load(f)
         
-    logger.info(f"✅ Discovered Library Manifest: {pipeline_id} ({len(manifest_data)} execution steps)")
+    logger.info(f"✅ Discovered Library Manifest at: {manifest_path}")
     return manifest_data
 
 def execute_setup_script(repo_path: Path, script_path: str):
