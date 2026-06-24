@@ -71,8 +71,10 @@ def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
     if not manifest_matches:
         error_msg = (
             f"\n{'='*80}\n"
-            f"🚨 CRITICAL: Manifest '{search_pattern}' could not be found.\n"
-            f"💡 HINT: Files in the Library Repository have been version-locked.\n"
+            f"🚨 FILE NOT FOUND: Library Manifest Missing\n"
+            f"{'-'*80}\n"
+            f"CRITICAL: Manifest '{search_pattern}' could not be found.\n"
+            f"HINT: Files in the Library Repository have been version-locked.\n"
             "   It is highly likely this file was renamed (e.g., added a git-hash suffix).\n"
             "   1. Check the 'pipelines/' folder in your 'fluid_dynamics_simulator' repo.\n"
             "   2. Identify the new filename (e.g., 'mesh_pipeline_<hash>.json').\n"
