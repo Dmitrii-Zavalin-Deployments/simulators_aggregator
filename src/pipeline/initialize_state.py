@@ -61,13 +61,29 @@ def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
 
 def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
     """Finds and parses the target JSON manifest recursively within the Library."""
-    # Use rglob to search recursively for the manifest file anywhere in the repo
+    
+    # We look for the base name. 
+    # Note: If the file was renamed with a hash, this pattern match will fail, 
+    # which is exactly what triggers the diagnostic logic below.
     search_pattern = f"{pipeline_id}.json"
     manifest_matches = list(repo_path.rglob(search_pattern))
+    
     if not manifest_matches:
-        raise FileNotFoundError(f"Manifest '{search_pattern}' not found.")
+        # HUMAN-READABLE DIAGNOSTIC HINT
+        logger.error("="*80)
+        logger.error(f"🚨 CRITICAL: Manifest '{search_pattern}' could not be found.")
+        logger.error(f"💡 HINT: Files in the Library Repository have been version-locked.")
+        logger.error("   It is highly likely this file was renamed (e.g., added a git-hash suffix).")
+        logger.error("   1. Check the 'pipelines/' folder in your 'fluid_dynamics_simulator' repo.")
+        logger.error("   2. Identify the new filename (e.g., 'mesh_pipeline_<hash>.json').")
+        logger.error("   3. Update your task file in 'tasks/' to point to the new filename.")
+        logger.error("="*80)
+        
+        raise FileNotFoundError(f"Manifest '{search_pattern}' not found in {repo_path}")
+        
     with open(manifest_matches[0], 'r') as f:
         data = json.load(f)
+        
     logger.info(f"✅ Discovered Library Manifest at: {manifest_matches[0]}")
     return data
 
