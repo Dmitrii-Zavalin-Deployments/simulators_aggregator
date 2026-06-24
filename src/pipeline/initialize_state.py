@@ -61,32 +61,13 @@ def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
 
 def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
     """Finds and parses the target JSON manifest recursively within the Library."""
-    
-    # We look for the base name. 
-    # Note: If the file was renamed with a hash, this pattern match will fail, 
-    # which is exactly what triggers the diagnostic logic below.
-    manifest_matches = list(repo_path.rglob(pipeline_id))
-    
+    # Use rglob to search recursively for the manifest file anywhere in the repo
+    search_pattern = f"{pipeline_id}.json"
+    manifest_matches = list(repo_path.rglob(search_pattern))
     if not manifest_matches:
-        error_msg = (
-            f"\n{'='*80}\n"
-            f"🚨 CRITICAL: Manifest '{search_pattern}' could not be found.\n"
-            f"💡 HINT: Files in the Library Repository have been version-locked.\n"
-            "   It is highly likely this file was renamed (e.g., added a git-hash suffix).\n"
-            "   1. Check the 'pipelines/' folder in your 'fluid_dynamics_simulator' repo.\n"
-            "   2. Identify the new filename (e.g., 'mesh_pipeline_<hash>.json').\n"
-            "   3. Update your task file in 'tasks/' to point to the new filename.\n"
-            f"{'='*80}"
-        )
-        
-        logger.error(error_msg)
-        sys.stderr.flush()
-
-        raise FileNotFoundError(f"Manifest '{search_pattern}' not found in {repo_path}")
-        
+        raise FileNotFoundError(f"Manifest '{search_pattern}' not found.")
     with open(manifest_matches[0], 'r') as f:
         data = json.load(f)
-        
     logger.info(f"✅ Discovered Library Manifest at: {manifest_matches[0]}")
     return data
 
@@ -122,7 +103,8 @@ def stage_dependency_files(repo_path: Path, workspace_dir: Path, config_ids: lis
     target_dir = workspace_dir / subfolder
     target_dir.mkdir(parents=True, exist_ok=True)
     for config_id in config_ids:
-        matches = list(repo_path.rglob(config_id))
+        filename = f"{config_id}.json"
+        matches = list(repo_path.rglob(filename))
         if matches:
             shutil.copy2(matches[0], target_dir / filename)
             logger.info(f"✅ Successfully staged asset: {filename}")
