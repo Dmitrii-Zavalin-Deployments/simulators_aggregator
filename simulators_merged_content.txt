@@ -25,9 +25,9 @@
 • src/io/state_manager.py
 • src/io/upload_to_dropbox.py
 • src/io/download_from_dropbox.py
+• src/pipeline/deliverable_assembly.py
 • src/pipeline/initialize_state.py
-• src/pipeline/steps/deliverable_assembly.py
-• src/pipeline/steps/execution_engine.py
+• src/pipeline/execution_engine.py
 • src/upload_to_dropbox.sh
 • debug/forensic_audit.sh
 -------------------------------------------
@@ -3272,6 +3272,42 @@ class CloudIngestor:
             f.write(res.content)
         log.write(f"✅ Downloaded {entry.path_lower} -> {local_path}\n")========== END OF FILE: src/io/download_from_dropbox.py ==========
 
+========== START OF FILE: src/pipeline/deliverable_assembly.py ==========
+import os
+import json
+from interfaces.step_interface import StepInterface
+from src.state.tuner_state import TunerState
+
+class DeliverableAssemblyStep(StepInterface):
+    """
+    The Zero-Logic Packager. 
+    Constructs the final SaaP deliverables strictly from the Sovereign Container.
+    """
+
+    def execute(self, container: TunerState) -> None:
+        # 1. Read-Only Schema Extraction
+        deliverable_payload = container.to_saap_deliverable()
+
+        # 2. Physical Directory Scaffolding (Refactored from package_output)
+        os.makedirs(container.saap_skeleton_path, exist_ok=True)
+        
+        # 3. Write SaaP Pipeline Skeleton
+        pipeline_yml_path = os.path.join(container.saap_skeleton_path, 'pipeline.yml')
+        with open(pipeline_yml_path, 'w') as f:
+            f.write("# Final ACE Pipeline Config Extracted from Tuner\n")
+        
+        # 4. Generate Output Manifests (representing the ZIP staging)
+        with open(f"{container.success_zip_path}_manifest.json", 'w') as f:
+            json.dump(container.successful_runs, f, indent=4)
+            
+        with open(f"{container.failed_zip_path}_manifest.json", 'w') as f:
+            json.dump(container.failed_runs, f, indent=4)
+            
+        # 5. Write the final Deliverable Schema
+        final_schema_path = os.path.join(container.saap_skeleton_path, "deliverable.json")
+        with open(final_schema_path, "w") as f:
+            json.dump(deliverable_payload, f, indent=4)========== END OF FILE: src/pipeline/deliverable_assembly.py ==========
+
 ========== START OF FILE: src/pipeline/initialize_state.py ==========
 # src/pipeline/initialize_state.py
 import os
@@ -3498,43 +3534,7 @@ def main():
 if __name__ == "__main__":
     main()========== END OF FILE: src/pipeline/initialize_state.py ==========
 
-========== START OF FILE: src/pipeline/steps/deliverable_assembly.py ==========
-import os
-import json
-from interfaces.step_interface import StepInterface
-from src.state.tuner_state import TunerState
-
-class DeliverableAssemblyStep(StepInterface):
-    """
-    The Zero-Logic Packager. 
-    Constructs the final SaaP deliverables strictly from the Sovereign Container.
-    """
-
-    def execute(self, container: TunerState) -> None:
-        # 1. Read-Only Schema Extraction
-        deliverable_payload = container.to_saap_deliverable()
-
-        # 2. Physical Directory Scaffolding (Refactored from package_output)
-        os.makedirs(container.saap_skeleton_path, exist_ok=True)
-        
-        # 3. Write SaaP Pipeline Skeleton
-        pipeline_yml_path = os.path.join(container.saap_skeleton_path, 'pipeline.yml')
-        with open(pipeline_yml_path, 'w') as f:
-            f.write("# Final ACE Pipeline Config Extracted from Tuner\n")
-        
-        # 4. Generate Output Manifests (representing the ZIP staging)
-        with open(f"{container.success_zip_path}_manifest.json", 'w') as f:
-            json.dump(container.successful_runs, f, indent=4)
-            
-        with open(f"{container.failed_zip_path}_manifest.json", 'w') as f:
-            json.dump(container.failed_runs, f, indent=4)
-            
-        # 5. Write the final Deliverable Schema
-        final_schema_path = os.path.join(container.saap_skeleton_path, "deliverable.json")
-        with open(final_schema_path, "w") as f:
-            json.dump(deliverable_payload, f, indent=4)========== END OF FILE: src/pipeline/steps/deliverable_assembly.py ==========
-
-========== START OF FILE: src/pipeline/steps/execution_engine.py ==========
+========== START OF FILE: src/pipeline/execution_engine.py ==========
 import time
 from typing import Dict, Any
 from interfaces.step_interface import StepInterface
@@ -3621,7 +3621,7 @@ class ExecutionEngineStep(StepInterface):
                 })
         
         # 4. Advance the State Machine cursor
-        container.advance_cursor(len(batch))========== END OF FILE: src/pipeline/steps/execution_engine.py ==========
+        container.advance_cursor(len(batch))========== END OF FILE: src/pipeline/execution_engine.py ==========
 
 ========== START OF FILE: src/upload_to_dropbox.sh ==========
 #!/bin/bash
