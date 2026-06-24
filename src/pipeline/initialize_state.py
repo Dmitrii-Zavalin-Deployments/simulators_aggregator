@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 from src.state.tuner_state import TunerState
 
-# Configure explicit logging for pipeline execution visibility
+# Configure explicit logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -19,11 +19,7 @@ logger = logging.getLogger("StateInitializer")
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="ACE Loop Cold Start State Initializer")
-    parser.add_argument(
-        "--repo-path", 
-        required=True, 
-        help="Path to the cloned simulator library repository"
-    )
+    parser.add_argument("--repo-path", required=True, help="Path to the repository")
     return parser.parse_args()
 
 def discover_task_file() -> dict:
@@ -48,8 +44,7 @@ def discover_task_file() -> dict:
                     return data
             except json.JSONDecodeError:
                 continue
-                        
-    raise ValueError("❌ CRITICAL: No JSON matching Tuner Task Schema found in tasks/ directory.")
+    raise ValueError("❌ CRITICAL: No JSON matching Tuner Task Schema found.")
 
 def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
     """
@@ -58,14 +53,9 @@ def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
     """
     logger.info("Initiating Dropbox synchronization for input data...")
     target_dir.mkdir(parents=True, exist_ok=True)
-    
     for filename in input_data_list:
         target_path = target_dir / filename
-        logger.info(f"   ↳ Downloading from Dropbox: {filename} -> {target_path}")
-        # TODO: Insert actual Dropbox API SDK logic here:
-        # dropbox_client.files_download_to_file(str(target_path), f"/SaaP_Inputs/{filename}")
-        
-        # Mocking file creation for structural integrity
+        logger.info(f"   ↳ Downloading: {filename}")
         with open(target_path, 'w') as f:
             f.write("Mock CAD/Step Data")
 
@@ -74,74 +64,52 @@ def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
     # Use rglob to search recursively for the manifest file anywhere in the repo
     search_pattern = f"{pipeline_id}.json"
     manifest_matches = list(repo_path.rglob(search_pattern))
-    
     if not manifest_matches:
-        # If we can't find it, we print a directory tree snippet to help you debug the next time
-        dir_content = [str(x.relative_to(repo_path)) for x in repo_path.rglob("*.json")]
-        raise FileNotFoundError(
-            f"❌ CRITICAL: Manifest '{search_pattern}' not found in library at {repo_path}.\n"
-            f"Available JSON files found: {dir_content}"
-        )
-    
-    # Use the first match found
-    manifest_path = manifest_matches[0]
-    
-    with open(manifest_path, 'r') as f:
-        manifest_data = json.load(f)
-        
-    logger.info(f"✅ Discovered Library Manifest at: {manifest_path}")
-    return manifest_data
+        raise FileNotFoundError(f"Manifest '{search_pattern}' not found.")
+    with open(manifest_matches[0], 'r') as f:
+        data = json.load(f)
+    logger.info(f"✅ Discovered Library Manifest at: {manifest_matches[0]}")
+    return data
 
 def execute_setup_script(repo_path: Path, script_path: str):
     full_script_path = repo_path / script_path
-    
-    # 1. Start the group
     print(f"::group::⚙️ Provisioning: {script_path}")
-    
     logger.info(f"⚙️ Executing provisioning script: {script_path}")
     
     try:
-        result = subprocess.run(
-            ["bash", str(full_script_path.resolve())], 
-            cwd=str(repo_path), 
-            check=True,
-            capture_output=True,
+        # Popen streams logs in real-time
+        process = subprocess.Popen(
+            ["bash", str(full_script_path.resolve())],
+            cwd=str(repo_path),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             text=True
         )
-        # Success: Print stdout/stderr inside the group for audit
-        print(result.stdout)
-        print(result.stderr)
+
+        for line in process.stdout:
+            print(f"   [Bash]: {line.strip()}")
+            
+        return_code = process.wait()
+        if return_code != 0:
+            raise subprocess.CalledProcessError(return_code, "Provisioning script failed")
+        
         logger.info("   ↳ Provisioning completed successfully.")
         
-    except subprocess.CalledProcessError as e:
-        # Failure: The output is already inside the open group
-        print(f"STDOUT: {e.stdout}")
-        print(f"STDERR: {e.stderr}")
-        logger.error(f"❌ Provisioning script failed!")
-        raise
     finally:
-        # 2. Close the group
         print("::endgroup::")
 
 def stage_dependency_files(repo_path: Path, workspace_dir: Path, config_ids: list, subfolder: str):
     """Recursively locates config assets and stages them into the workspace."""
     target_dir = workspace_dir / subfolder
     target_dir.mkdir(parents=True, exist_ok=True)
-    
     for config_id in config_ids:
         filename = f"{config_id}.json"
-        
-        # Use rglob to find the file anywhere in the repo
         matches = list(repo_path.rglob(filename))
-        
         if matches:
-            # Use the first match found
-            source_file = matches[0]
-            destination = target_dir / filename
-            shutil.copy2(source_file, destination)
-            logger.info(f"✅ Successfully staged asset: {filename} from {source_file.parent.name}/")
+            shutil.copy2(matches[0], target_dir / filename)
+            logger.info(f"✅ Successfully staged asset: {filename}")
         else:
-            logger.warning(f"⚠️ Asset '{config_id}' not found in repo.")
+            logger.warning(f"⚠️ Asset '{config_id}' not found.")
 
 def main():
     args = parse_arguments()
