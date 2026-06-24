@@ -259,8 +259,8 @@ jobs:
         if: failure()
         shell: bash -el {0}
         run: |
-          chmod +x src/debug/forensic_audit.sh
-          bash src/debug/forensic_audit.sh
+          chmod +x debug/forensic_audit.sh
+          bash debug/forensic_audit.sh
 
       # - name: 📥 Import Control Plane (Dropbox Sync)
       #   env:
