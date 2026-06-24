@@ -93,27 +93,35 @@ def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
     return manifest_data
 
 def execute_setup_script(repo_path: Path, script_path: str):
-    """Runs the environment provisioning script defined in the library manifest."""
     full_script_path = repo_path / script_path
     
-    if not full_script_path.exists():
-        logger.warning(f"⚠️ Setup script not found at {full_script_path}. Skipping.")
-        return
-
+    # 1. Start the group
+    print(f"::group::⚙️ Provisioning: {script_path}")
+    
     logger.info(f"⚙️ Executing provisioning script: {script_path}")
+    
     try:
-        # full_script_path.resolve() makes the path absolute so cwd doesn't break it
-        subprocess.run(
+        result = subprocess.run(
             ["bash", str(full_script_path.resolve())], 
             cwd=str(repo_path), 
             check=True,
             capture_output=True,
             text=True
         )
+        # Success: Print stdout/stderr inside the group for audit
+        print(result.stdout)
+        print(result.stderr)
         logger.info("   ↳ Provisioning completed successfully.")
+        
     except subprocess.CalledProcessError as e:
-        logger.error(f"❌ Provisioning script failed!\nSTDOUT: {e.stdout}\nSTDERR: {e.stderr}")
+        # Failure: The output is already inside the open group
+        print(f"STDOUT: {e.stdout}")
+        print(f"STDERR: {e.stderr}")
+        logger.error(f"❌ Provisioning script failed!")
         raise
+    finally:
+        # 2. Close the group
+        print("::endgroup::")
 
 def stage_dependency_files(repo_path: Path, workspace_dir: Path, config_ids: list, subfolder: str):
     """Recursively locates config assets and stages them into the workspace."""
