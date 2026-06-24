@@ -65,7 +65,7 @@ def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
     # We look for the base name. 
     # Note: If the file was renamed with a hash, this pattern match will fail, 
     # which is exactly what triggers the diagnostic logic below.
-    search_pattern = f"{pipeline_id}.json"
+    search_pattern = f"{pipeline_id}"
     manifest_matches = list(repo_path.rglob(search_pattern))
     
     if not manifest_matches:
