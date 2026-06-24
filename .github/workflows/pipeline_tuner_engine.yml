@@ -224,14 +224,16 @@ jobs:
           channel-priority: strict
           activate-environment: tuner-env
 
-      # 📦 CACHE: Saves the environment state for the next run
       - name: 📦 Cache Conda Environment
         uses: actions/cache@v4
         with:
           path: /usr/share/miniconda/envs/tuner-env
-          key: ${{ runner.os }}-conda-v1-${{ github.run_id }}
+          # Strict Key: Matches the exact Task + Branch
+          key: ${{ hashFiles('tasks/**') }}-${{ github.ref_name }}
+          # Strict Restore: Only allows falling back to caches that share 
+          # the same Task + Branch prefix (e.g., previous runs of this exact task)
           restore-keys: |
-            ${{ runner.os }}-conda-v1-
+            ${{ hashFiles('tasks/**') }}-${{ github.ref_name }}-
 
       # ⚙️ INITIALIZATION (Cold Start Only)
       # This step now handles everything: cloning + invoking the Python logic + provisioning
