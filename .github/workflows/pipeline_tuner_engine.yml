@@ -237,6 +237,7 @@ jobs:
           python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator
       
       - name: Run debug script
+        if: always()
         run:
           bash debug/forensic_audit.sh
 
