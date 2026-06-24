@@ -115,23 +115,25 @@ def execute_setup_script(repo_path: Path, script_path: str):
         logger.error(f"❌ Provisioning script failed!\nSTDOUT: {e.stdout}\nSTDERR: {e.stderr}")
         raise
 
-def stage_dependency_files(repo_path: Path, workspace_dir: Path, file_names: list, category: str):
-    """Locates and stages required files from the repo into the workspace."""
-    staging_target = workspace_dir / category
-    staging_target.mkdir(parents=True, exist_ok=True)
+def stage_dependency_files(repo_path: Path, workspace_dir: Path, config_ids: list, subfolder: str):
+    """Recursively locates config assets and stages them into the workspace."""
+    target_dir = workspace_dir / subfolder
+    target_dir.mkdir(parents=True, exist_ok=True)
     
-    for target_name in file_names:
-        file_found = False
-        for root, _, files in os.walk(repo_path):
-            if target_name in files:
-                source_file = Path(root) / target_name
-                shutil.copy2(source_file, staging_target / target_name)
-                logger.info(f"   ↳ Staged {category[:-1]}: {target_name} -> {category}/")
-                file_found = True
-                break
+    for config_id in config_ids:
+        filename = f"{config_id}.json"
         
-        if not file_found:
-            logger.warning(f"⚠️ Asset '{target_name}' not found in repo.")
+        # Use rglob to find the file anywhere in the repo
+        matches = list(repo_path.rglob(filename))
+        
+        if matches:
+            # Use the first match found
+            source_file = matches[0]
+            destination = target_dir / filename
+            shutil.copy2(source_file, destination)
+            logger.info(f"✅ Successfully staged asset: {filename} from {source_file.parent.name}/")
+        else:
+            logger.warning(f"⚠️ Asset '{config_id}' not found in repo.")
 
 def main():
     args = parse_arguments()
