@@ -255,8 +255,8 @@ jobs:
           conda activate tuner-env
           python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator
       
-      - name: 🔍 Run Forensic Audit on Failure
-        if: failure()
+      - name: 🔍 Run Forensic Audit (Integrity Check)
+        if: always()
         shell: bash -el {0}
         run: |
           chmod +x debug/forensic_audit.sh
