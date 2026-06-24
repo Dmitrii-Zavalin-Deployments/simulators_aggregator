@@ -2,46 +2,45 @@
 set -euo pipefail
 
 echo "========================================================================"
-echo "🕵️‍♂️ BEGINNING ACE PIPELINE FORENSIC AUDIT (MISSING ASSET WARNING)"
+echo "🕵️‍♂️ BEGINNING ACE PIPELINE VERIFICATION SUITE"
 echo "========================================================================"
 
 REPO_PATH="repositories/fluid_dynamics_simulator"
-MISSING_ASSET="mesh_config_01"
+WORKSPACE_CONFIGS="data/testing-input-output/tuning_main/configs"
+STATE_FILE="data/testing-input-output/tuning_main/state.json"
 
-# --- 1. GREP DIAGNOSTICS FOR CODES & MANIFEST INTENT ---
-echo -e "\n🔍 [1/4] SCANNING MANIFESTS FOR ASSET DECLARATIONS..."
-if [ -d "$REPO_PATH" ]; then
-    echo "Grepping for references to '${MISSING_ASSET}' inside the library:"
-    grep -rn "$MISSING_ASSET" "$REPO_PATH" || echo "❌ No asset reference found in text files."
+# --- 1. CONFIG ASSET AUDIT ---
+echo -e "\n📁 [1/4] AUDITING STAGED CONFIGURATION ASSETS..."
+if [ -d "$WORKSPACE_CONFIGS" ]; then
+    echo "Files found in workspace configs:"
+    ls -l "$WORKSPACE_CONFIGS"
 else
-    echo "❌ Repository path not found."
+    echo "❌ Workspace config directory not found at ${WORKSPACE_CONFIGS}."
 fi
 
-# --- 2. FILESYSTEM DIAGNOSTICS FOR CONFIGURATION ASSETS ---
-echo -e "\n📁 [2/4] LOCATING ALL AVAILABLE CONFIGURATION ASSETS..."
-echo "Searching for any JSON/YAML configuration files in the library repo structure:"
-find "$REPO_PATH" -type f \( -name "*.json" -o -name "*.yaml" -o -name "*.yml" \) | sort
+# --- 2. SOVEREIGN STATE AUDIT ---
+echo -e "\n📜 [2/4] INSPECTING GENERATED SOVEREIGN STATE..."
+if [ -f "$STATE_FILE" ]; then
+    echo "Contents of ${STATE_FILE}:"
+    cat "$STATE_FILE"
+else
+    echo "❌ State file not found!"
+fi
 
-# --- 3. SMOKING-GUN SOURCE AUDIT (cat -n) ---
-echo -e "\n📜 [3/4] PRINTING ASSET VALIDATION CALL STACK (initialize_state.py)..."
+# --- 3. SMOKING-GUN SOURCE AUDIT (initialize_state.py) ---
+echo -e "\n🔍 [3/4] AUDITING MATRIX COMPILATION LOGIC (Lines 185-200)..."
 FILE="src/pipeline/initialize_state.py"
 if [ -f "$FILE" ]; then
-    # Audit the configuration processing and validation loop (typically lines 160-195)
-    echo "Lines 160 to 195 from ${FILE}:"
-    cat -n "$FILE" | sed -n '160,195p'
+    cat -n "$FILE" | sed -n '185,200p'
 else
-    echo "❌ Missing source file: $FILE"
+    echo "❌ Missing source file."
 fi
 
 # --- 4. PREPARED SED INJECTIONS FOR AUTOMATED REPAIRS ---
-echo -e "\n🛠️ [4/4] REMEDIATION SUGGESTIONS (UNCOMMENT TO APPLY)..."
-
-# Repair Option A: If the manifest points to 'mesh_config_01' but the file is actually named 'mesh_config.json'
-# sed -i 's/"mesh_config_01"/"mesh_config"/g' repositories/fluid_dynamics_simulator/pipelines/mesh_pipeline.json
-
-# Repair Option B: Bypass asset validation check in python if assets are downloaded dynamically later
-# sed -i 's/logger.warning(f"⚠️ Asset '\''{config_id}'\'' not found in repo.")/logger.info(f"Asset checked: {config_id}")/g' src/pipeline/initialize_state.py
+echo -e "\n🛠️ [4/4] REMEDIATION SUGGESTIONS..."
+# If the state.json is empty or missing keys, you can regenerate it:
+# rm data/testing-input-output/tuning_main/state.json && python3 src/pipeline/initialize_state.py
 
 echo "========================================================================"
-echo "🏁 FORENSIC AUDIT SEQUENCE COMPLETED 🏁"
+echo "🏁 VERIFICATION COMPLETED. CHECK 'STATE.JSON' OUTPUT ABOVE. 🏁"
 echo "========================================================================"
