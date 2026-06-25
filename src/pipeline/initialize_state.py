@@ -123,20 +123,6 @@ def execute_setup_script(repo_path: Path, script_path: str):
         print("::endgroup::")
 
 
-def stage_dependency_files(repo_path: Path, workspace_dir: Path, config_ids: list, subfolder: str):
-    """Recursively locates config assets and stages them into the workspace."""
-    target_dir = workspace_dir / subfolder
-    target_dir.mkdir(parents=True, exist_ok=True)
-    for config_id in config_ids:
-        filename = f"{config_id}.json"
-        matches = list(repo_path.rglob(filename))
-        if matches:
-            shutil.copy2(matches[0], target_dir / filename)
-            logger.info(f"✅ Successfully staged asset: {filename}")
-        else:
-            logger.warning(f"⚠️ Asset '{config_id}' not found.")
-
-
 def main():
     args = parse_arguments()
     repo_path = Path(args.repo_path)
@@ -166,9 +152,9 @@ def main():
     # 4. Discover Library Manifest & Extract Configurations
     manifest_steps = load_pipeline_manifest(repo_path, task_data["pipeline_id"])
     
-    all_config_ids = []
+    target_config_path = None
     
-    # 5. Process Manifest Steps (Conditional Setup Scripts & Config Extraction)
+    # 5. Process Manifest Steps (Conditional Setup Scripts & Config Key Capture)
     for step in sorted(manifest_steps, key=lambda x: x.get("order", 0)):
         logger.info(f"Processing Step {step.get('order')} for repository: {step.get('repository_url')}")
         
@@ -179,27 +165,41 @@ def main():
             else:
                 logger.info(f"⏩ Skipping provisioning script (Cache Hit: True): {step['setup_script']}")
             
-        # Aggregate configs regardless of caching strategy
-        if "config_ids" in step:
-            all_config_ids.extend(step["config_ids"])
+        # Capture the unified config file location
+        if "config" in step:
+            target_config_path = step["config"]
             
-    # Remove duplicates if any configs overlap between steps
-    unique_config_ids = list(set(all_config_ids))
-    
-    # 6. Stage Configs to Workspace
-    stage_dependency_files(repo_path, workspace_dir, unique_config_ids, "configs")
+    # 6. Stage Unified Config to Workspace (Deterministic Direct Copy)
+    if target_config_path:
+        configs_dir = workspace_dir / "configs"
+        configs_dir.mkdir(parents=True, exist_ok=True)
+        config_filename = os.path.basename(target_config_path)
+        
+        # Look for the exact path match first, then fall back to basename rglob if structures drift
+        matches = list(repo_path.rglob(target_config_path))
+        if not matches:
+            matches = list(repo_path.rglob(config_filename))
+            
+        if matches:
+            shutil.copy2(matches[0], configs_dir / config_filename)
+            logger.info(f"✅ Successfully staged unified config asset: {config_filename}")
+        else:
+            logger.error(f"❌ CRITICAL: Configuration file '{target_config_path}' could not be located inside {repo_path}")
+            sys.exit(1)
+    else:
+        logger.error("❌ CRITICAL: Manifest schema violation. No 'config' baseline file specified.")
+        sys.exit(1)
     
     # 7. Dynamically Generate the Search-Space Super-Matrix
     logger.info("Compiling hyperparameter execution super-matrix search space...")
     combinations_to_test = []
-    for config_id in unique_config_ids:
-        for input_file in task_data["input_data_list"]:
-            combinations_to_test.append({
-                "config_id": config_id,
-                "input_data": str(inputs_dir / input_file), # Explicit path resolving to the downloaded file
-                "status": "pending",
-                "execution_summary": {}
-            })
+    for input_file in task_data["input_data_list"]:
+        combinations_to_test.append({
+            "config_id": config_filename,
+            "input_data": str(inputs_dir / input_file), 
+            "status": "pending",
+            "execution_summary": {}
+        })
             
     logger.info(f"Matrix built. Total distinct experimental permutations: {len(combinations_to_test)}")
 
@@ -208,7 +208,7 @@ def main():
         state_container = TunerState(
             pipeline_id=task_data["pipeline_id"],
             input_data_list=task_data["input_data_list"],
-            task_details=manifest_steps, # Injected immutable bill of materials (BOM)
+            task_details=manifest_steps, 
             successful_runs_archive=f"successful_runs_{branch_name}.zip",
             failed_runs_archive=f"failed_runs_{branch_name}.zip",
             saap_skeleton=f"saap_skeleton_{branch_name}",
