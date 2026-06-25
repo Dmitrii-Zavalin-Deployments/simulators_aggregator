@@ -63,8 +63,8 @@ def main():
     local_path = Path("data/testing-input-output") / args.filename
 
     try:
-        # Initialize token tracking and execute atomic upload block
-        token_manager = TokenManager(app_key=app_key, app_secret=app_secret)
+        # Initialize token tracking with correct interface signatures matching dropbox_utils.py
+        token_manager = TokenManager(client_id=app_key, client_secret=app_secret)
         uploader = CloudUploader(token_manager, refresh_token)
         
         uploader.upload(local_path, args.folder)
