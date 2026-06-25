@@ -19,19 +19,17 @@ jobs:
       - name: 🗂️ Checkout Repository
         uses: actions/checkout@v4
 
-      # Rule 1: Isolation Mandate. Circuit breaker for the Pulsed Batch.
       - name: 🔍 Check Dormancy Flag
         id: check
         run: |
           FLAG_PATH="dormant.flag"
-          
           if [[ "${{ github.event_name }}" == "schedule" ]]; then
             if [ -f "$FLAG_PATH" ] && grep -q "STATUS: DORMANT" "$FLAG_PATH"; then
               echo "status=dormant" >> $GITHUB_OUTPUT
-              echo "🛑 ENGINE DORMANT: Status set to DORMANT. Halting pulse."
+              echo "🛑 ENGINE DORMANT: Halting hourly pulse execution."
             else
               echo "status=active" >> $GITHUB_OUTPUT
-              echo "🚀 ENGINE ACTIVE: No dormancy signal found. Proceeding."
+              echo "🚀 ENGINE ACTIVE: Proceeding with execution pulse."
             fi
           else
             echo "status=active" >> $GITHUB_OUTPUT
@@ -174,15 +172,16 @@ jobs:
     name: "🚀 Production: ACE Loop Execution"
     # needs: pre_flight_tests
     needs: gatekeeper
+    if: needs.gatekeeper.outputs.status == 'active'
     runs-on: ubuntu-latest
     env:
       PYTHONPATH: ${{ github.workspace }}
       DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
       DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
       DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
-      # Centralized Parameters
       DROPBOX_FOLDER: "simulators"
       TUNER_STATE_ARCHIVE: "tuning_${{ github.ref_name }}.zip"
+      WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
     
     steps:
       - name: 🗂️ Checkout Engine
@@ -205,7 +204,7 @@ jobs:
       - name: 📦 Install Engine Pip Dependencies
         run: pip install -r requirements.txt
       
-      # 📥 STATE IMPORT: Check if we are "initialized" or need an archive
+      # 📥 STATE IMPORT: Check if a prior state zip exists on Dropbox
       - name: 📥 Check Pipeline State Existence
         id: import_state
         run: |
@@ -213,22 +212,21 @@ jobs:
             --folder "${{ env.DROPBOX_FOLDER }}" \
             --filename "${{ env.TUNER_STATE_ARCHIVE }}" >> $GITHUB_OUTPUT
       
-      - name: 🔍 Debug Status
-        run: echo "Checkpoint status is ${{ steps.import_state.outputs.state_status }}"
+      - name: 🔍 Log Pipeline State Status
+        run: echo "Current state status is [${{ steps.import_state.outputs.state_status }}]"
 
-      # 📥 CONDITIONAL: Download Archive if found
-      - name: 📥 Download State Archive
+      # 📥 WARM START: Download and unpack state archive if found
+      - name: 📥 Download Existing State Archive
         if: steps.import_state.outputs.state_status == 'found'
         run: |
           python3 src/io/download_from_dropbox.py \
             --folder "${{ env.DROPBOX_FOLDER }}" \
             --filename "${{ env.TUNER_STATE_ARCHIVE }}"
           
-          # Use the variable here as well for consistent unzipping
-          unzip -o data/testing-input-output/${{ env.TUNER_STATE_ARCHIVE }} \
-            -d data/testing-input-output/
+          mkdir -p data/testing-input-output
+          unzip -o data/testing-input-output/${{ env.TUNER_STATE_ARCHIVE }} -d data/testing-input-output/
 
-      # 🐍 ENV CAPABILITY: Creates the environment (Must happen before initialization)
+      # 🐍 ENV CAPABILITY: Provisions Conda environment for executing simulator modules
       - name: 🐍 Set up Conda Environment
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -243,19 +241,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /usr/share/miniconda/envs/tuner-env
-          # Strict Key: Matches the exact Task + Branch
           key: ${{ hashFiles('tasks/**') }}-${{ github.ref_name }}
-          # Strict Restore: Only allows falling back to caches that share 
-          # the same Task + Branch prefix
           restore-keys: |
             ${{ hashFiles('tasks/**') }}-${{ github.ref_name }}-
 
-      # ⚙️ INITIALIZATION (Cold Start Only)
+      # ⚙️ COLD START ONLY (Initialization & Parameter Explosion)
       - name: ⚙️ Initialize Pipeline State (Cold Start)
         if: steps.import_state.outputs.state_status == 'not_found'
         shell: bash -el {0}
         run: |
-          echo "📥 Cold Start Detected: Staging simulator library..."
+          echo "📥 Cold Start Detected: Scaffolding baseline files..."
           mkdir -p repositories
           rm -rf repositories/fluid_dynamics_simulator
           git clone https://github.com/Dmitrii-Zavalin-Deployments/fluid_dynamics_simulator.git repositories/fluid_dynamics_simulator
@@ -276,15 +271,64 @@ jobs:
               echo "💡 Conda cache hit achieved. Appending --cached-dependency to skip setup scripts."
               CMD="$CMD --cached-dependency"
           fi
-          
           $CMD
-      
-      - name: 🔍 Run Forensic Audit (Integrity Check)
+
+      - name: 🧮 Explode Configuration Range Matrix (Cold Start)
+        if: steps.import_state.outputs.state_status == 'not_found'
+        shell: bash -el {0}
+        run: |
+          python3 src/pipeline/matrix_exploder.py \
+            --config-path "${{ env.WORKSPACE_DIR }}/configs/mesh_config_0970b4d.json" \
+            --output-path "${{ env.WORKSPACE_DIR }}/config_combinations_array.json"
+
+      # 🚀 PROCESSING LOOPS: Process a discrete tuning batch
+      - name: 🚀 Execute Tuning Batch Pulse
+        if: steps.import_state.outputs.state_status == 'found'
+        id: execution_pulse
+        shell: bash -el {0}
+        run: |
+          conda activate tuner-env
+          python3 src/pipeline/execute_batch.py \
+            --workspace "${{ env.WORKSPACE_DIR }}" \
+            --batch-size 1 >> $GITHUB_OUTPUT
+
+      # 🎁 CLOSURE RUN ONLY: Triggered when queue is empty on run entry
+      - name: 🎁 Assemble SaaP Deliverables & Set Dormancy
+        if: steps.import_state.outputs.state_status == 'found' && steps.execution_pulse.outputs.tuning_done == 'true'
+        shell: bash -el {0}
+        run: |
+          python3 src/pipeline/deliverable_assembly.py --workspace "${{ env.WORKSPACE_DIR }}"
+          
+          echo "STATUS: DORMANT" > dormant.flag
+          git add dormant.flag
+          git commit -m "🤖 robot: pipeline execution fully depleted | transition to DORMANT"
+          git push origin HEAD
+
+      # 📤 STATE PERSISTENCE: Packaging and uploading updates to Dropbox
+      - name: 📤 Package and Upload State Snapshot
+        if: always()
+        run: |
+          if [ -d "${{ env.WORKSPACE_DIR }}" ]; then
+            echo "📦 Packing active state folder..."
+            cd data/testing-input-output/
+            zip -r "${{ env.TUNER_STATE_ARCHIVE }}" "tuning_${{ github.ref_name }}"
+            cd ../..
+            
+            echo "📤 Uploading updated transaction state to Dropbox..."
+            python3 src/io/upload_to_dropbox.py \
+              --folder "${{ env.DROPBOX_FOLDER }}" \
+              --filename "${{ env.TUNER_STATE_ARCHIVE }}"
+          fi
+
+      # 🔍 INTEGRITY ENFORCEMENT
+      - name: 🔍 Run Forensic Audit
         if: always()
         shell: bash -el {0}
         run: |
-          chmod +x debug/forensic_audit.sh
-          bash debug/forensic_audit.sh
+          if [ -f "debug/forensic_audit.sh" ]; then
+            chmod +x debug/forensic_audit.sh
+            bash debug/forensic_audit.sh
+          fi
 
       # - name: 📥 Import Control Plane (Dropbox Sync)
       #   env:
