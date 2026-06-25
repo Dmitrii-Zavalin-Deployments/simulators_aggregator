@@ -177,9 +177,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHONPATH: ${{ github.workspace }}
-      DROPBOX_APP_KEY: ${{ secrets.APP_KEY }}
-      DROPBOX_APP_SECRET: ${{ secrets.APP_SECRET }}
-      DROPBOX_REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+      DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
+      DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
+      DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
     
     steps:
       - name: 🗂️ Checkout Engine
