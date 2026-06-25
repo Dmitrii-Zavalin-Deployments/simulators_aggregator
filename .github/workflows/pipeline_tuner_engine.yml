@@ -180,6 +180,9 @@ jobs:
       DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
       DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
       DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
+      # Centralized Parameters
+      DROPBOX_FOLDER: "simulators"
+      TUNER_STATE_ARCHIVE: "tuning_${{ github.ref_name }}.zip"
     
     steps:
       - name: 🗂️ Checkout Engine
@@ -203,35 +206,26 @@ jobs:
         run: pip install -r requirements.txt
       
       # 📥 STATE IMPORT: Check if we are "initialized" or need an archive
-      - name: 📥 Import Pipeline State
+      - name: 📥 Check Pipeline State Existence
         id: import_state
         run: |
-          # This should now output: status=archive_needed|filename=state_backup.zip
-          # or simply: status=initialized
-          OUTPUT=$(python3 src/io/state_manager.py --action import)
-          echo "$OUTPUT" >> $GITHUB_OUTPUT
+          python3 src/io/state_manager.py \
+            --folder "${{ env.DROPBOX_FOLDER }}" \
+            --filename "${{ env.TUNER_STATE_ARCHIVE }}" >> $GITHUB_OUTPUT
 
-      # 📥 CONDITIONAL: Download Archive if needed
+      # 📥 CONDITIONAL: Download Archive if found
       - name: 📥 Download State Archive
-        if: startsWith(steps.import_state.outputs.status, 'archive_needed')
+        if: steps.import_state.outputs.state_status == 'found'
         run: |
-          chmod +x src/download_from_dropbox.sh
-          # Pass the filename outputted by the state manager
-          bash src/download_from_dropbox.sh "${{ steps.import_state.outputs.zip_name }}"
-          # Add logic here to unzip it if required:
-          # unzip data/testing-input-output/${{ steps.import_state.outputs.zip_name }} -d data/testing-input-output/
+          python3 src/io/download_from_dropbox.py \
+            --folder "${{ env.DROPBOX_FOLDER }}" \
+            --filename "${{ env.TUNER_STATE_ARCHIVE }}"
+          
+          # Use the variable here as well for consistent unzipping
+          unzip -o data/testing-input-output/${{ env.TUNER_STATE_ARCHIVE }} \
+            -d data/testing-input-output/
 
-      # ⚙️ INITIALIZATION (Cold Start Only)
-      - name: ⚙️ Initialize Pipeline State (Cold Start)
-        if: steps.import_state.outputs.status == 'initialized'
-        shell: bash -el {0}
-        run: |
-          echo "📥 Cold Start Detected..."
-          # ... (Your existing clone/init logic) ...
-          conda activate tuner-env
-          python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator
-
-      # 🐍 ENV CAPABILITY: Creates the environment
+      # 🐍 ENV CAPABILITY: Creates the environment (Must happen before initialization)
       - name: 🐍 Set up Conda Environment
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -248,14 +242,13 @@ jobs:
           # Strict Key: Matches the exact Task + Branch
           key: ${{ hashFiles('tasks/**') }}-${{ github.ref_name }}
           # Strict Restore: Only allows falling back to caches that share 
-          # the same Task + Branch prefix (e.g., previous runs of this exact task)
+          # the same Task + Branch prefix
           restore-keys: |
             ${{ hashFiles('tasks/**') }}-${{ github.ref_name }}-
 
       # ⚙️ INITIALIZATION (Cold Start Only)
-      # This step now handles everything: cloning + invoking the Python logic + provisioning
       - name: ⚙️ Initialize Pipeline State (Cold Start)
-        if: steps.import_state.outputs.status == 'initialized'
+        if: steps.import_state.outputs.state_status == 'not_found'
         shell: bash -el {0}
         run: |
           echo "📥 Cold Start Detected: Staging simulator library..."
