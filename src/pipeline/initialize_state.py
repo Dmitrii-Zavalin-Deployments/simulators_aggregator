@@ -190,20 +190,7 @@ def main():
         logger.error("❌ CRITICAL: Manifest schema violation. No 'config' baseline file specified.")
         sys.exit(1)
     
-    # 7. Dynamically Generate the Search-Space Super-Matrix
-    logger.info("Compiling hyperparameter execution super-matrix search space...")
-    combinations_to_test = []
-    for input_file in task_data["input_data_list"]:
-        combinations_to_test.append({
-            "config_id": config_filename,
-            "input_data": str(inputs_dir / input_file), 
-            "status": "pending",
-            "execution_summary": {}
-        })
-            
-    logger.info(f"Matrix built. Total distinct experimental permutations: {len(combinations_to_test)}")
-
-    # 8. Instantiate Sovereign State Container
+    # 7. Instantiate Sovereign State Container
     try:
         state_container = TunerState(
             pipeline_id=task_data["pipeline_id"],
@@ -215,13 +202,12 @@ def main():
             saap_skeleton_path=str(workspace_dir / "saap_skeleton"),
             success_zip_path=str(workspace_dir / f"successful_runs_{branch_name}.zip"),
             failed_zip_path=str(workspace_dir / f"failed_zip_{branch_name}.zip"),
-            combinations_to_test=combinations_to_test,
             successful_runs=[],
             failed_runs=[],
             batch_cursor=0
         )
         
-        # 9. Serialize State Document
+        # 8. Serialize State Document
         target_state_json = workspace_dir / "state.json"
         state_container.save_to_disk(str(target_state_json))
         logger.info(f"✅ SUCCESS: Cold start completed. Sovereign state written to: {target_state_json}")
