@@ -212,6 +212,9 @@ jobs:
           python3 src/io/state_manager.py \
             --folder "${{ env.DROPBOX_FOLDER }}" \
             --filename "${{ env.TUNER_STATE_ARCHIVE }}" >> $GITHUB_OUTPUT
+      
+      - name: 🔍 Debug Status
+        run: echo "Checkpoint status is: ${{ steps.import_state.outputs.state_status }}"
 
       # 📥 CONDITIONAL: Download Archive if found
       - name: 📥 Download State Archive
