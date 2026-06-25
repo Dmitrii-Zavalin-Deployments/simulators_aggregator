@@ -26,7 +26,6 @@ class TunerState:
         'failed_zip_path',          # Explicit path routing for local compression handling of failed runs
         
         # --- Operational Automated Cumulative Execution (ACE) Tracking State ---
-        'combinations_to_test',     # The complete multi-module structural search space (Super-Matrix)
         'successful_runs',          # Collection of individual run data payloads matching Tuner Results Schema
         'failed_runs',              # Collection of individual run error payloads matching Tuner Results Schema
         'batch_cursor'              # Tracks progress for the Pulsed Batch execution cursor index
@@ -43,7 +42,6 @@ class TunerState:
         saap_skeleton_path: str,
         success_zip_path: str,
         failed_zip_path: str,
-        combinations_to_test: List[Dict[str, Any]],
         successful_runs: List[Dict[str, Any]],
         failed_runs: List[Dict[str, Any]],
         batch_cursor: int
@@ -58,7 +56,6 @@ class TunerState:
         if saap_skeleton_path is None: raise ValueError("Missing structural parameter: saap_skeleton_path")
         if success_zip_path is None: raise ValueError("Missing structural parameter: success_zip_path")
         if failed_zip_path is None: raise ValueError("Missing structural parameter: failed_zip_path")
-        if combinations_to_test is None: raise ValueError("Missing structural parameter: combinations_to_test")
         if successful_runs is None: raise ValueError("Missing structural parameter: successful_runs")
         if failed_runs is None: raise ValueError("Missing structural parameter: failed_runs")
         if batch_cursor is None: raise ValueError("Missing structural parameter: batch_cursor")
@@ -73,7 +70,6 @@ class TunerState:
         self.saap_skeleton_path = saap_skeleton_path
         self.success_zip_path = success_zip_path
         self.failed_zip_path = failed_zip_path
-        self.combinations_to_test = combinations_to_test
         self.successful_runs = successful_runs
         self.failed_runs = failed_runs
         self.batch_cursor = batch_cursor
@@ -101,7 +97,6 @@ class TunerState:
             saap_skeleton_path=data['saap_skeleton_path'],
             success_zip_path=data['success_zip_path'],
             failed_zip_path=data['failed_zip_path'],
-            combinations_to_test=data['combinations_to_test'],
             successful_runs=data['successful_runs'],
             failed_runs=data['failed_runs'],
             batch_cursor=data['batch_cursor']
@@ -130,7 +125,7 @@ class TunerState:
             "task": {
                 "pipeline_id": self.pipeline_id,
                 "input_data_list": self.input_data_list,
-                "task_details": self.task_details # Added to deliverable
+                "task_details": self.task_details
             },
             "deliverables": {
                 "successful_runs_archive": self.successful_runs_archive,
@@ -140,12 +135,6 @@ class TunerState:
         }
 
     # --- Pulsed Batch Utilities ---
-
-    def get_next_batch(self, limit: int) -> List[Dict[str, Any]]:
-        """Slices the search space from the bookmark array pointer location."""
-        start = self.batch_cursor
-        end = min(start + limit, len(self.combinations_to_test))
-        return self.combinations_to_test[start:end]
 
     def advance_cursor(self, batch_size: int):
         """Advances pointer cleanly upon conclusion of automated batch cycle."""
