@@ -1,20 +1,19 @@
-# src/io/upload_to_dropbox.py
-
+#!/usr/bin/env python3
 """
 Archivist I/O: Cloud Upload Module.
 """
-
+import argparse
+import os
+import sys
 from pathlib import Path
-
 import dropbox
-
 from src.io.dropbox_utils import TokenManager
 
 
 class CloudUploader:
     """
     Handles secure uploading of simulation artifacts.
-    Uses __slots__ per Rule 0 to minimize memory footprint.
+    Uses __slots__ to minimize memory footprint.
     """
     __slots__ = ['dbx']
 
@@ -34,8 +33,7 @@ class CloudUploader:
         dropbox_file_path = f"{folder}/{local_path.name}"
         
         with open(local_path, "rb") as f:
-            # Rule 0: Using f.read() is fine for small/medium Zips, 
-            # for multi-GB files, we would use session_upload.
+            # Using f.read() is optimal for stateless transaction Zips
             self.dbx.files_upload(
                 f.read(), 
                 dropbox_file_path, 
@@ -43,3 +41,38 @@ class CloudUploader:
             )
         
         print(f"✅ Successfully uploaded: {dropbox_file_path}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Upload transaction state archive to Dropbox")
+    parser.add_argument("--folder", required=True, help="Target Dropbox folder destination")
+    parser.add_argument("--filename", required=True, help="Name of the target zip archive file")
+    args = parser.parse_args()
+
+    # Collect authentication payload from runner environment context
+    app_key = os.environ.get("DROPBOX_APP_KEY")
+    app_secret = os.environ.get("DROPBOX_APP_SECRET")
+    refresh_token = os.environ.get("DROPBOX_REFRESH_TOKEN")
+
+    if not all([app_key, app_secret, refresh_token]):
+        print("❌ CRITICAL: Missing required Dropbox environment variables.")
+        sys.exit(1)
+
+    # Resolve local path. The workflow zips inside 'data/testing-input-output/' 
+    # and returns to repo root before calling this script.
+    local_path = Path("data/testing-input-output") / args.filename
+
+    try:
+        # Initialize token tracking and execute atomic upload block
+        token_manager = TokenManager(app_key=app_key, app_secret=app_secret)
+        uploader = CloudUploader(token_manager, refresh_token)
+        
+        uploader.upload(local_path, args.folder)
+        
+    except Exception as e:
+        print(f"❌ CRITICAL: Cloud upload pipeline transaction failed: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
