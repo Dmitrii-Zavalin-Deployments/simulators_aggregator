@@ -17,22 +17,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger("StateInitializer")
 
-def str2bool(v):
-    """Helper function to cleanly parse true/false strings from bash environment."""
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
 def parse_arguments():
     parser = argparse.ArgumentParser(description="ACE Loop Cold Start State Initializer")
-    # Support both options seamlessly
+    # Support both options seamlessly mapping to repo_path
     parser.add_argument("--repository-path", "--repo-path", required=True, dest="repo_path", help="Path to the repository")
-    parser.add_argument("--cached-dependency", type=str2bool, default=False, help="Set to true if environment/conda cache hit achieved")
+    # Idiomatic boolean flag: True if present, False if absent
+    parser.add_argument("--cached-dependency", action="store_true", help="Flag indicating environment/conda cache hit achieved; skips provisioning scripts")
     return parser.parse_args()
 
 def discover_task_file() -> dict:

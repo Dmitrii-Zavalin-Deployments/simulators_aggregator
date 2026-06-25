@@ -239,6 +239,7 @@ jobs:
           activate-environment: tuner-env
 
       - name: 📦 Cache Conda Environment
+        id: cache-conda
         uses: actions/cache@v4
         with:
           path: /usr/share/miniconda/envs/tuner-env
@@ -266,9 +267,17 @@ jobs:
           echo "✅ Repository staged successfully."
 
           echo "🚀 Running state initialization logic..."
-          # Crucial: Activate env and run the script within it
           conda activate tuner-env
-          python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator
+
+          # Build the command dynamically without risking the Python string evaluation trap
+          CMD="python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator"
+          
+          if [ "${{ steps.cache-conda.outputs.cache-hit }}" == "true" ]; then
+              echo "💡 Conda cache hit achieved. Appending --cached-dependency to skip setup scripts."
+              CMD="$CMD --cached-dependency"
+          fi
+          
+          $CMD
       
       - name: 🔍 Run Forensic Audit (Integrity Check)
         if: always()
