@@ -17,9 +17,22 @@ logging.basicConfig(
 )
 logger = logging.getLogger("StateInitializer")
 
+def str2bool(v):
+    """Helper function to cleanly parse true/false strings from bash environment."""
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="ACE Loop Cold Start State Initializer")
-    parser.add_argument("--repo-path", required=True, help="Path to the repository")
+    # Support both options seamlessly
+    parser.add_argument("--repository-path", "--repo-path", required=True, dest="repo_path", help="Path to the repository")
+    parser.add_argument("--cached-dependency", type=str2bool, default=False, help="Set to true if environment/conda cache hit achieved")
     return parser.parse_args()
 
 def discover_task_file() -> dict:
@@ -27,7 +40,7 @@ def discover_task_file() -> dict:
     tasks_dir = Path("tasks")
     logger.info(f"Scanning {tasks_dir} for an ACE execution task payload...")
     
-    # Required keys according to the NEW Tuner Task Schema (Intent only)
+    # Required keys according to the Tuner Task Schema (Intent only)
     required_keys = {"pipeline_id", "input_data_list"}
     
     task_files = list(tasks_dir.glob("*.json"))
@@ -61,10 +74,6 @@ def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
 
 def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
     """Finds and parses the target JSON manifest recursively within the Library."""
-    
-    # We look for the base name. 
-    # Note: If the file was renamed with a hash, this pattern match will fail, 
-    # which is exactly what triggers the diagnostic logic below.
     search_pattern = f"{pipeline_id}.json"
     manifest_matches = list(repo_path.rglob(search_pattern))
     
@@ -140,7 +149,7 @@ def main():
         sys.exit(1)
         
     branch_name = os.environ.get("GITHUB_REF_NAME", "default_branch")
-    logger.info(f"Initializing state machine for branch: [{branch_name}]")
+    logger.info(f"Initializing state machine for branch: [{branch_name}] (Conda Cache Hit: {args.cached_dependency})")
     
     # 1. Discover Task Schema
     try:
@@ -162,15 +171,18 @@ def main():
     
     all_config_ids = []
     
-    # 5. Process Manifest Steps (Setup Scripts & Config Extraction)
+    # 5. Process Manifest Steps (Conditional Setup Scripts & Config Extraction)
     for step in sorted(manifest_steps, key=lambda x: x.get("order", 0)):
         logger.info(f"Processing Step {step.get('order')} for repository: {step.get('repository_url')}")
         
-        # Execute provisioning
+        # Execute provisioning ONLY if dependencies are NOT cached
         if "setup_script" in step:
-            execute_setup_script(repo_path, step["setup_script"])
+            if not args.cached_dependency:
+                execute_setup_script(repo_path, step["setup_script"])
+            else:
+                logger.info(f"⏩ Skipping provisioning script (Cache Hit: True): {step['setup_script']}")
             
-        # Aggregate configs
+        # Aggregate configs regardless of caching strategy
         if "config_ids" in step:
             all_config_ids.extend(step["config_ids"])
             
