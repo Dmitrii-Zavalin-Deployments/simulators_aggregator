@@ -203,8 +203,7 @@ def main():
             success_zip_path=str(workspace_dir / f"successful_runs_{branch_name}.zip"),
             failed_zip_path=str(workspace_dir / f"failed_zip_{branch_name}.zip"),
             successful_runs=[],
-            failed_runs=[],
-            batch_cursor=0
+            failed_runs=[]
         )
         
         # 8. Serialize State Document

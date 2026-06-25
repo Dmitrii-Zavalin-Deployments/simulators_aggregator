@@ -16,19 +16,12 @@ class TunerState:
         'task_details',             # Immutable manifest of repo/setup state (tracking everything)
         
         # --- Output Schema Deliverables ---
-        'successful_runs_archive',  # Filename of the successful runs ZIP (e.g., successful_runs_<branch>.zip)
-        'failed_runs_archive',      # Filename of the failed runs ZIP (e.g., failed_runs_<branch>.zip)
+        'successful_runs_archive',  # Target folder name for successful execution results
+        'failed_runs_archive',      # Target folder name for failed execution results
         'saap_skeleton',            # Path to the root of the generated saap_skeleton folder structure
         
         # --- Explicitly Requested Path Routing Slots ---
-        'saap_skeleton_path',       # Explicit absolute/relative path to the saap skeleton workspace
-        'success_zip_path',         # Explicit path routing for local compression handling of successful runs
-        'failed_zip_path',          # Explicit path routing for local compression handling of failed runs
-        
-        # --- Operational Automated Cumulative Execution (ACE) Tracking State ---
-        'successful_runs',          # Collection of individual run data payloads matching Tuner Results Schema
-        'failed_runs',              # Collection of individual run error payloads matching Tuner Results Schema
-        'batch_cursor'              # Tracks progress for the Pulsed Batch execution cursor index
+        'saap_skeleton_path'        # Explicit absolute/relative path to the saap skeleton workspace
     ]
 
     def __init__(
@@ -39,12 +32,7 @@ class TunerState:
         successful_runs_archive: str,
         failed_runs_archive: str,
         saap_skeleton: str,
-        saap_skeleton_path: str,
-        success_zip_path: str,
-        failed_zip_path: str,
-        successful_runs: List[Dict[str, Any]],
-        failed_runs: List[Dict[str, Any]],
-        batch_cursor: int
+        saap_skeleton_path: str
     ):
         # --- Zero-Default Policy Verification ---
         if pipeline_id is None: raise ValueError("Missing structural parameter: pipeline_id")
@@ -54,11 +42,6 @@ class TunerState:
         if failed_runs_archive is None: raise ValueError("Missing structural parameter: failed_runs_archive")
         if saap_skeleton is None: raise ValueError("Missing structural parameter: saap_skeleton")
         if saap_skeleton_path is None: raise ValueError("Missing structural parameter: saap_skeleton_path")
-        if success_zip_path is None: raise ValueError("Missing structural parameter: success_zip_path")
-        if failed_zip_path is None: raise ValueError("Missing structural parameter: failed_zip_path")
-        if successful_runs is None: raise ValueError("Missing structural parameter: successful_runs")
-        if failed_runs is None: raise ValueError("Missing structural parameter: failed_runs")
-        if batch_cursor is None: raise ValueError("Missing structural parameter: batch_cursor")
 
         # Assign properties to state container instance
         self.pipeline_id = pipeline_id
@@ -68,11 +51,6 @@ class TunerState:
         self.failed_runs_archive = failed_runs_archive
         self.saap_skeleton = saap_skeleton
         self.saap_skeleton_path = saap_skeleton_path
-        self.success_zip_path = success_zip_path
-        self.failed_zip_path = failed_zip_path
-        self.successful_runs = successful_runs
-        self.failed_runs = failed_runs
-        self.batch_cursor = batch_cursor
 
     # --- Dehydration & Hydration Logic ---
 
@@ -94,12 +72,7 @@ class TunerState:
             successful_runs_archive=data['successful_runs_archive'],
             failed_runs_archive=data['failed_runs_archive'],
             saap_skeleton=data['saap_skeleton'],
-            saap_skeleton_path=data['saap_skeleton_path'],
-            success_zip_path=data['success_zip_path'],
-            failed_zip_path=data['failed_zip_path'],
-            successful_runs=data['successful_runs'],
-            failed_runs=data['failed_runs'],
-            batch_cursor=data['batch_cursor']
+            saap_skeleton_path=data['saap_skeleton_path']
         )
 
     def save_to_disk(self, path: str):
@@ -133,9 +106,3 @@ class TunerState:
                 "saap_skeleton": self.saap_skeleton
             }
         }
-
-    # --- Pulsed Batch Utilities ---
-
-    def advance_cursor(self, batch_size: int):
-        """Advances pointer cleanly upon conclusion of automated batch cycle."""
-        self.batch_cursor += batch_size
