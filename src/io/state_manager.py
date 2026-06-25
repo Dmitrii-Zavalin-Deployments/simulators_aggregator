@@ -16,14 +16,25 @@ logging.basicConfig(
 )
 logger = logging.getLogger("StateManager")
 
+def _get_required_env(key: str) -> str:
+    """Helper to enforce No-Default policy."""
+    val = os.environ.get(key)
+    if val is None:
+        raise EnvironmentError(f"Missing required environment variable: {key}")
+    
+    val_stripped = val.strip()
+    if not val_stripped:
+        raise EnvironmentError(f"Environment variable '{key}' is empty or whitespace.")
+    
+    return val_stripped
+
 def get_config():
-    """Retrieves environment configuration with defensive stripping."""
-    # .strip() prevents errors from hidden newlines in GitHub Secrets
+    """Retrieves environment configuration with strict validation."""
     return {
-        "app_key": os.environ.get("DROPBOX_APP_KEY", "").strip(),
-        "app_secret": os.environ.get("DROPBOX_APP_SECRET", "").strip(),
-        "refresh_token": os.environ.get("DROPBOX_REFRESH_TOKEN", "").strip(),
-        "branch": os.environ.get("GITHUB_REF_NAME", "default"),
+        "app_key": _get_required_env("DROPBOX_APP_KEY"),
+        "app_secret": _get_required_env("DROPBOX_APP_SECRET"),
+        "refresh_token": _get_required_env("DROPBOX_REFRESH_TOKEN"),
+        "branch": _get_required_env("GITHUB_REF_NAME"),
     }
 
 def check_exists(ingestor, remote_path):
@@ -38,10 +49,6 @@ def check_exists(ingestor, remote_path):
 
 def run_import():
     cfg = get_config()
-    # Validate keys are not empty strings after stripping
-    if not cfg["app_key"] or not cfg["app_secret"] or not cfg["refresh_token"]:
-        raise ValueError("Missing or malformed Dropbox credentials in environment.")
-
     tm = TokenManager(cfg["app_key"], cfg["app_secret"])
     ingestor = CloudIngestor(tm, cfg["refresh_token"], Path("sync_log.txt"))
     
@@ -52,13 +59,13 @@ def run_import():
     
     if not check_exists(ingestor, remote_path):
         logger.warning("No checkpoint found. Proceeding to Cold Start.")
-        print("initialized") # Signal to CI/CD
+        print("state_status=initialized") # CI/CD Signal
         return
 
     logger.info("Checkpoint detected. Downloading...")
     ingestor.sync(remote_path, local_dir, ['.zip'])
     logger.info("Import complete.")
-    print("restored") # Signal to CI/CD
+    print("state_status=restored") # CI/CD Signal
 
 def run_export():
     cfg = get_config()
@@ -71,7 +78,7 @@ def run_export():
     uploader.upload(local_zip, "/checkpoints")
     
     logger.info("Export complete.")
-    print("exported") # Signal to CI/CD
+    print("state_status=exported") # CI/CD Signal
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -84,5 +91,6 @@ if __name__ == "__main__":
         else:
             run_export()
     except Exception as e:
+        # This will catch our custom EnvironmentErrors from get_config
         logger.error(f"Critical failure during {args.action}: {e}")
         sys.exit(1)
