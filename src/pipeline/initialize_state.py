@@ -17,6 +17,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("StateInitializer")
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="ACE Loop Cold Start State Initializer")
     # Support both options seamlessly mapping to repo_path
@@ -24,6 +25,7 @@ def parse_arguments():
     # Idiomatic boolean flag: True if present, False if absent
     parser.add_argument("--cached-dependency", action="store_true", help="Flag indicating environment/conda cache hit achieved; skips provisioning scripts")
     return parser.parse_args()
+
 
 def discover_task_file() -> dict:
     """Scans the local 'tasks/' directory to locate and validate a lean task JSON."""
@@ -49,6 +51,7 @@ def discover_task_file() -> dict:
                 continue
     raise ValueError("❌ CRITICAL: No JSON matching Tuner Task Schema found.")
 
+
 def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
     """
     Simulated Dropbox integration layer.
@@ -58,9 +61,10 @@ def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
     target_dir.mkdir(parents=True, exist_ok=True)
     for filename in input_data_list:
         target_path = target_dir / filename
-        logger.info(f"   ↳ Downloading: {filename}")
+        logger.info(f"    ↳ Downloading: {filename}")
         with open(target_path, 'w') as f:
             f.write("Mock CAD/Step Data")
+
 
 def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
     """Finds and parses the target JSON manifest recursively within the Library."""
@@ -72,10 +76,10 @@ def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
             f"\n{'='*80}\n"
             f"🚨 CRITICAL: Manifest '{search_pattern}' could not be found.\n"
             f"💡 HINT: Files in the Library Repository have been version-locked.\n"
-            "   It is highly likely this file was renamed (e.g., added a git-hash suffix).\n"
-            "   1. Check the 'pipelines/' folder in your 'fluid_dynamics_simulator' repo.\n"
-            "   2. Identify the new filename (e.g., 'mesh_pipeline_<hash>.json').\n"
-            "   3. Update your task file in 'tasks/' to point to the new filename.\n"
+            f"   It is highly likely this file was renamed (e.g., added a git-hash suffix).\n"
+            f"   1. Check the 'pipelines/' folder in your 'fluid_dynamics_simulator' repo.\n"
+            f"   2. Identify the new filename (e.g., 'mesh_pipeline_<hash>.json').\n"
+            f"   3. Update your task file in 'tasks/' to point to the new filename.\n"
             f"{'='*80}"
         )
         
@@ -89,6 +93,7 @@ def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
         
     logger.info(f"✅ Discovered Library Manifest at: {manifest_matches[0]}")
     return data
+
 
 def execute_setup_script(repo_path: Path, script_path: str):
     full_script_path = repo_path / script_path
@@ -112,10 +117,11 @@ def execute_setup_script(repo_path: Path, script_path: str):
         if return_code != 0:
             raise subprocess.CalledProcessError(return_code, "Provisioning script failed")
         
-        logger.info("   ↳ Provisioning completed successfully.")
+        logger.info("    ↳ Provisioning completed successfully.")
         
     finally:
         print("::endgroup::")
+
 
 def stage_dependency_files(repo_path: Path, workspace_dir: Path, config_ids: list, subfolder: str):
     """Recursively locates config assets and stages them into the workspace."""
@@ -129,6 +135,7 @@ def stage_dependency_files(repo_path: Path, workspace_dir: Path, config_ids: lis
             logger.info(f"✅ Successfully staged asset: {filename}")
         else:
             logger.warning(f"⚠️ Asset '{config_id}' not found.")
+
 
 def main():
     args = parse_arguments()
@@ -201,6 +208,7 @@ def main():
         state_container = TunerState(
             pipeline_id=task_data["pipeline_id"],
             input_data_list=task_data["input_data_list"],
+            task_details=manifest_steps, # Injected immutable bill of materials (BOM)
             successful_runs_archive=f"successful_runs_{branch_name}.zip",
             failed_runs_archive=f"failed_runs_{branch_name}.zip",
             saap_skeleton=f"saap_skeleton_{branch_name}",
@@ -221,6 +229,7 @@ def main():
     except Exception as e:
         logger.error(f"❌ Structural state packaging failure: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

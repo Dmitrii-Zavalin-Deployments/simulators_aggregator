@@ -16,11 +16,51 @@
           "items": {
             "type": "string"
           }
+        },
+        "task_details": {
+          "type": "array",
+          "description": "The immutable bill of materials (BOM) tracking the repository state.",
+          "items": {
+            "type": "object",
+            "required": [
+              "order",
+              "repository_url",
+              "version_tag",
+              "config_ids",
+              "setup_script"
+            ],
+            "properties": {
+              "order": {
+                "type": "integer",
+                "description": "The number in the sequence of execution."
+              },
+              "repository_url": {
+                "type": "string",
+                "description": "The full Git URL for the simulator repository."
+              },
+              "version_tag": {
+                "type": "string",
+                "description": "Git branch, tag, or commit hash to checkout."
+              },
+              "config_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of config files (from the library configs/ folder) to run for this step."
+              },
+              "setup_script": {
+                "type": "string",
+                "description": "The path to the shell script within this Library repository that provisions the environment (e.g., 'setup_scripts/mesh_generator_setup.sh')."
+              }
+            }
+          }
         }
       },
       "required": [
         "pipeline_id",
-        "input_data_list"
+        "input_data_list",
+        "task_details"
       ]
     },
     "deliverables": {

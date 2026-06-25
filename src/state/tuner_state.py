@@ -1,3 +1,4 @@
+# src/state/tuner_state.py
 import json
 from typing import List, Dict, Any
 
@@ -8,8 +9,11 @@ class TunerState:
     """
     __slots__ = [
         # --- Unified Fields (Input Schema & Output Task Schema) ---
-        'pipeline_id',              # Identifier for the target YAML in Library
+        'pipeline_id',              # Identifier for the target YAML/JSON in Library
         'input_data_list',          # The list of names of the input files for this run
+        
+        # --- Provenance & Environment Traceability (The BOM) ---
+        'task_details',             # Immutable manifest of repo/setup state (tracking everything)
         
         # --- Output Schema Deliverables ---
         'successful_runs_archive',  # Filename of the successful runs ZIP (e.g., successful_runs_<branch>.zip)
@@ -25,13 +29,14 @@ class TunerState:
         'combinations_to_test',     # The complete multi-module structural search space (Super-Matrix)
         'successful_runs',          # Collection of individual run data payloads matching Tuner Results Schema
         'failed_runs',              # Collection of individual run error payloads matching Tuner Results Schema
-        'batch_cursor'              # Tracks progress for the Pulsed Batch execution; this is the cursor to the index in the combinations_to_test list where the current run should start.
+        'batch_cursor'              # Tracks progress for the Pulsed Batch execution cursor index
     ]
 
     def __init__(
         self, 
         pipeline_id: str, 
         input_data_list: List[str],
+        task_details: List[Dict[str, Any]],
         successful_runs_archive: str,
         failed_runs_archive: str,
         saap_skeleton: str,
@@ -44,9 +49,9 @@ class TunerState:
         batch_cursor: int
     ):
         # --- Zero-Default Policy Verification ---
-        # Immediate error raising ensures missing initialization fields fail-fast at runtime.
         if pipeline_id is None: raise ValueError("Missing structural parameter: pipeline_id")
         if input_data_list is None: raise ValueError("Missing structural parameter: input_data_list")
+        if task_details is None: raise ValueError("Missing structural parameter: task_details")
         if successful_runs_archive is None: raise ValueError("Missing structural parameter: successful_runs_archive")
         if failed_runs_archive is None: raise ValueError("Missing structural parameter: failed_runs_archive")
         if saap_skeleton is None: raise ValueError("Missing structural parameter: saap_skeleton")
@@ -61,6 +66,7 @@ class TunerState:
         # Assign properties to state container instance
         self.pipeline_id = pipeline_id
         self.input_data_list = input_data_list
+        self.task_details = task_details
         self.successful_runs_archive = successful_runs_archive
         self.failed_runs_archive = failed_runs_archive
         self.saap_skeleton = saap_skeleton
@@ -72,7 +78,7 @@ class TunerState:
         self.failed_runs = failed_runs
         self.batch_cursor = batch_cursor
 
-    # --- Dehydration & Hydration Logic (Dropbox Pulse Layer) ---
+    # --- Dehydration & Hydration Logic ---
 
     def to_dict(self) -> Dict[str, Any]:
         """Converts state to flat dictionary schema mapping for persistent serialization."""
@@ -88,6 +94,7 @@ class TunerState:
         return cls(
             pipeline_id=data['pipeline_id'],
             input_data_list=data['input_data_list'],
+            task_details=data['task_details'],
             successful_runs_archive=data['successful_runs_archive'],
             failed_runs_archive=data['failed_runs_archive'],
             saap_skeleton=data['saap_skeleton'],
@@ -122,7 +129,8 @@ class TunerState:
         return {
             "task": {
                 "pipeline_id": self.pipeline_id,
-                "input_data_list": self.input_data_list
+                "input_data_list": self.input_data_list,
+                "task_details": self.task_details # Added to deliverable
             },
             "deliverables": {
                 "successful_runs_archive": self.successful_runs_archive,
