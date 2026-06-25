@@ -18,7 +18,6 @@ class TunerState:
         # --- Output Schema Deliverables ---
         'successful_runs_archive',  # Target folder name for successful execution results
         'failed_runs_archive',      # Target folder name for failed execution results
-        'saap_skeleton',            # Path to the root of the generated saap_skeleton folder structure
         
         # --- Explicitly Requested Path Routing Slots ---
         'saap_skeleton_path'        # Explicit absolute/relative path to the saap skeleton workspace
@@ -31,7 +30,6 @@ class TunerState:
         task_details: List[Dict[str, Any]],
         successful_runs_archive: str,
         failed_runs_archive: str,
-        saap_skeleton: str,
         saap_skeleton_path: str
     ):
         # --- Zero-Default Policy Verification ---
@@ -40,7 +38,6 @@ class TunerState:
         if task_details is None: raise ValueError("Missing structural parameter: task_details")
         if successful_runs_archive is None: raise ValueError("Missing structural parameter: successful_runs_archive")
         if failed_runs_archive is None: raise ValueError("Missing structural parameter: failed_runs_archive")
-        if saap_skeleton is None: raise ValueError("Missing structural parameter: saap_skeleton")
         if saap_skeleton_path is None: raise ValueError("Missing structural parameter: saap_skeleton_path")
 
         # Assign properties to state container instance
@@ -49,7 +46,6 @@ class TunerState:
         self.task_details = task_details
         self.successful_runs_archive = successful_runs_archive
         self.failed_runs_archive = failed_runs_archive
-        self.saap_skeleton = saap_skeleton
         self.saap_skeleton_path = saap_skeleton_path
 
     # --- Dehydration & Hydration Logic ---
@@ -71,7 +67,6 @@ class TunerState:
             task_details=data['task_details'],
             successful_runs_archive=data['successful_runs_archive'],
             failed_runs_archive=data['failed_runs_archive'],
-            saap_skeleton=data['saap_skeleton'],
             saap_skeleton_path=data['saap_skeleton_path']
         )
 
@@ -103,6 +98,6 @@ class TunerState:
             "deliverables": {
                 "successful_runs_archive": self.successful_runs_archive,
                 "failed_runs_archive": self.failed_runs_archive,
-                "saap_skeleton": self.saap_skeleton
+                "saap_skeleton": self.saap_skeleton_path
             }
         }

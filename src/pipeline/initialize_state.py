@@ -196,14 +196,9 @@ def main():
             pipeline_id=task_data["pipeline_id"],
             input_data_list=task_data["input_data_list"],
             task_details=manifest_steps, 
-            successful_runs_archive=f"successful_runs_{branch_name}.zip",
-            failed_runs_archive=f"failed_runs_{branch_name}.zip",
-            saap_skeleton=f"saap_skeleton_{branch_name}",
-            saap_skeleton_path=str(workspace_dir / "saap_skeleton"),
-            success_zip_path=str(workspace_dir / f"successful_runs_{branch_name}.zip"),
-            failed_zip_path=str(workspace_dir / f"failed_zip_{branch_name}.zip"),
-            successful_runs=[],
-            failed_runs=[]
+            successful_runs_archive=f"successful_runs_{branch_name}",
+            failed_runs_archive=f"failed_runs_{branch_name}",
+            saap_skeleton_path=str(workspace_dir / "saap_skeleton")
         )
         
         # 8. Serialize State Document
