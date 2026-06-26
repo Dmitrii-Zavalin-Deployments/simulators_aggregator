@@ -311,33 +311,23 @@ jobs:
             --config-path "${{ env.WORKSPACE_DIR }}/configs/mesh_config_0970b4d.json" \
             --output-path "${{ env.WORKSPACE_DIR }}/config_combinations_array.json"
 
-      
       - name: ⚙️ Initialize Pipeline State (Warm Start)
-        # Assuming you want to trigger this when state is 'found' (the opposite of your cold start)
-        if: steps.import_state.outputs.state_status == 'found' 
+        if: steps.import_state.outputs.status == 'found' 
         shell: bash -el {0}
         env:
-          # Dynamically resolve directory based on the current branch (e.g., main, develop, feature-x)
           WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
+          REPO_ROOT: "data/testing-input-output/repositories"
         run: |
           echo "📥 Warm Start Detected: Initializing from $WORKSPACE_DIR..."
           
-          # 1. Safety check: ensure the dynamic path actually exists
+          # 1. Safety check
           if [ ! -f "$WORKSPACE_DIR/state.json" ]; then
             echo "❌ ERROR: State file not found at $WORKSPACE_DIR/state.json"
             exit 1
           fi
 
-          # 2. Generate the command string using the dynamic environment variable
+          # 2. Generate and Execute provisioning
           PROVISION_CMD=$(python3 src/pipeline/generate_provision_cmd.py --state-file "$WORKSPACE_DIR/state.json")
-          
-          # 3. Audit
-          echo "=========================================================="
-          echo "GENERATED COMMAND:"
-          echo "$PROVISION_CMD"
-          echo "=========================================================="
-          
-          # 4. Execute
           eval "$PROVISION_CMD"
           
           if [ $? -eq 0 ]; then
@@ -347,16 +337,26 @@ jobs:
             exit 1
           fi
 
-          echo "🚀 Running state initialization logic..."
+          # 3. Dynamic Initialization Loop
+          echo "🚀 Running state initialization logic for all repositories..."
           conda activate tuner-env
           
-          # Note: Ensure this path is also dynamic if your repo destination depends on branch
-          CMD="python3 src/pipeline/initialize_state.py --repo-path repositories/mesh_generator"
-          
-          if [ "${{ steps.cache-conda.outputs.cache-hit }}" == "true" ]; then
-              CMD="$CMD --cached-dependency"
-          fi
-          $CMD
+          # Iterate through every directory found in the repository root
+          for repo_dir in $REPO_ROOT/*; do
+            if [ -d "$repo_dir" ]; then
+              echo "--------------------------------------------------------"
+              echo "⚙️ Processing: $repo_dir"
+              
+              CMD="python3 src/pipeline/initialize_state.py --repo-path $repo_dir"
+              
+              if [ "${{ steps.cache-conda.outputs.cache-hit }}" == "true" ]; then
+                  CMD="$CMD --cached-dependency"
+              fi
+              
+              # Execute initialization for this specific repo
+              $CMD
+            fi
+          done
 
       # # 🚀 PROCESSING LOOPS: Process a discrete tuning batch
       # - name: 🚀 Execute Tuning Batch Pulse
@@ -493,13 +493,19 @@ jobs:
           echo -e "\n📂 --- SOVEREIGN STATE VERIFICATION ---"
           BRANCH="${GITHUB_REF_NAME:-main}"
           STATE_DIR="data/testing-input-output/tuning_${BRANCH}"
+          PARENT_DIR="data/testing-input-output"
 
+          # --- GLOBAL SCOPE AUDIT ---
+          echo -e "\n--- FULL SCOPE DIRECTORY LISTING (data/testing-input-output) ---"
+          if [ -d "$PARENT_DIR" ]; then
+              ls -R "$PARENT_DIR"
+          else
+              echo "⚠️ Parent directory $PARENT_DIR does not exist."
+          fi
+
+          # --- BRANCH-SPECIFIC AUDIT ---
           if [ -d "$STATE_DIR" ]; then
-              echo "📍 Verifying contents of workspace: $STATE_DIR"
-              
-              # List the tree
-              echo -e "\n--- RECURSIVE DIRECTORY LISTING (ls -R) ---"
-              ls -R "$STATE_DIR"
+              echo -e "\n📍 Verifying contents of active workspace: $STATE_DIR"
               
               # Automatically cat all JSON files found in the directory tree
               echo -e "\n--- DUMPING CONTENT OF ALL JSON ASSETS ---"
@@ -512,7 +518,7 @@ jobs:
               
               # Verify critical file existence
               if [ ! -f "$STATE_DIR/state.json" ]; then
-                  echo -e "\n❌ ERROR: state.json was NOT found."
+                  echo -e "\n❌ ERROR: state.json was NOT found in $STATE_DIR."
                   exit 1
               fi
           else

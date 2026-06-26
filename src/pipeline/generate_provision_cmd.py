@@ -23,7 +23,9 @@ def main():
 
     tasks = sorted(data.get("task_details", []), key=lambda x: x.get("order", 1))
     
-    commands = ["mkdir -p repositories"]
+    # UPDATE: Centralized repository path
+    repo_root = "data/testing-input-output/repositories"
+    commands = [f"mkdir -p {repo_root}"]
 
     for task in tasks:
         repo_url = task["repository_url"]
@@ -36,7 +38,8 @@ def main():
         config_source = task["config"] 
 
         repo_name = repo_url.split("/")[-1].replace(".git", "")
-        repo_dir = f"repositories/{repo_name}"
+        # UPDATE: Targeted repo directory within the centralized path
+        repo_dir = f"{repo_root}/{repo_name}"
         
         # Dynamically map the config file to the directory of the state file
         config_filename = os.path.basename(config_source)
@@ -55,7 +58,7 @@ def main():
             f"echo 'DEBUG: Verifying file existence at {source_config_asset}'; "
             f"ls -l '{source_config_asset}' || echo '❌ FILE NOT FOUND BY SHELL'; "
             f"cp '{source_config_asset}' config/config.json; "
-            f"cd ../..; "
+            f"cd ../../..; " # Adjusted to move back up to project root from the deeper path
             f"echo '✅ Staged {repo_name} successfully.'"
         )
         commands.append(cmd)
