@@ -316,47 +316,27 @@ jobs:
         shell: bash -el {0}
         env:
           WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
-          REPO_ROOT: "data/testing-input-output/repositories"
         run: |
           echo "📥 Warm Start Detected: Initializing from $WORKSPACE_DIR..."
           
-          # 1. Safety check
+          # 1. Pipeline gatekeeper safety check
           if [ ! -f "$WORKSPACE_DIR/state.json" ]; then
             echo "❌ ERROR: State file not found at $WORKSPACE_DIR/state.json"
             exit 1
           fi
 
-          # 2. Generate and Execute provisioning
-          PROVISION_CMD=$(python3 src/pipeline/generate_provision_cmd.py --state-file "$WORKSPACE_DIR/state.json")
-          eval "$PROVISION_CMD"
-          
-          if [ $? -eq 0 ]; then
-            echo "✅ Repositories staged successfully."
-          else
-            echo "❌ ERROR: Repository staging failed."
-            exit 1
+          # 2. Activate conda environment for runtime modules
+          conda activate tuner-env
+
+          # 3. Handle dependency cache states
+          CACHE_ARG=""
+          if [ "${{ steps.cache-conda.outputs.cache-hit }}" == "true" ]; then
+              CACHE_ARG="--cached-dependency"
           fi
 
-          # 3. Dynamic Initialization Loop
-          echo "🚀 Running state initialization logic for all repositories..."
-          conda activate tuner-env
-          
-          # Iterate through every directory found in the repository root
-          for repo_dir in $REPO_ROOT/*; do
-            if [ -d "$repo_dir" ]; then
-              echo "--------------------------------------------------------"
-              echo "⚙️ Processing: $repo_dir"
-              
-              CMD="python3 src/pipeline/initialize_state.py --repo-path $repo_dir"
-              
-              if [ "${{ steps.cache-conda.outputs.cache-hit }}" == "true" ]; then
-                  CMD="$CMD --cached-dependency"
-              fi
-              
-              # Execute initialization for this specific repo
-              $CMD
-            fi
-          done
+          # 4. Generate & Execute the orchestration chain
+          PROVISION_CMD=$(python3 src/pipeline/generate_provision_cmd.py --state-file "$WORKSPACE_DIR/state.json" $CACHE_ARG)
+          eval "$PROVISION_CMD"
 
       # # 🚀 PROCESSING LOOPS: Process a discrete tuning batch
       # - name: 🚀 Execute Tuning Batch Pulse
