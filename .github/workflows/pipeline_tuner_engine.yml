@@ -11,7 +11,7 @@ on:
 
 jobs:
   gatekeeper:
-    - name: "🚦 Semaphore"
+      name: "🚦 Semaphore"
       runs-on: ubuntu-latest
       outputs:
         status: ${{ steps.check.outputs.status }}
