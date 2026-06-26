@@ -11,7 +11,7 @@ on:
 
 jobs:
   gatekeeper:
-    - name: 🚦 Semaphore
+    - name: "🚦 Semaphore"
       id: check
       run: |
         # 1. 🔧 GLOBAL ROBOT IDENTITY INITIALIZATION
