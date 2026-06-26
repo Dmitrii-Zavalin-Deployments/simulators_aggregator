@@ -336,7 +336,7 @@ jobs:
             exit 1
           fi
       
-      - name: 🚀 Execute Pipeline Sequence (Run Matrix)
+      - name: 🚀 Execute Pipeline Sequence (Warm Start)
         if: steps.import_state.outputs.state_status == 'found'
         shell: bash -el {0}
         env:
@@ -354,29 +354,6 @@ jobs:
             echo "❌ ERROR: Pipeline sequence execution failed."
             exit 1
           fi
-
-      # # 🚀 PROCESSING LOOPS: Process a discrete tuning batch
-      # - name: 🚀 Execute Tuning Batch Pulse
-      #   if: steps.import_state.outputs.state_status == 'found'
-      #   id: execution_pulse
-      #   shell: bash -el {0}
-      #   run: |
-      #     conda activate tuner-env
-      #     python3 src/pipeline/execute_batch.py \
-      #       --workspace "${{ env.WORKSPACE_DIR }}" \
-      #       --batch-size 1 >> $GITHUB_OUTPUT
-
-      # # 🎁 CLOSURE RUN ONLY: Triggered when queue is empty on run entry
-      # - name: 🎁 Assemble SaaP Deliverables & Set Dormancy
-      #   if: steps.import_state.outputs.state_status == 'found' && steps.execution_pulse.outputs.tuning_done == 'true'
-      #   shell: bash -el {0}
-      #   run: |
-      #     python3 src/pipeline/deliverable_assembly.py --workspace "${{ env.WORKSPACE_DIR }}"
-          
-      #     echo "STATUS: DORMANT" > dormant.flag
-      #     git add dormant.flag
-      #     git commit -m "🤖 robot: pipeline execution fully depleted | transition to DORMANT"
-      #     git push origin HEAD
 
       # 📤 STATE PERSISTENCE: Packaging and uploading updates to Dropbox
       - name: 📤 Package and Upload State Snapshot
