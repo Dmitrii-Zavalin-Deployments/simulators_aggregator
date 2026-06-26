@@ -12,51 +12,59 @@ on:
 jobs:
   gatekeeper:
     - name: "🚦 Semaphore"
-      id: check
-      run: |
-        # 1. 🔧 GLOBAL ROBOT IDENTITY INITIALIZATION
-        git config --global user.name "Automation Engine [${{ github.ref_name }}]"
-        git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
-        git config --global notes.rewriteRef "refs/notes/*"
+      runs-on: ubuntu-latest
+      outputs:
+        status: ${{ steps.check.outputs.status }}
+      steps:
+        - name: 🗂️ Checkout Repository
+          uses: actions/checkout@v4
 
-        FLAG_PATH="dormant.flag"
-        IS_SCHEDULED="${{ github.event_name == 'schedule' }}"
+        - name: 🔍 Check Dormancy Flag
+          id: check
+          run: |
+            # 1. 🔧 GLOBAL ROBOT IDENTITY INITIALIZATION
+            git config --global user.name "Automation Engine [${{ github.ref_name }}]"
+            git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
+            git config --global notes.rewriteRef "refs/notes/*"
 
-        # 2. LOGIC CHECK
-        # If scheduled and DORMANT -> Halt
-        if [[ "$IS_SCHEDULED" == "true" ]] && [ -f "$FLAG_PATH" ] && grep -q "STATUS: DORMANT" "$FLAG_PATH"; then
-          echo "status=dormant" >> $GITHUB_OUTPUT
-          echo "🛑 ENGINE DORMANT: Halting hourly pulse execution."
+            FLAG_PATH="dormant.flag"
+            IS_SCHEDULED="${{ github.event_name == 'schedule' }}"
 
-        # If NOT scheduled (Manual/Push) OR Active -> Wake/Keep Active
-        else
-          echo "status=active" >> $GITHUB_OUTPUT
-          echo "🚀 ENGINE ACTIVE: Proceeding with execution pulse."
+            # 2. LOGIC CHECK
+            # If scheduled and DORMANT -> Halt
+            if [[ "$IS_SCHEDULED" == "true" ]] && [ -f "$FLAG_PATH" ] && grep -q "STATUS: DORMANT" "$FLAG_PATH"; then
+              echo "status=dormant" >> $GITHUB_OUTPUT
+              echo "🛑 ENGINE DORMANT: Halting hourly pulse execution."
 
-          # Check if we need to "Wake Up" the engine
-          if [ -f "$FLAG_PATH" ] && grep -q "STATUS: DORMANT" "$FLAG_PATH"; then
-            echo "🌅 WAKING ENGINE: Changing flag to ACTIVE..."
-            echo "STATUS: ACTIVE" > "$FLAG_PATH"
+            # If NOT scheduled (Manual/Push) OR Active -> Wake/Keep Active
+            else
+              echo "status=active" >> $GITHUB_OUTPUT
+              echo "🚀 ENGINE ACTIVE: Proceeding with execution pulse."
 
-            # 3. GIT ORCHESTRATION (The "Healing" phase)
-            git add "$FLAG_PATH"
-            
-            if [ -n "$(git status --porcelain)" ]; then
-              git commit -m "🤖 robot: reset dormant flag to active [Engine]"
-              TARGET_COMMIT=$(git rev-parse HEAD)
+              # Check if we need to "Wake Up" the engine
+              if [ -f "$FLAG_PATH" ] && grep -q "STATUS: DORMANT" "$FLAG_PATH"; then
+                echo "🌅 WAKING ENGINE: Changing flag to ACTIVE..."
+                echo "STATUS: ACTIVE" > "$FLAG_PATH"
 
-              # Fetch remote notes
-              git fetch origin refs/notes/commits:refs/notes/commits || true
+                # 3. GIT ORCHESTRATION (The "Healing" phase)
+                git add "$FLAG_PATH"
+                
+                if [ -n "$(git status --porcelain)" ]; then
+                  git commit -m "🤖 robot: reset dormant flag to active [Engine]"
+                  TARGET_COMMIT=$(git rev-parse HEAD)
 
-              # Add note locally
-              git notes add -f -m "robot: true" "$TARGET_COMMIT"
+                  # Fetch remote notes
+                  git fetch origin refs/notes/commits:refs/notes/commits || true
 
-              # Push commit and notes
-              git push origin HEAD
-              git push --force origin refs/notes/commits
+                  # Add note locally
+                  git notes add -f -m "robot: true" "$TARGET_COMMIT"
+
+                  # Push commit and notes
+                  git push origin HEAD
+                  git push --force origin refs/notes/commits
+                fi
+              fi
             fi
-          fi
-        fi
 
   # pre_flight_tests:
   #   name: "🧪 Pre-Flight: Logic & Hygiene"
