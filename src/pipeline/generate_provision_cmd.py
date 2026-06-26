@@ -24,9 +24,15 @@ def main():
     with open(combinations_path, "r") as f:
         combinations = json.load(f)
 
+    # 🔄 NEW CONDITION: Handle completed matrix gracefully
     if not combinations or not isinstance(combinations, list) or len(combinations) == 0:
-        print(f"echo '❌ ERROR: No remaining unrolled configurations available.'; exit 1")
-        sys.exit(1)
+        shutdown_commands = [
+            "echo '🏁 Notice: All configuration variations have been completely exhausted.'",
+            "echo 'STATUS: DORMANT' > dormant.flag",
+            "echo '✅ Successfully set pipeline state to DORMANT inside dormant.flag.'"
+        ]
+        print(" && ".join(shutdown_commands))
+        sys.exit(0)  # Exit 0 so the GitHub Action step succeeds gracefully
 
     # 🎯 KEY REQUIREMENT STEP: Pop exactly ONE variant for ALL repositories
     current_runtime_config = combinations.pop(0)
@@ -57,7 +63,6 @@ def main():
     cached_flag = "--cached-dependency" if args.cached_dependency else ""
 
     # Loop through all folders and inject the identical config asset
-    # Inside the loop in generate_provision_cmd.py
     for task in tasks:
         repo_url = task["repository_url"]
         if repo_url.startswith("git@github.com:"):
