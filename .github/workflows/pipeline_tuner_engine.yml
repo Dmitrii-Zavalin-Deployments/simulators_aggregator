@@ -312,7 +312,7 @@ jobs:
             --output-path "${{ env.WORKSPACE_DIR }}/config_combinations_array.json"
 
       - name: ⚙️ Initialize Pipeline State (Warm Start)
-        if: steps.import_state.outputs.status == 'found' 
+        if: steps.import_state.outputs.state_status == 'found' 
         shell: bash -el {0}
         env:
           WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
