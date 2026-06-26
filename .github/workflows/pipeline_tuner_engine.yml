@@ -1,4 +1,4 @@
-name: "Simulators Pipeline Tuning Engine"
+name: "🛰️ Simulators Pipeline Tuning Engine"
 
 on:
   push:
@@ -6,8 +6,10 @@ on:
       - "**"
   workflow_dispatch:
   schedule:
-    # Hourly Pulse: Wakes up at the top of every hour to execute a batch
-    - cron: '0 * * * *'
+    # 🛰️ High-Availability Dual Pulse Matrix
+    # Using specific off-peak minutes bypasses GitHub's global queue congestion.
+    - cron: '14 * * * *'   # Primary Pulse: Fires every hour at minute 14
+    - cron: '44 * * * *'   # Recovery Pulse: Fires every hour at minute 44
 
 jobs:
   gatekeeper:
