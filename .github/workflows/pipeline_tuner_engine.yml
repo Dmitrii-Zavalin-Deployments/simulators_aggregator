@@ -107,15 +107,20 @@ jobs:
             fi
 
             # 4️⃣ THE SIMPLIFIED STASH-PULL-POP LOOP
-            # Sweep all modified tracked files into a temporary stash to clean the runway
             git stash -m "temporary-automation-isolation"
 
-            # Pull remote updates with a clean slate
-            git pull origin HEAD --rebase
+            # Pull remote updates, but if a conflict occurs, 
+            # we force the use of our local file (ours) over the remote (theirs)
+            git pull origin HEAD --rebase -X ours
 
-            # Restore your modifications seamlessly
+            # Restore your modifications
             git stash pop || echo "📋 Workspace modifications restored safely."
-
+            
+            # Clean up any potential lingering conflict markers just in case
+            sed -i '/<<<<<<< Updated upstream/d' performance_audit.md
+            sed -i '/=======/d' performance_audit.md
+            sed -i '/>>>>>>> Stashed changes/d' performance_audit.md
+            
             # 5️⃣ ISOLATED COMMIT & PUSH
             # Explicitly target only the public ledger for the final commit
             git add performance_audit.md
@@ -496,14 +501,19 @@ jobs:
           fi
 
           # 4️⃣ THE SIMPLIFIED STASH-PULL-POP LOOP
-          # Sweep all modified tracked files into a temporary stash to clean the runway
           git stash -m "temporary-automation-isolation"
 
-          # Pull remote updates with a clean slate
-          git pull origin HEAD --rebase
+          # Pull remote updates, but if a conflict occurs, 
+          # we force the use of our local file (ours) over the remote (theirs)
+          git pull origin HEAD --rebase -X ours
 
-          # Restore your modifications seamlessly
+          # Restore your modifications
           git stash pop || echo "📋 Workspace modifications restored safely."
+          
+          # Clean up any potential lingering conflict markers just in case
+          sed -i '/<<<<<<< Updated upstream/d' performance_audit.md
+          sed -i '/=======/d' performance_audit.md
+          sed -i '/>>>>>>> Stashed changes/d' performance_audit.md
 
           # 5️⃣ ISOLATED COMMIT & PUSH
           # Explicitly target only the public ledger for the final commit
