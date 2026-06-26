@@ -335,6 +335,25 @@ jobs:
             echo "❌ ERROR: Repository staging failed."
             exit 1
           fi
+      
+      - name: 🚀 Execute Pipeline Sequence (Run Matrix)
+        if: steps.import_state.outputs.state_status == 'found'
+        shell: bash -el {0}
+        env:
+          WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
+        run: |
+          echo "🚀 Initiating simulator pipeline execution sequence..."
+          
+          # Generate and run deterministic execution matrix strings
+          EXEC_CMD=$(python3 src/pipeline/generate_execution_cmd.py --state-file "$WORKSPACE_DIR/state.json")
+          eval "$EXEC_CMD"
+          
+          if [ $? -eq 0 ]; then
+            echo "✅ Pipeline sequence completed successfully."
+          else
+            echo "❌ ERROR: Pipeline sequence execution failed."
+            exit 1
+          fi
 
       # # 🚀 PROCESSING LOOPS: Process a discrete tuning batch
       # - name: 🚀 Execute Tuning Batch Pulse
