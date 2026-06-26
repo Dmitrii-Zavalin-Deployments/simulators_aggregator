@@ -67,79 +67,6 @@ jobs:
                 fi
               fi
             fi
-        
-        - name: 📊 Audit Performance Ledger & Sync (Semaphore)
-          if: always()
-          env:
-            TASK_NAME: "Semaphore"
-          run: |
-            echo "📊 Commencing performance audit ledger generation for task: $TASK_NAME..."
-
-            # 1️⃣ Collect environment performance metrics
-            RUN_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
-            STATUS="${{ job.status }}"
-            CURRENT_BRANCH=${GITHUB_REF##*/}
-            CPU_LOAD=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4 "%"}')
-            MEM_USAGE=$(free -m | awk '/Mem:/ { print $3 "/" $2 "MB" }')
-
-            # 2️⃣ Build the Markdown entry with the accurate Task metadata
-            NEW_ENTRY=$(cat <<EOF
-
-            ### Audit: $RUN_DATE
-            - **Task Phase:** \`$TASK_NAME\`
-            - **Branch:** \`$CURRENT_BRANCH\`
-            - **Status:** $STATUS
-            - **CPU Load:** $CPU_LOAD
-            - **Memory Usage:** $MEM_USAGE
-            ---
-            EOF
-            )
-
-            # 3️⃣ Inject entry at the top of the file directly under the header
-            HEADER="# 🛰️ Simulators Aggregator Performance Audit"
-            if [ -f "performance_audit.md" ]; then
-                tail -n +2 performance_audit.md > old_body.tmp
-                echo "$HEADER" > performance_audit.md
-                echo "$NEW_ENTRY" >> performance_audit.md
-                cat old_body.tmp >> performance_audit.md
-                rm old_body.tmp
-            else
-                echo "$HEADER" > performance_audit.md
-                echo "$NEW_ENTRY" >> performance_audit.md
-            fi
-
-            # 4️⃣ THE SIMPLIFIED STASH-PULL-POP LOOP
-            git stash -m "temporary-automation-isolation"
-
-            # Pull remote updates, but if a conflict occurs, 
-            # we force the use of our local file (ours) over the remote (theirs)
-            git pull origin HEAD --rebase -X ours
-
-            # Restore your modifications
-            git stash pop || echo "📋 Workspace modifications restored safely."
-            
-            # Clean up any potential lingering conflict markers just in case
-            sed -i '/<<<<<<< Updated upstream/d' performance_audit.md
-            sed -i '/=======/d' performance_audit.md
-            sed -i '/>>>>>>> Stashed changes/d' performance_audit.md
-            
-            # 5️⃣ ISOLATED COMMIT & PUSH
-            # Explicitly target only the public ledger for the final commit
-            git add performance_audit.md dormant.flag
-
-            if [ -n "$(git status --porcelain performance_audit.md)" ]; then
-              git commit -m "🤖 robot: audit ledger update [$STATUS]"
-              TARGET_COMMIT=$(git rev-parse HEAD)
-
-              # Sync and attach metadata notes
-              git fetch origin refs/notes/commits:refs/notes/commits || true
-              git notes add -f -m "robot: true" "$TARGET_COMMIT"
-              
-              git push origin HEAD
-              git push --force origin refs/notes/commits || true
-            else
-              echo "📋 Notice: No ledger modifications detected. Skipping commit loop."
-            fi
 
   # pre_flight_tests:
   #   name: "🧪 Pre-Flight: Logic & Hygiene"
@@ -467,6 +394,19 @@ jobs:
         env:
           TASK_NAME: "Assemble & Tuning"
         run: |
+          # Dynamically extract pipeline_id from the state workspace asset
+          STATE_FILE="data/testing-input-output/tuning_${{ github.ref_name }}/state.json"
+          
+          if [ -f "$STATE_FILE" ]; then
+              # Parse pipeline_id using jq, fallback to default name if empty
+              EXTRACTED_ID=$(jq -r '.pipeline_id' "$STATE_FILE" 2>/dev/null)
+              TASK_NAME="${EXTRACTED_ID:-"Assemble & Tuning (Fallback)"}"
+              echo "✅ Successfully parsed active execution context: $TASK_NAME"
+          else
+              echo "⚠️ Warning: State file not found at $STATE_FILE. Using fallback task name."
+              TASK_NAME="Assemble & Tuning (Disconnected)"
+          fi
+
           echo "📊 Commencing performance audit ledger generation for task: $TASK_NAME..."
 
           # 1️⃣ Collect environment performance metrics
