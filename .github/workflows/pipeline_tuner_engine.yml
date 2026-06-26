@@ -106,28 +106,30 @@ jobs:
                 echo "$NEW_ENTRY" >> performance_audit.md
             fi
 
-            # 4️⃣ ISOLATED STAGING: Stage ONLY the public audit ledger document
+            # 4️⃣ THE SIMPLIFIED STASH-PULL-POP LOOP
+            # Sweep all modified tracked files into a temporary stash to clean the runway
+            git stash -m "temporary-automation-isolation"
+
+            # Pull remote updates with a clean slate
+            git pull origin HEAD --rebase
+
+            # Restore your modifications seamlessly
+            git stash pop || echo "📋 Workspace modifications restored safely."
+
+            # 5️⃣ ISOLATED COMMIT & PUSH
+            # Explicitly target only the public ledger for the final commit
             git add performance_audit.md
 
-            # 5️⃣ Commit and execute the deterministic push-and-notes loop
             if [ -n "$(git status --porcelain performance_audit.md)" ]; then
               git commit -m "🤖 robot: audit ledger update [$STATUS]"
               TARGET_COMMIT=$(git rev-parse HEAD)
 
-              # Fetch remote notes architecture cleanly
+              # Sync and attach metadata notes
               git fetch origin refs/notes/commits:refs/notes/commits || true
               git notes add -f -m "robot: true" "$TARGET_COMMIT"
               
-              # This satisfies the rebase constraint without tracking or losing confidential data
-              git stash push --keep-index -m "temporary-sim-isolation"
-
-              # Rebase to keep linear history safely
-              git pull origin HEAD --rebase || echo "⚠️ Rebase warning encountered; forcing push sequence."
               git push origin HEAD
               git push --force origin refs/notes/commits || true
-
-              # Restore the uncommitted simulation outputs back to the local workspace for downstream tasks
-              git stash pop || echo "📋 Notice: Local scratchpad state restored."
             else
               echo "📋 Notice: No ledger modifications detected. Skipping commit loop."
             fi
@@ -493,28 +495,30 @@ jobs:
               echo "$NEW_ENTRY" >> performance_audit.md
           fi
 
-          # 4️⃣ ISOLATED STAGING: Stage ONLY the public audit ledger document
+          # 4️⃣ THE SIMPLIFIED STASH-PULL-POP LOOP
+          # Sweep all modified tracked files into a temporary stash to clean the runway
+          git stash -m "temporary-automation-isolation"
+
+          # Pull remote updates with a clean slate
+          git pull origin HEAD --rebase
+
+          # Restore your modifications seamlessly
+          git stash pop || echo "📋 Workspace modifications restored safely."
+
+          # 5️⃣ ISOLATED COMMIT & PUSH
+          # Explicitly target only the public ledger for the final commit
           git add performance_audit.md
 
-          # 5️⃣ Commit and execute the deterministic push-and-notes loop
           if [ -n "$(git status --porcelain performance_audit.md)" ]; then
             git commit -m "🤖 robot: audit ledger update [$STATUS]"
             TARGET_COMMIT=$(git rev-parse HEAD)
 
-            # Fetch remote notes architecture cleanly
+            # Sync and attach metadata notes
             git fetch origin refs/notes/commits:refs/notes/commits || true
             git notes add -f -m "robot: true" "$TARGET_COMMIT"
             
-            # This satisfies the rebase constraint without tracking or losing confidential data
-            git stash push --keep-index -m "temporary-sim-isolation"
-
-            # Rebase to keep linear history safely
-            git pull origin HEAD --rebase || echo "⚠️ Rebase warning encountered; forcing push sequence."
             git push origin HEAD
             git push --force origin refs/notes/commits || true
-
-            # Restore the uncommitted simulation outputs back to the local workspace for downstream tasks
-            git stash pop || echo "📋 Notice: Local scratchpad state restored."
           else
             echo "📋 Notice: No ledger modifications detected. Skipping commit loop."
           fi
