@@ -57,6 +57,7 @@ def main():
     cached_flag = "--cached-dependency" if args.cached_dependency else ""
 
     # Loop through all folders and inject the identical config asset
+    # Inside the loop in generate_provision_cmd.py
     for task in tasks:
         repo_url = task["repository_url"]
         if repo_url.startswith("git@github.com:"):
@@ -69,7 +70,7 @@ def main():
         target_config_json = f"{repo_dir}/config/config.json"
         staged_configs.append(target_config_json)
 
-        # Inject the single config source of truth into this specific simulator
+        # Simplified command: Only clone, checkout, and stage config
         cmd = (
             f"echo '📥 Cloning target simulator repository: {repo_name}...'; "
             f"if [ -d '{repo_dir}' ]; then rm -rf '{repo_dir}'; fi; "
@@ -78,9 +79,7 @@ def main():
             f"  git checkout {version_tag} && "
             f"  mkdir -p config && "
             f"  cp '{abs_config_temp}' config/config.json && "
-            f"  echo '✅ Staged identical configuration variant inside {repo_name}.') && "
-            f"echo '⚙️ Running state initialization logic for {repo_name}...' && "
-            f"python3 src/pipeline/initialize_state.py --repo-path '{repo_dir}' {cached_flag}"
+            f"  echo '✅ Staged identical configuration variant inside {repo_name}.')"
         )
         commands.append(cmd)
 

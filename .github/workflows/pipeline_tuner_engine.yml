@@ -319,24 +319,21 @@ jobs:
         run: |
           echo "📥 Warm Start Detected: Initializing from $WORKSPACE_DIR..."
           
-          # 1. Pipeline gatekeeper safety check
           if [ ! -f "$WORKSPACE_DIR/state.json" ]; then
-            echo "❌ ERROR: State file not found at $WORKSPACE_DIR/state.json"
+            echo "❌ ERROR: State file not found."
             exit 1
           fi
 
-          # 2. Activate conda environment for runtime modules
-          conda activate tuner-env
-
-          # 3. Handle dependency cache states
-          CACHE_ARG=""
-          if [ "${{ steps.cache-conda.outputs.cache-hit }}" == "true" ]; then
-              CACHE_ARG="--cached-dependency"
-          fi
-
-          # 4. Generate & Execute the orchestration chain
-          PROVISION_CMD=$(python3 src/pipeline/generate_provision_cmd.py --state-file "$WORKSPACE_DIR/state.json" $CACHE_ARG)
+          Generate and Execute provisioning (Cloning + Config Injection ONLY)
+          PROVISION_CMD=$(python3 src/pipeline/generate_provision_cmd.py --state-file "$WORKSPACE_DIR/state.json")
           eval "$PROVISION_CMD"
+          
+          if [ $? -eq 0 ]; then
+            echo "✅ Repositories staged successfully."
+          else
+            echo "❌ ERROR: Repository staging failed."
+            exit 1
+          fi
 
       # # 🚀 PROCESSING LOOPS: Process a discrete tuning batch
       # - name: 🚀 Execute Tuning Batch Pulse
