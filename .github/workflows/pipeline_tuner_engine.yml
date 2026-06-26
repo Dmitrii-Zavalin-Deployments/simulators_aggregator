@@ -43,28 +43,28 @@ jobs:
               echo "status=active" >> $GITHUB_OUTPUT
               echo "🚀 ENGINE ACTIVE: Proceeding with execution pulse."
 
-              # Check if we need to "Wake Up" the engine
-              if [ -f "$FLAG_PATH" ] && grep -q "STATUS: DORMANT" "$FLAG_PATH"; then
-                echo "🌅 WAKING ENGINE: Changing flag to ACTIVE..."
-                echo "STATUS: ACTIVE" > "$FLAG_PATH"
+              # 3. FORCE ACTIVE STATE (Declarative & Idempotent)
+              # This overwrites the file. If it was already ACTIVE, git status will be clean.
+              echo "STATUS: ACTIVE" > "$FLAG_PATH"
+              git add "$FLAG_PATH"
+              
+              # Only commit and push if the flag content actually changed
+              if [ -n "$(git status --porcelain)" ]; then
+                echo "🌅 WAKING ENGINE: State changed to ACTIVE. Syncing..."
+                git commit -m "🤖 robot: reset dormant flag to active [Engine]"
+                TARGET_COMMIT=$(git rev-parse HEAD)
 
-                # 3. GIT ORCHESTRATION (The "Healing" phase)
-                git add "$FLAG_PATH"
-                
-                if [ -n "$(git status --porcelain)" ]; then
-                  git commit -m "🤖 robot: reset dormant flag to active [Engine]"
-                  TARGET_COMMIT=$(git rev-parse HEAD)
+                # Fetch remote notes
+                git fetch origin refs/notes/commits:refs/notes/commits || true
 
-                  # Fetch remote notes
-                  git fetch origin refs/notes/commits:refs/notes/commits || true
+                # Add note locally
+                git notes add -f -m "robot: true" "$TARGET_COMMIT"
 
-                  # Add note locally
-                  git notes add -f -m "robot: true" "$TARGET_COMMIT"
-
-                  # Push commit and notes
-                  git push origin HEAD
-                  git push --force origin refs/notes/commits
-                fi
+                # Push commit and notes
+                git push origin HEAD
+                git push --force origin refs/notes/commits
+              else
+                echo "✅ Engine already active. No commit required."
               fi
             fi
 
