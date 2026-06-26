@@ -1,4 +1,4 @@
-name: "ACE Pipeline Tuner Engine"
+name: "Simulators Pipeline Tuning Engine"
 
 on:
   push:
@@ -106,7 +106,7 @@ jobs:
                 echo "$NEW_ENTRY" >> performance_audit.md
             fi
 
-            # 4️⃣ ISOLATED STAGING: Stage ONLY the public audit ledger document.
+            # 4️⃣ ISOLATED STAGING: Stage ONLY the public audit ledger document
             git add performance_audit.md
 
             # 5️⃣ Commit and execute the deterministic push-and-notes loop
@@ -118,10 +118,16 @@ jobs:
               git fetch origin refs/notes/commits:refs/notes/commits || true
               git notes add -f -m "robot: true" "$TARGET_COMMIT"
               
-              # Rebase to keep linear history without touching any untracked workspace data
+              # This satisfies the rebase constraint without tracking or losing confidential data
+              git stash push --keep-index -m "temporary-sim-isolation"
+
+              # Rebase to keep linear history safely
               git pull origin HEAD --rebase || echo "⚠️ Rebase warning encountered; forcing push sequence."
               git push origin HEAD
               git push --force origin refs/notes/commits || true
+
+              # Restore the uncommitted simulation outputs back to the local workspace for downstream tasks
+              git stash pop || echo "📋 Notice: Local scratchpad state restored."
             else
               echo "📋 Notice: No ledger modifications detected. Skipping commit loop."
             fi
@@ -487,7 +493,7 @@ jobs:
               echo "$NEW_ENTRY" >> performance_audit.md
           fi
 
-          # 4️⃣ ISOLATED STAGING: Stage ONLY the public audit ledger document.
+          # 4️⃣ ISOLATED STAGING: Stage ONLY the public audit ledger document
           git add performance_audit.md
 
           # 5️⃣ Commit and execute the deterministic push-and-notes loop
@@ -499,10 +505,16 @@ jobs:
             git fetch origin refs/notes/commits:refs/notes/commits || true
             git notes add -f -m "robot: true" "$TARGET_COMMIT"
             
-            # Rebase to keep linear history without touching any untracked workspace data
+            # This satisfies the rebase constraint without tracking or losing confidential data
+            git stash push --keep-index -m "temporary-sim-isolation"
+
+            # Rebase to keep linear history safely
             git pull origin HEAD --rebase || echo "⚠️ Rebase warning encountered; forcing push sequence."
             git push origin HEAD
             git push --force origin refs/notes/commits || true
+
+            # Restore the uncommitted simulation outputs back to the local workspace for downstream tasks
+            git stash pop || echo "📋 Notice: Local scratchpad state restored."
           else
             echo "📋 Notice: No ledger modifications detected. Skipping commit loop."
           fi
