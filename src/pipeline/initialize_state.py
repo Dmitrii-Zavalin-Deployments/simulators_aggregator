@@ -144,7 +144,7 @@ def main():
     # 2. Create Clean-Room Isolated Workspace
     workspace_dir = Path("data/testing-input-output") / f"tuning_{branch_name}"
     workspace_dir.mkdir(parents=True, exist_ok=True)
-    inputs_dir = workspace_dir / "inputs"
+    inputs_dir = workspace_dir / "inputs-outputs"
     
     # 3. Download Inputs from Dropbox
     fetch_inputs_from_dropbox(task_data["input_data_list"], inputs_dir)
