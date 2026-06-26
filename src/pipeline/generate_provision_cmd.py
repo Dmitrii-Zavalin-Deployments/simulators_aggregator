@@ -70,16 +70,16 @@ def main():
         target_config_json = f"{repo_dir}/config/config.json"
         staged_configs.append(target_config_json)
 
-        # Simplified command: Only clone, checkout, and stage config
+        # Ensure there is no trailing '&&' and the string is properly formed
         cmd = (
             f"echo '📥 Cloning target simulator repository: {repo_name}...'; "
             f"if [ -d '{repo_dir}' ]; then rm -rf '{repo_dir}'; fi; "
             f"git clone {repo_url} {repo_dir} && "
-            f"(cd {repo_dir} && "
-            f"  git checkout {version_tag} && "
-            f"  mkdir -p config && "
-            f"  cp '{abs_config_temp}' config/config.json && "
-            f"  echo '✅ Staged identical configuration variant inside {repo_name}.')"
+            f"cd {repo_dir} && "
+            f"git checkout {version_tag} && "
+            f"mkdir -p config && "
+            f"cp '{abs_config_temp}' config/config.json && "
+            f"cd - > /dev/null"
         )
         commands.append(cmd)
 
