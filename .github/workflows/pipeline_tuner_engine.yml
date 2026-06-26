@@ -517,7 +517,7 @@ jobs:
 
           # 5️⃣ ISOLATED COMMIT & PUSH
           # Explicitly target only the public ledger for the final commit
-          git add performance_audit.md
+          git add performance_audit.md dormant.flag
 
           if [ -n "$(git status --porcelain performance_audit.md)" ]; then
             git commit -m "🤖 robot: audit ledger update [$STATUS]"
