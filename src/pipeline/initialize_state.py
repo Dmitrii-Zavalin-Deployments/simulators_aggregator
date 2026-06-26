@@ -197,8 +197,7 @@ def main():
             input_data_list=task_data["input_data_list"],
             task_details=manifest_steps, 
             successful_runs_archive=f"successful_runs_{branch_name}",
-            failed_runs_archive=f"failed_runs_{branch_name}",
-            saap_skeleton_path=str(workspace_dir / "saap_skeleton")
+            failed_runs_archive=f"failed_runs_{branch_name}"
         )
         
         # 8. Serialize State Document

@@ -18,9 +18,6 @@ class TunerState:
         # --- Output Schema Deliverables ---
         'successful_runs_archive',  # Target folder name for successful execution results
         'failed_runs_archive',      # Target folder name for failed execution results
-        
-        # --- Explicitly Requested Path Routing Slots ---
-        'saap_skeleton_path'        # Explicit absolute/relative path to the saap skeleton workspace
     ]
 
     def __init__(
@@ -29,8 +26,7 @@ class TunerState:
         input_data_list: List[str],
         task_details: List[Dict[str, Any]],
         successful_runs_archive: str,
-        failed_runs_archive: str,
-        saap_skeleton_path: str
+        failed_runs_archive: str
     ):
         # --- Zero-Default Policy Verification ---
         if pipeline_id is None: raise ValueError("Missing structural parameter: pipeline_id")
@@ -38,7 +34,6 @@ class TunerState:
         if task_details is None: raise ValueError("Missing structural parameter: task_details")
         if successful_runs_archive is None: raise ValueError("Missing structural parameter: successful_runs_archive")
         if failed_runs_archive is None: raise ValueError("Missing structural parameter: failed_runs_archive")
-        if saap_skeleton_path is None: raise ValueError("Missing structural parameter: saap_skeleton_path")
 
         # Assign properties to state container instance
         self.pipeline_id = pipeline_id
@@ -46,7 +41,6 @@ class TunerState:
         self.task_details = task_details
         self.successful_runs_archive = successful_runs_archive
         self.failed_runs_archive = failed_runs_archive
-        self.saap_skeleton_path = saap_skeleton_path
 
     # --- Dehydration & Hydration Logic ---
 
@@ -67,7 +61,6 @@ class TunerState:
             task_details=data['task_details'],
             successful_runs_archive=data['successful_runs_archive'],
             failed_runs_archive=data['failed_runs_archive'],
-            saap_skeleton_path=data['saap_skeleton_path']
         )
 
     def save_to_disk(self, path: str):
@@ -98,6 +91,5 @@ class TunerState:
             "deliverables": {
                 "successful_runs_archive": self.successful_runs_archive,
                 "failed_runs_archive": self.failed_runs_archive,
-                "saap_skeleton": self.saap_skeleton_path
             }
         }

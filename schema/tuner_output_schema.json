@@ -74,16 +74,11 @@
         "failed_runs_archive": {
           "type": "string",
           "description": "Filename of the failed runs ZIP (e.g., failed_runs_<branch_name>.zip)."
-        },
-        "saap_skeleton": {
-          "type": "string",
-          "description": "Path to the root of the generated saap_skeleton folder structure."
         }
       },
       "required": [
         "successful_runs_archive",
-        "failed_runs_archive",
-        "saap_skeleton"
+        "failed_runs_archive"
       ]
     }
   },
