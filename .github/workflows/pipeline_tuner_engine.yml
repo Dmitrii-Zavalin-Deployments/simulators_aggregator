@@ -346,22 +346,39 @@ jobs:
         run: |
           echo "🚀 Initiating simulator pipeline execution sequence..."
           
-          # 1. Generate execution command sequences using the untouched engine script
+          # 1. Generate execution command sequences using the engine script
           EXEC_CMD=$(python3 src/pipeline/generate_execution_cmd.py --state-file "$WORKSPACE_DIR/state.json")
           
-          # 2. Execute commands, logging stdout/stderr to GitHub's isolated job temp directory
+          # 2. Execute commands, bypassing 'set -e' to safeguard execution metrics
           LOG_FILE="$RUNNER_TEMP/pipeline_execution.log"
+          
+          set +e # Open error gates to manually process exit telemetry
           eval "$EXEC_CMD" > "$LOG_FILE" 2>&1
           RUN_RC=$?
+          set -e # Restore default strict environment security
           
-          # 3. Stream logs instantly back to the live GitHub Actions runner console for visibility
-          cat "$LOG_FILE"
+          # 3. Stream logs instantly back to the live GitHub Actions runner console
+          echo "📋 ========================================================================"
+          echo "📋                  --- LIVE PIPELINE EXECUTION LOGS ---"
+          echo "📋 ========================================================================"
+          if [ -f "$LOG_FILE" ]; then
+              cat "$LOG_FILE"
+          else
+              echo "❌ Error Error: Isolated pipeline runtime log file was never created."
+          fi
+          echo "📋 ========================================================================"
           
-          # 4. Invoke the separate telemetry tracking engine to process results and clean up
+          # 4. Invoke the separate telemetry tracking engine to process results
           python3 src/pipeline/record_telemetry.py \
             --state-file "$WORKSPACE_DIR/state.json" \
             --exit-code $RUN_RC \
             --log-file "$LOG_FILE"
+
+          # 5. Explicitly fail the workflow step if the simulation pipeline failed
+          if [ $RUN_RC -ne 0 ]; then
+              echo "❌ Execution Failure: Core simulation step returned non-zero code [$RUN_RC]."
+              exit $RUN_RC
+          fi
 
       # 📤 STATE PERSISTENCE: Packaging and uploading updates to Dropbox
       - name: 📤 Package and Upload State Snapshot
