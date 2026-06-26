@@ -323,8 +323,9 @@ jobs:
             echo "❌ ERROR: State file not found."
             exit 1
           fi
-
-          Generate and Execute provisioning (Cloning + Config Injection ONLY)
+          
+          # ✅ Added the missing comment symbol here:
+          # Generate and Execute provisioning (Cloning + Config Injection ONLY)
           PROVISION_CMD=$(python3 src/pipeline/generate_provision_cmd.py --state-file "$WORKSPACE_DIR/state.json")
           eval "$PROVISION_CMD"
           
