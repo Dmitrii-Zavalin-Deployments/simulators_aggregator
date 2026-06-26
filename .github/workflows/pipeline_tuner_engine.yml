@@ -344,16 +344,22 @@ jobs:
         run: |
           echo "🚀 Initiating simulator pipeline execution sequence..."
           
-          # Generate and run deterministic execution matrix strings
+          # 1. Generate execution command sequences using the untouched engine script
           EXEC_CMD=$(python3 src/pipeline/generate_execution_cmd.py --state-file "$WORKSPACE_DIR/state.json")
-          eval "$EXEC_CMD"
           
-          if [ $? -eq 0 ]; then
-            echo "✅ Pipeline sequence completed successfully."
-          else
-            echo "❌ ERROR: Pipeline sequence execution failed."
-            exit 1
-          fi
+          # 2. Execute commands, logging stdout/stderr to GitHub's isolated job temp directory
+          LOG_FILE="$RUNNER_TEMP/pipeline_execution.log"
+          eval "$EXEC_CMD" > "$LOG_FILE" 2>&1
+          RUN_RC=$?
+          
+          # 3. Stream logs instantly back to the live GitHub Actions runner console for visibility
+          cat "$LOG_FILE"
+          
+          # 4. Invoke the separate telemetry tracking engine to process results and clean up
+          python3 src/pipeline/record_telemetry.py \
+            --state-file "$WORKSPACE_DIR/state.json" \
+            --exit-code $RUN_RC \
+            --log-file "$LOG_FILE"
 
       # 📤 STATE PERSISTENCE: Packaging and uploading updates to Dropbox
       - name: 📤 Package and Upload State Snapshot
