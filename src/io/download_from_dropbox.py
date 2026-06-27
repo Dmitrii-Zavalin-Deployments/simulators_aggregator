@@ -10,6 +10,7 @@ Compliance:
 import os
 import sys
 import argparse
+import logging
 from pathlib import Path
 import dropbox
 
@@ -27,13 +28,34 @@ class CloudIngestor:
     Handles secure synchronization of simulation artifacts.
     Uses __slots__ to minimize memory footprint during heavy I/O.
     """
-    __slots__ = ['dbx', 'log_path']
+    __slots__ = ['dbx', 'logger']
 
     def __init__(self, token_manager: TokenManager, refresh_token: str, log_path: Path):
         """Deterministic initialization via TokenManager dependency."""
         access_token = token_manager.refresh_access_token(refresh_token)
         self.dbx = dropbox.Dropbox(access_token)
-        self.log_path = log_path
+        self.logger = self._setup_logger(log_path)
+
+    def _setup_logger(self, log_path: Path) -> logging.Logger:
+        """Configures dual-stream logging (Console + File) for CI/CD and Test observability."""
+        logger = logging.getLogger(self.__class__.__name__)
+        logger.setLevel(logging.INFO)
+        
+        # Guard: Prevent duplicate handlers if object is re-initialized in test loops
+        if not logger.handlers:
+            formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+            
+            # 1. File Handler (Persistent logs as per requirement)
+            file_handler = logging.FileHandler(log_path)
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+            
+            # 2. Stream Handler (GitHub Actions console output)
+            console_handler = logging.StreamHandler(sys.stdout)
+            console_handler.setFormatter(formatter)
+            logger.addHandler(console_handler)
+            
+        return logger
 
     def download_file(self, remote_path: str, local_path: Path):
         """Public method to download a specific file."""
@@ -41,45 +63,45 @@ class CloudIngestor:
         _, res = self.dbx.files_download(path=remote_path)
         with open(local_path, "wb") as f:
             f.write(res.content)
-        print(f"✅ Downloaded {remote_path} -> {local_path}")
+        self.logger.info(f"✅ Downloaded {remote_path} -> {local_path}")
 
     def sync(self, source_folder: str, target_folder: Path, allowed_ext: list):
         """Atomic sync operation with recursive discovery and path reconstruction."""
         target_folder.mkdir(parents=True, exist_ok=True)
         src_base = source_folder.lower().rstrip('/')
         
-        with open(self.log_path, "a") as log:
-            log.write(f"🚀 Ingestion started: {source_folder}\n")
+        self.logger.info(f"🚀 Ingestion started: {source_folder}")
+        
+        has_more = True
+        cursor = None
+        
+        while has_more:
+            result = (self.dbx.files_list_folder_continue(cursor) 
+                      if cursor else self.dbx.files_list_folder(source_folder, recursive=True))
             
-            has_more = True
-            cursor = None
-            
-            while has_more:
-                result = (self.dbx.files_list_folder_continue(cursor) 
-                          if cursor else self.dbx.files_list_folder(source_folder, recursive=True))
-                
-                for entry in result.entries:
-                    if isinstance(entry, dropbox.files.FileMetadata):
-                        if not allowed_ext or Path(entry.name).suffix.lower() in allowed_ext:
-                            rel_path = os.path.relpath(entry.path_lower, src_base)
-                            local_file_path = target_folder / rel_path
-                            local_file_path.parent.mkdir(parents=True, exist_ok=True)
-                            self._download_file(entry, local_file_path, log)
-                    
-                    elif isinstance(entry, dropbox.files.FolderMetadata):
+            for entry in result.entries:
+                if isinstance(entry, dropbox.files.FileMetadata):
+                    if not allowed_ext or Path(entry.name).suffix.lower() in allowed_ext:
                         rel_path = os.path.relpath(entry.path_lower, src_base)
-                        (target_folder / rel_path).mkdir(parents=True, exist_ok=True)
+                        local_file_path = target_folder / rel_path
+                        local_file_path.parent.mkdir(parents=True, exist_ok=True)
+                        self._download_file(entry, local_file_path)
+                
+                elif isinstance(entry, dropbox.files.FolderMetadata):
+                    rel_path = os.path.relpath(entry.path_lower, src_base)
+                    (target_folder / rel_path).mkdir(parents=True, exist_ok=True)
 
-                has_more = result.has_more
-                cursor = result.cursor
-            log.write("🎉 Ingestion complete.\n")
+            has_more = result.has_more
+            cursor = result.cursor
+            
+        self.logger.info("🎉 Ingestion complete.")
 
-    def _download_file(self, entry, local_path: Path, log):
+    def _download_file(self, entry, local_path: Path):
         """Internal helper for specific file transfer."""
         _, res = self.dbx.files_download(path=entry.path_lower)
         with open(local_path, "wb") as f:
             f.write(res.content)
-        log.write(f"✅ Downloaded {entry.path_lower} -> {local_path}\n")
+        self.logger.info(f"✅ Downloaded {entry.path_lower} -> {local_path}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Direct Dropbox Downloader")
@@ -88,7 +110,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     try:
-        # Enforce No-Default Policy
         tm = TokenManager(
             _get_required_env("DROPBOX_APP_KEY"),
             _get_required_env("DROPBOX_APP_SECRET")
@@ -105,5 +126,6 @@ if __name__ == "__main__":
         ingestor.download_file(remote_path, local_dir / args.filename)
         
     except Exception as e:
-        print(f"CRITICAL ERROR: {e}", file=sys.stderr)
+        # Use logging for the critical error as well
+        logging.getLogger("CloudIngestor").error(f"CRITICAL ERROR: {e}")
         sys.exit(1)
