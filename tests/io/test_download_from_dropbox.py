@@ -156,3 +156,52 @@ def test_main_critical_error_exit():
         with pytest.raises(SystemExit) as e:
             main()
         assert e.value.code == 1
+
+def test_main_success_flow(monkeypatch):
+    """Verify that main() executes correctly when arguments are valid."""
+    # 1. Setup required environment variables
+    monkeypatch.setenv("DROPBOX_APP_KEY", "test_key")
+    monkeypatch.setenv("DROPBOX_APP_SECRET", "test_secret")
+    monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "test_refresh")
+
+    # 2. Patch dependencies
+    with patch("src.io.download_from_dropbox.CloudIngestor") as MockIngestor:
+        with patch("src.io.download_from_dropbox.argparse.ArgumentParser.parse_args") as mock_args:
+            # Mock the parsed arguments
+            mock_args.return_value = MagicMock(folder="my_folder", filename="my_file.txt")
+            
+            # 3. Execute main
+            main()
+            
+            # 4. Assertions
+            MockIngestor.return_value.download_file.assert_called_once()
+            # Check if remote path was formatted correctly (based on line 112)
+            args, _ = MockIngestor.return_value.download_file.call_args
+            assert args[0] == "/my_folder/my_file.txt"
+
+def test_sync_full_coverage(mock_ingestor):
+    """Verify folder creation and filtering logic."""
+    ingestor, tmp_path = mock_ingestor
+    
+    # 1. Prepare Mock Entries
+    mock_file = MagicMock(spec=dropbox.files.FileMetadata)
+    mock_file.name = "data.csv"
+    mock_file.path_lower = "/remote/data.csv"
+    
+    mock_folder = MagicMock(spec=dropbox.files.FolderMetadata)
+    mock_folder.path_lower = "/remote/new_dir"
+    
+    # 2. Mock list_folder to return both
+    ingestor.dbx.files_list_folder.return_value = MagicMock(
+        entries=[mock_file, mock_folder], 
+        has_more=False, 
+        cursor=None
+    )
+    
+    # 3. Execute sync with allowed_ext=None (Covers Line 76: 'if not allowed_ext')
+    # and includes FolderMetadata (Covers Lines 82-84)
+    with patch("pathlib.Path.mkdir") as mock_mkdir:
+        ingestor.sync("/remote", tmp_path, None)
+        
+    # Verify folder creation logic
+    assert mock_mkdir.called
