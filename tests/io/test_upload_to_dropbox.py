@@ -20,7 +20,7 @@ def test_cloud_uploader_success(mock_dbx_class):
     mock_dbx = mock_dbx_class.return_value
     
     # 2. Instantiate via Dependency Injection
-    uploader = CloudUploader(mock_tm, "initial_refresh_token")
+    uploader = CloudUploader(mock_tm, "initial_refresh_token", tmp_path / "test.log")
     
     local_file = Path("navier_stokes_output.zip")
     binary_data = b"simulation_results_payload"
@@ -56,7 +56,7 @@ def test_cloud_uploader_file_not_found():
     mock_tm = MagicMock(spec=TokenManager)
     mock_tm.refresh_access_token.return_value = "valid_token"
     
-    uploader = CloudUploader(mock_tm, "some_token")
+    uploader = CloudUploader(mock_tm, "some_token", tmp_path / "test.log")
     
     # Use a path that definitely won't exist locally
     fake_path = Path("/tmp/non_existent_solver_output_9999.zip")
@@ -75,4 +75,4 @@ def test_cloud_uploader_constructor_auth_failure(mock_dbx_class):
     mock_tm.refresh_access_token.side_effect = RuntimeError("Dropbox Auth Failed")
     
     with pytest.raises(RuntimeError, match="Dropbox Auth Failed"):
-        CloudUploader(mock_tm, "bad_refresh_token")
+        CloudUploader(mock_tm, "bad_refresh_token", tmp_path / "test.log")
