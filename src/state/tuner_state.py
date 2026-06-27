@@ -29,11 +29,16 @@ class TunerState:
         failed_runs_archive: str
     ):
         # --- Zero-Default Policy Verification ---
-        if pipeline_id is None: raise ValueError("Missing structural parameter: pipeline_id")
-        if input_data_list is None: raise ValueError("Missing structural parameter: input_data_list")
-        if task_details is None: raise ValueError("Missing structural parameter: task_details")
-        if successful_runs_archive is None: raise ValueError("Missing structural parameter: successful_runs_archive")
-        if failed_runs_archive is None: raise ValueError("Missing structural parameter: failed_runs_archive")
+        if pipeline_id is None:
+            raise ValueError("Missing structural parameter: pipeline_id")
+        if input_data_list is None:
+            raise ValueError("Missing structural parameter: input_data_list")
+        if task_details is None:
+            raise ValueError("Missing structural parameter: task_details")
+        if successful_runs_archive is None:
+            raise ValueError("Missing structural parameter: successful_runs_archive")
+        if failed_runs_archive is None:
+            raise ValueError("Missing structural parameter: failed_runs_archive")
 
         # Assign properties to state container instance
         self.pipeline_id = pipeline_id
