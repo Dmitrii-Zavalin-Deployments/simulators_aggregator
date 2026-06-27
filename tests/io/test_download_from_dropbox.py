@@ -7,8 +7,6 @@ and atomic file operations.
 """
 
 import pytest
-import os
-import sys
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 import dropbox
