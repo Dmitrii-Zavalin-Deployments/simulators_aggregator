@@ -20,12 +20,22 @@ jobs:
       - name: Check last run hour
         id: check
         run: |
+          IS_SCHEDULED="${{ github.event_name == 'schedule' }}"
+
+          # If not scheduled (push or manual), always run
+          if [[ "$IS_SCHEDULED" != "true" ]]; then
+            echo "should_run=yes" >> $GITHUB_OUTPUT
+            echo "🚀 Non-scheduled event (push/manual) — always run."
+            exit 0
+          fi
+
+          # Scheduled event → apply hourly guard
           CURRENT_HOUR=$(date -u +"%Y-%m-%d-%H")
           AUDIT_FILE="performance_audit.md"
 
           if [ ! -f "$AUDIT_FILE" ]; then
             echo "should_run=yes" >> $GITHUB_OUTPUT
-            echo "📄 No audit file yet — first run allowed."
+            echo "📄 No audit file yet — first scheduled run allowed."
             exit 0
           fi
 
@@ -37,10 +47,10 @@ jobs:
 
           if [ "$CURRENT_HOUR" == "$LAST_RUN_HOUR" ]; then
             echo "should_run=no" >> $GITHUB_OUTPUT
-            echo "⏳ Already ran this hour — skipping."
+            echo "⏳ Already ran this hour — skipping scheduled run."
           else
             echo "should_run=yes" >> $GITHUB_OUTPUT
-            echo "🚀 First run this hour — proceeding."
+            echo "🚀 First scheduled run this hour — proceeding."
           fi
 
   gatekeeper:
