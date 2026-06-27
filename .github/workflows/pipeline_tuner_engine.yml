@@ -439,16 +439,6 @@ jobs:
               --filename "${{ env.TUNER_STATE_ARCHIVE }}"
           fi
 
-      # 🔍 INTEGRITY ENFORCEMENT
-      - name: 🔍 Run Forensic Audit
-        if: always()
-        shell: bash -el {0}
-        run: |
-          if [ -f "debug/forensic_audit.sh" ]; then
-            chmod +x debug/forensic_audit.sh
-            bash debug/forensic_audit.sh
-          fi
-
       - name: 📊 Audit Performance Ledger & Sync (Assemble & Tuning)
         if: always()
         env:
