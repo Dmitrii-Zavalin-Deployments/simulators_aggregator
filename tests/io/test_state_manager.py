@@ -90,7 +90,7 @@ def test_check_file_exists_other_error(mock_dbx):
     
     # CRITICAL FIX: Explicitly set is_path to False
     # Without this, the code thinks it's a "path not found" error and returns False.
-    mock_error.error.is_path.return_value = False 
+    mock_error.is_path.return_value = False 
     
     mock_dbx.files_get_metadata.side_effect = dropbox.exceptions.ApiError(
         request_id="123", 
