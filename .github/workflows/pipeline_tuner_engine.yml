@@ -6,14 +6,47 @@ on:
       - "**"
   workflow_dispatch:
   schedule:
-    # 🛰️ High-Availability Dual Pulse Matrix
-    # Using specific off-peak minutes bypasses GitHub's global queue congestion.
-    - cron: '14 * * * *'   # Primary Pulse: Fires every hour at minute 14
-    - cron: '44 * * * *'   # Recovery Pulse: Fires every hour at minute 44
+    - cron: "* * * * *"
 
 jobs:
+  hourly_guard:
+    name: "🕒 Hourly Guard — Use performance_audit.md"
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check last run hour
+        id: check
+        run: |
+          CURRENT_HOUR=$(date -u +"%Y-%m-%d-%H")
+          AUDIT_FILE="performance_audit.md"
+
+          if [ ! -f "$AUDIT_FILE" ]; then
+            echo "should_run=yes" >> $GITHUB_OUTPUT
+            echo "📄 No audit file yet — first run allowed."
+            exit 0
+          fi
+
+          LAST_RUN=$(grep -m1 "### Audit:" "$AUDIT_FILE" | sed 's/### Audit: //; s/ UTC//')
+          LAST_RUN_HOUR=$(date -u -d "$LAST_RUN" +"%Y-%m-%d-%H")
+
+          echo "Last run hour: $LAST_RUN_HOUR"
+          echo "Current hour:  $CURRENT_HOUR"
+
+          if [ "$CURRENT_HOUR" == "$LAST_RUN_HOUR" ]; then
+            echo "should_run=no" >> $GITHUB_OUTPUT
+            echo "⏳ Already ran this hour — skipping."
+          else
+            echo "should_run=yes" >> $GITHUB_OUTPUT
+            echo "🚀 First run this hour — proceeding."
+          fi
+
   gatekeeper:
       name: "🚦 Semaphore"
+      needs: hourly_guard
+      if: needs.hourly_guard.outputs.should_run == 'yes'
       runs-on: ubuntu-latest
       outputs:
         status: ${{ steps.check.outputs.status }}
