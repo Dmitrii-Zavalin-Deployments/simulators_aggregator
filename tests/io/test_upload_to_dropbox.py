@@ -11,7 +11,7 @@ from src.io.upload_to_dropbox import CloudUploader
 
 
 @patch("dropbox.Dropbox")
-def test_cloud_uploader_success(mock_dbx_class):
+def test_cloud_uploader_success(mock_dbx_class, tmp_path):
     """Rule 5 & 10: Verify DI-based initialization and atomic upload."""
     
     # 1. Setup Deterministic Mocks (Rule 5)
@@ -49,7 +49,7 @@ def test_cloud_uploader_success(mock_dbx_class):
     assert kwargs['mode'] == dropbox.files.WriteMode.overwrite
 
 
-def test_cloud_uploader_file_not_found():
+def test_cloud_uploader_file_not_found(tmp_path):
     """Rule 2: Ensure zero-debt execution by failing fast on missing files."""
     
     # Setup mock with valid token so we don't fail at the constructor
@@ -67,7 +67,7 @@ def test_cloud_uploader_file_not_found():
 
 
 @patch("dropbox.Dropbox")
-def test_cloud_uploader_constructor_auth_failure(mock_dbx_class):
+def test_cloud_uploader_constructor_auth_failure(mock_dbx_class, tmp_path):
     """Rule 5: Verify that uploader fails immediately if token refresh fails."""
     
     mock_tm = MagicMock(spec=TokenManager)
