@@ -10,7 +10,7 @@ on:
 
 jobs:
   hourly_guard:
-    name: "🕒 Hourly Guard — Use performance_audit.md"
+    name: "🕒 Hourly Guard"
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
