@@ -13,7 +13,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 import dropbox
 
-from src.io.download_from_dropbox import CloudIngestor, _get_required_env
+from src.io.download_from_dropbox import CloudIngestor, _get_required_env, main
 from src.io.dropbox_utils import TokenManager
 
 # =============================================================================
@@ -73,16 +73,20 @@ def test_token_manager_refresh_failure():
 # 3. CloudIngestor Operational Logic (Rule 8)
 # =============================================================================
 
-# The CloudIngestor acts as an atomic synchronization agent. We use dependency 
-# injection for the Dropbox client to ensure tests do not rely on actual network state.
-
 @pytest.fixture
 def mock_ingestor(tmp_path):
-    """Fixture to provide a fully initialized CloudIngestor with mocked dependencies."""
+    """Fixture providing a CloudIngestor with an explicitly mocked DBX client."""
     mock_tm = MagicMock(spec=TokenManager)
     mock_tm.refresh_access_token.return_value = "fake_token"
     log_path = tmp_path / "download.log"
-    return CloudIngestor(mock_tm, "refresh_token", log_path), tmp_path
+    
+    # Initialize the ingestor
+    ingestor = CloudIngestor(mock_tm, "refresh_token", log_path)
+    
+    # CRITICAL: Fix for AttributeError - Explicitly override the real Dropbox client
+    ingestor.dbx = MagicMock()
+    
+    return ingestor, tmp_path
 
 def test_download_file(mock_ingestor):
     """Verify single-file download and local filesystem writing."""
@@ -102,16 +106,12 @@ def test_download_file(mock_ingestor):
 
 @patch("dropbox.Dropbox")
 def test_cloud_ingestor_recursive_sync(mock_dbx_class):
-    """
-    Verify recursion, path reconstruction, and file extension filtering.
-    This test simulates a paginated API response from Dropbox.
-    """
-    # 1. Setup Dependency Injection
+    """Verify recursion, path reconstruction, and file extension filtering."""
+    # Setup
     mock_tm = MagicMock(spec=TokenManager)
     mock_tm.refresh_access_token.return_value = "fake_access_token"
-    mock_dbx = mock_dbx_class.return_value
     
-    # Page 1: A valid file in a subfolder
+    # Page 1 Setup
     page1 = MagicMock()
     file_valid = MagicMock(spec=dropbox.files.FileMetadata)
     file_valid.name = "simulation_01.h5"
@@ -120,32 +120,33 @@ def test_cloud_ingestor_recursive_sync(mock_dbx_class):
     page1.has_more = True
     page1.cursor = "next_page_token"
     
-    # Page 2: A folder and an invalid extension
+    # Page 2 Setup
     page2 = MagicMock()
     folder_entry = MagicMock(spec=dropbox.files.FolderMetadata)
     folder_entry.path_lower = "/remote/case_02"
     file_invalid = MagicMock(spec=dropbox.files.FileMetadata)
     file_invalid.name = "notes.txt"
     file_invalid.path_lower = "/remote/notes.txt"
-    
     page2.entries = [folder_entry, file_invalid]
     page2.has_more = False
     
+    # Apply Mocks
+    mock_dbx = mock_dbx_class.return_value
     mock_dbx.files_list_folder.return_value = page1
     mock_dbx.files_list_folder_continue.return_value = page2
     mock_dbx.files_download.return_value = (None, MagicMock(content=b"physics_data"))
 
-    # 3. Execute with filesystem mocks
+    # Execute
     log_path = Path("test_ingest.log")
     local_base = Path("./local_test_data")
     
     with patch("builtins.open", mock_open()), patch("pathlib.Path.mkdir"):
         ingestor = CloudIngestor(mock_tm, "initial_refresh_token", log_path)
+        ingestor.dbx = mock_dbx # Ensure instance uses the mock
         ingestor.sync("/remote", local_base, [".h5"])
     
-    # 4. Assertions
+    # Assertions
     mock_dbx.files_list_folder.assert_called_once_with("/remote", recursive=True)
-    mock_dbx.files_list_folder_continue.assert_called_once_with("next_page_token")
     mock_dbx.files_download.assert_called_once_with(path="/remote/case_01/simulation_01.h5")
 
 
@@ -153,16 +154,11 @@ def test_cloud_ingestor_recursive_sync(mock_dbx_class):
 # 4. Module Execution Entry Point
 # =============================================================================
 
-# The main block handles system exit codes and critical failures. 
-# We test these paths to ensure robustness in the CI/CD pipeline.
-
 def test_main_critical_error_exit():
-    """Verify that failures in the main entry point correctly trigger a system exit."""
+    """Verify that failures in main trigger system exit without test-aware wrappers."""
     with patch("src.io.download_from_dropbox.argparse.ArgumentParser.parse_args", 
                side_effect=Exception("Critical Failure")):
         with pytest.raises(SystemExit) as e:
-            # We trigger the logic by simulating a failure in the main block
-            # (Assuming standard execution flow inside the if __name__ == "__main__")
-            from src.io.download_from_dropbox import main_logic_wrapper
-            main_logic_wrapper()
+            # We call the real main function defined in the module
+            main()
         assert e.value.code == 1

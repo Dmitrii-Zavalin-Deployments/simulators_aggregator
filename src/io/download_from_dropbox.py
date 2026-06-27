@@ -103,29 +103,23 @@ class CloudIngestor:
             f.write(res.content)
         self.logger.info(f"✅ Downloaded {entry.path_lower} -> {local_path}")
 
-if __name__ == "__main__":
+def main():
+    """Entry point logic (Architectural standard, not test-specific)."""
     parser = argparse.ArgumentParser(description="Direct Dropbox Downloader")
     parser.add_argument("--folder", required=True, help="Dropbox folder path")
     parser.add_argument("--filename", required=True, help="File to download")
     args = parser.parse_args()
 
     try:
-        tm = TokenManager(
-            _get_required_env("DROPBOX_APP_KEY"),
-            _get_required_env("DROPBOX_APP_SECRET")
-        )
-        ingestor = CloudIngestor(
-            tm, 
-            _get_required_env("DROPBOX_REFRESH_TOKEN"), 
-            Path("download_log.txt")
-        )
-
+        # Standard execution flow
+        tm = TokenManager(_get_required_env("DROPBOX_APP_KEY"), _get_required_env("DROPBOX_APP_SECRET"))
+        ingestor = CloudIngestor(tm, _get_required_env("DROPBOX_REFRESH_TOKEN"), Path("download_log.txt"))
         remote_path = f"/{args.folder.strip('/')}/{args.filename.strip('/')}"
         local_dir = Path("data/testing-input-output")
-        
         ingestor.download_file(remote_path, local_dir / args.filename)
-        
     except Exception as e:
-        # Use logging for the critical error as well
         logging.getLogger("CloudIngestor").error(f"CRITICAL ERROR: {e}")
         sys.exit(1)
+
+if __name__ == "__main__":  # pragma: no cover
+    main()
