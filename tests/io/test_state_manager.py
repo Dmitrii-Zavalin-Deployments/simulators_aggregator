@@ -70,7 +70,10 @@ def test_check_file_exists_not_found(mock_dbx):
     
     # We force the mock client to raise this specific error.
     mock_dbx.files_get_metadata.side_effect = dropbox.exceptions.ApiError(
-        request_id="123", error=mock_error
+        request_id="123", 
+        error=mock_error, 
+        user_message_text="not found", 
+        user_message_locale="en"
     )
     
     # Audit: Logic identifies this as "File does not exist".
@@ -87,7 +90,10 @@ def test_check_file_exists_other_error(mock_dbx):
     mock_error.error.is_path.return_value = False
     
     mock_dbx.files_get_metadata.side_effect = dropbox.exceptions.ApiError(
-        request_id="123", error=mock_error
+        request_id="123", 
+        error=mock_error, 
+        user_message_text="Auth Fail", 
+        user_message_locale="en"
     )
     
     # Audit: We expect the error to bubble up.
