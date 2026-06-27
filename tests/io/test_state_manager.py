@@ -103,33 +103,6 @@ def test_check_file_exists_other_error(mock_dbx):
     with pytest.raises(dropbox.exceptions.ApiError):
         check_file_exists(mock_dbx, "folder", "file.txt")
 
-# --- Main Orchestration Tests ---
-
-@patch("src.io.state_manager.TokenManager")
-@patch("src.io.state_manager.dropbox.Dropbox")
-@patch("src.io.state_manager.check_file_exists")
-def test_main_success_not_found(mock_check, mock_dbx, mock_tm, monkeypatch, capsys):
-    """
-    Narrative: Verify the execution path when the file does not exist.
-    The system should output 'state_status=not_found' (Line 56).
-    """
-    # 1. Setup required environment
-    monkeypatch.setenv("DROPBOX_APP_KEY", "k")
-    monkeypatch.setenv("DROPBOX_APP_SECRET", "s")
-    monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "t")
-    
-    # 2. Mock CLI arguments
-    with patch("sys.argv", ["script", "--folder", "f", "--filename", "n"]):
-        # 3. Force the existence check to return False
-        mock_check.return_value = False 
-        
-        # 4. Execute
-        main()
-        
-        # 5. Audit: Captured standard output
-        captured = capsys.readouterr()
-        assert "state_status=not_found" in captured.out
-
 @patch("src.io.state_manager.TokenManager")
 def test_main_missing_env(mock_tm, monkeypatch, capsys):
     """
@@ -169,3 +142,54 @@ def test_main_unexpected_exception(mock_tm, monkeypatch, capsys):
         
         captured = capsys.readouterr()
         assert "CRITICAL ERROR: Auth Exploded" in captured.err
+
+@patch("src.io.state_manager.TokenManager")
+@patch("src.io.state_manager.dropbox.Dropbox")
+@patch("src.io.state_manager.check_file_exists")
+def test_main_success_found(mock_check, mock_dbx, mock_tm, monkeypatch, capsys):
+    """
+    Narrative: Verify the execution path when the file is successfully found.
+    The system must print 'state_status=found' to standard output (Line 54).
+    """
+    # We supply all mandatory credentials to fulfill the environment guard rails.
+    monkeypatch.setenv("DROPBOX_APP_KEY", "key_value")
+    monkeypatch.setenv("DROPBOX_APP_SECRET", "secret_value")
+    monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "token_value")
+    
+    # We mock command line arguments targeting our target folder and file.
+    with patch("sys.argv", ["script_name", "--folder", "simulators", "--filename", "output.zip"]):
+        # We explicitly configure the file checker to return True.
+        mock_check.return_value = True
+        
+        # We execute the orchestrator entry point.
+        main()
+        
+        # Forensic Audit: Verify that standard output received the correct CI/CD signal.
+        captured = capsys.readouterr()
+        assert "state_status=found" in captured.out
+
+
+@patch("src.io.state_manager.TokenManager")
+@patch("src.io.state_manager.dropbox.Dropbox")
+@patch("src.io.state_manager.check_file_exists")
+def test_main_success_not_found(mock_check, mock_dbx, mock_tm, monkeypatch, capsys):
+    """
+    Narrative: Verify the execution path when the file does not exist.
+    The system must print 'state_status=not_found' to standard output (Line 56).
+    """
+    # We supply all mandatory credentials to fulfill the environment guard rails.
+    monkeypatch.setenv("DROPBOX_APP_KEY", "key_value")
+    monkeypatch.setenv("DROPBOX_APP_SECRET", "secret_value")
+    monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "token_value")
+    
+    # We mock command line arguments targeting our target folder and file.
+    with patch("sys.argv", ["script_name", "--folder", "simulators", "--filename", "output.zip"]):
+        # We explicitly configure the file checker to return False.
+        mock_check.return_value = False 
+        
+        # We execute the orchestrator entry point.
+        main()
+        
+        # Forensic Audit: Verify that standard output received the correct CI/CD signal.
+        captured = capsys.readouterr()
+        assert "state_status=not_found" in captured.out
