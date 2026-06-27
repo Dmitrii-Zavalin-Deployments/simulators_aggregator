@@ -76,3 +76,70 @@ def test_cloud_uploader_constructor_auth_failure(mock_dbx_class, tmp_path):
     
     with pytest.raises(RuntimeError, match="Dropbox Auth Failed"):
         CloudUploader(mock_tm, "bad_refresh_token", tmp_path / "test.log")
+
+def test_main_missing_env_vars(monkeypatch):
+    """
+    Rule: Ensure system exits if required environment variables are missing.
+    We test the branch: if not all([app_key, app_secret, refresh_token]):
+    """
+    # 1. Clear environment to force validation failure
+    monkeypatch.delenv("DROPBOX_APP_KEY", raising=False)
+    
+    # 2. Mock argparse to simulate CLI input
+    with patch("src.io.upload_to_dropbox.argparse.ArgumentParser.parse_args") as mock_args:
+        mock_args.return_value = MagicMock(folder="test", filename="test.zip")
+        
+        # 3. Assert system exit
+        with pytest.raises(SystemExit) as e:
+            from src.io.upload_to_dropbox import main
+            main()
+        assert e.value.code == 1
+
+
+def test_main_success_flow(monkeypatch):
+    """
+    Rule: Verify standard execution flow when all environment variables are present.
+    """
+    # 1. Set required environment
+    monkeypatch.setenv("DROPBOX_APP_KEY", "key")
+    monkeypatch.setenv("DROPBOX_APP_SECRET", "secret")
+    monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "token")
+    
+    # 2. Mock dependencies
+    with patch("src.io.upload_to_dropbox.argparse.ArgumentParser.parse_args") as mock_args, \
+         patch("src.io.upload_to_dropbox.CloudUploader") as MockUploader:
+        
+        mock_args.return_value = MagicMock(folder="target", filename="data.zip")
+        instance = MockUploader.return_value
+        
+        # 3. Execute main
+        from src.io.upload_to_dropbox import main
+        main()
+        
+        # 4. Verify orchestration
+        MockUploader.assert_called_once()
+        instance.upload.assert_called_once()
+
+
+def test_main_exception_handling(monkeypatch):
+    """
+    Rule: Verify that the catch-all exception block in main() triggers sys.exit(1).
+    This exercises lines 85-93 (the try...except block).
+    """
+    monkeypatch.setenv("DROPBOX_APP_KEY", "key")
+    monkeypatch.setenv("DROPBOX_APP_SECRET", "secret")
+    monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "token")
+    
+    with patch("src.io.upload_to_dropbox.argparse.ArgumentParser.parse_args") as mock_args, \
+         patch("src.io.upload_to_dropbox.CloudUploader") as MockUploader:
+        
+        mock_args.return_value = MagicMock(folder="target", filename="data.zip")
+        
+        # Force the upload method to crash
+        MockUploader.return_value.upload.side_effect = Exception("Critical Failure")
+        
+        # Assert system exit
+        with pytest.raises(SystemExit) as e:
+            from src.io.upload_to_dropbox import main
+            main()
+        assert e.value.code == 1
