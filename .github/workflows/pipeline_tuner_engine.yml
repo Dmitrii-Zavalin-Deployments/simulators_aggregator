@@ -437,7 +437,7 @@ jobs:
           NEW_ENTRY=$(cat <<EOF
 
           ### Audit: $RUN_DATE
-          - **Task Phase:** \`$TASK_NAME\`
+          - **Pipeline:** \`$TASK_NAME\`
           - **Branch:** \`$CURRENT_BRANCH\`
           - **Status:** $STATUS
           - **CPU Load:** $CPU_LOAD
