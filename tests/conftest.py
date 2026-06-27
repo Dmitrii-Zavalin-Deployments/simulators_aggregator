@@ -1,6 +1,4 @@
 import pytest
-import os
-import shutil
 import json
 from unittest.mock import MagicMock
 from tests.dummies import dummy_in

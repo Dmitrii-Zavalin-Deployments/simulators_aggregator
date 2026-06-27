@@ -60,7 +60,7 @@ def main():
     commands = [f"mkdir -p {repo_root}"]
     staged_configs = []
     
-    cached_flag = "--cached-dependency" if args.cached_dependency else ""
+    "--cached-dependency" if args.cached_dependency else ""
 
     # Loop through all folders and inject the identical config asset
     for task in tasks:
@@ -90,8 +90,8 @@ def main():
 
     # 🔬 Strict Integrity Check: Verify that ALL injected files are exactly identical
     verify_script = (
-        f"echo '🔍 --- COMMENCING TARGET VARIANT INTEGRITY AUDIT ---'; "
-        f"INTEGRITY_PASSED=true; "
+        "echo '🔍 --- COMMENCING TARGET VARIANT INTEGRITY AUDIT ---'; "
+        "INTEGRITY_PASSED=true; "
     )
     for config_path in staged_configs:
         verify_script += (
