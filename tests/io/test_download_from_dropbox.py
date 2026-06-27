@@ -198,10 +198,17 @@ def test_sync_full_coverage(mock_ingestor):
         cursor=None
     )
     
-    # 3. Execute sync with allowed_ext=None (Covers Line 76: 'if not allowed_ext')
-    # and includes FolderMetadata (Covers Lines 82-84)
+    # --- FIX STARTS HERE ---
+    # Create a mock response object
+    mock_response = MagicMock()
+    mock_response.content = b"data"
+    
+    # Return a tuple (None, mock_response) to satisfy the unpacking _, res = ...
+    ingestor.dbx.files_download.return_value = (None, mock_response)
+    # --- FIX ENDS HERE ---
+    
+    # 3. Execute sync
     with patch("pathlib.Path.mkdir") as mock_mkdir:
         ingestor.sync("/remote", tmp_path, None)
         
-    # Verify folder creation logic
     assert mock_mkdir.called
