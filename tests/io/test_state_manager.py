@@ -1,74 +1,82 @@
 # tests/io/test_state_manager.py
 
 import os
+import sys
 import pytest
 from unittest.mock import MagicMock, patch
 import dropbox
 from src.io.state_manager import _get_required_env, check_file_exists, main
 
-# --- Helper Logic Tests ---
+# ==============================================================================
+# Helper Logic Tests
+# ==============================================================================
 
 def test_get_required_env_success():
-    """
-    Narrative: Verify that the environment variable loader correctly
-    returns a stripped string when the key exists.
-    """
+    """Verify clean string extraction for valid keys."""
+    # We prime the environment with a key containing padding whitespace.
     os.environ["VALID_KEY"] = "  secret_value  "
     
-    # We assert that the value is correctly retrieved and whitespace is stripped.
-    assert _get_required_env("VALID_KEY") == "secret_value"
+    # We pass the key to our loader and check that leading/trailing spaces are stripped.
+    retrieved_val = _get_required_env("VALID_KEY")
+    assert retrieved_val == "secret_value"
     
-    # Cleanup
+    # We clean up the target environment variables to prevent environment leaks.
     del os.environ["VALID_KEY"]
 
+
 def test_get_required_env_missing():
-    """
-    Narrative: Ensure the system raises EnvironmentError when a key is absent.
-    This enforces the 'No-Default' security policy.
-    """
+    """Verify strict validation errors for missing keys."""
+    # We attempt to retrieve a key that is guaranteed to be absent from our environment.
+    # The loader must catch this and immediately raise a strict EnvironmentError.
     with pytest.raises(EnvironmentError, match="Missing required environment variable"):
         _get_required_env("NON_EXISTENT_KEY")
 
+
 def test_get_required_env_empty():
-    """
-    Narrative: Ensure the system raises EnvironmentError when a key exists 
-    but contains only whitespace.
-    """
+    """Verify validation errors for blank spaces or empty configurations."""
+    # We explicitly simulate a key defined only with blank spaces.
     os.environ["EMPTY_KEY"] = "   "
+    
+    # The application loader must treat whitespace-only configuration values as empty 
+    # and fail fast with an EnvironmentError.
     with pytest.raises(EnvironmentError, match="is empty or whitespace"):
         _get_required_env("EMPTY_KEY")
+        
+    # We tear down the temporary variable.
     del os.environ["EMPTY_KEY"]
 
 
-# --- Core Logic Tests ---
+# ==============================================================================
+# Core Logic Tests
+# ==============================================================================
 
 @patch("dropbox.Dropbox")
 def test_check_file_exists_positive(mock_dbx):
-    """
-    Narrative: Verify that when the Dropbox API returns metadata, 
-    the function correctly identifies the file as present.
-    """
-    # Execution: Call the checker.
+    """Verify successful tracking when the metadata endpoint confirms a file exists."""
+    # We invoke the function with regular arguments to evaluate remote path normalization.
     result = check_file_exists(mock_dbx, "folder", "file.txt")
     
-    # Audit: The API was invoked and the logic returned True.
+    # The underlying file metadata API must be called with a clean, leading-slash path:
+    #     remote_path = "/folder/file.txt"
     mock_dbx.files_get_metadata.assert_called_once_with("/folder/file.txt")
+    
+    # Since metadata retrieval succeeded without errors, the function returns True.
     assert result is True
+
 
 @patch("dropbox.Dropbox")
 def test_check_file_exists_not_found(mock_dbx):
-    """
-    Narrative: Verify that a Dropbox ApiError specifically denoting 
-    "path not found" is handled gracefully by returning False.
-    """
-    # Setup: Create a mock ApiError that identifies as a path not found.
+    """Verify fallback response logic when the remote path does not exist."""
+    # We construct a mock representation of an API path exception context.
     mock_error = MagicMock()
-    mock_error.error.is_path.return_value = True
+    mock_error.is_path.return_value = True
+    
+    # We mock the nested path locator object to simulate a missing file asset status.
     mock_path = MagicMock()
     mock_path.is_not_found.return_value = True
-    mock_error.error.get_path.return_value = mock_path
+    mock_error.get_path.return_value = mock_path
     
-    # We force the mock client to raise this specific error.
+    # We configure the metadata fetch operation to bubble up a structural ApiError.
     mock_dbx.files_get_metadata.side_effect = dropbox.exceptions.ApiError(
         request_id="123", 
         error=mock_error, 
@@ -76,22 +84,21 @@ def test_check_file_exists_not_found(mock_dbx):
         user_message_locale="en"
     )
     
-    # Audit: Logic identifies this as "File does not exist".
-    assert check_file_exists(mock_dbx, "folder", "file.txt") is False
+    # We run the visibility test. The path error must be caught gracefully and return False.
+    result = check_file_exists(mock_dbx, "folder", "file.txt")
+    assert result is False
+
 
 @patch("dropbox.Dropbox")
 def test_check_file_exists_other_error(mock_dbx):
-    """
-    Narrative: Verify that unexpected API errors (e.g., Auth issues)
-    are re-raised rather than suppressed.
-    """
-    # Setup: Mock a generic ApiError
+    """Verify critical exceptions are re-raised rather than caught."""
+    # We stub out a generic exception block that is completely separate from path failures.
     mock_error = MagicMock()
     
-    # CRITICAL FIX: Explicitly set is_path to False
-    # Without this, the code thinks it's a "path not found" error and returns False.
+    # We force the path verification indicator to return False to skip standard path fallbacks.
     mock_error.is_path.return_value = False 
     
+    # We inject the structured error behavior into our client mock pipeline.
     mock_dbx.files_get_metadata.side_effect = dropbox.exceptions.ApiError(
         request_id="123", 
         error=mock_error, 
@@ -99,72 +106,75 @@ def test_check_file_exists_other_error(mock_dbx):
         user_message_locale="en"
     )
     
-    # Audit: We expect the error to bubble up.
+    # The unhandled operational error must exit our function context and bubble straight up.
     with pytest.raises(dropbox.exceptions.ApiError):
         check_file_exists(mock_dbx, "folder", "file.txt")
 
+
+# ==============================================================================
+# Main Orchestration Tests
+# ==============================================================================
+
 @patch("src.io.state_manager.TokenManager")
 def test_main_missing_env(mock_tm, monkeypatch, capsys):
-    """
-    Narrative: Verify that missing environment variables trigger a clean
-    system exit with error diagnostics sent to stderr.
-    """
-    # Clear env
+    """Verify failure paths when environment keys are completely missing."""
+    # We wipe the current tracking app key to break initialization logic.
     monkeypatch.delenv("DROPBOX_APP_KEY", raising=False)
     
+    # We mimic a manual terminal call executing with standard flags.
     with patch("sys.argv", ["script", "--folder", "f", "--filename", "n"]):
-        # Execute and Expect Exit
-        with pytest.raises(SystemExit) as e:
+        # The environment checkpoint must trigger a SystemExit with an error code of 1.
+        with pytest.raises(SystemExit) as exit_context:
             main()
-        assert e.value.code == 1
+        assert exit_context.value.code == 1
         
-        # Audit: Ensure error went to stderr
+        # We process the current screen buffer streams to ensure standard errors were recorded.
         captured = capsys.readouterr()
         assert "CRITICAL ERROR" in captured.err
 
+
 @patch("src.io.state_manager.TokenManager")
 def test_main_unexpected_exception(mock_tm, monkeypatch, capsys):
-    """
-    Narrative: Verify that unhandled exceptions are caught, reported,
-    and result in a non-zero exit code.
-    """
+    """Verify error containment and safe terminations during execution."""
+    # We fill out the base initialization elements to satisfy credential processing checks.
     monkeypatch.setenv("DROPBOX_APP_KEY", "k")
     monkeypatch.setenv("DROPBOX_APP_SECRET", "s")
     monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "t")
     
-    # Force an error in instantiation
+    # We mimic a runtime authentication explosion when initializing token states.
     mock_tm.side_effect = Exception("Auth Exploded")
     
+    # We mock out parameters and step through runtime lifecycle handling loops.
     with patch("sys.argv", ["script", "--folder", "f", "--filename", "n"]):
-        with pytest.raises(SystemExit) as e:
+        # The crash must be handled internally, printing to stderr and exiting with 1.
+        with pytest.raises(SystemExit) as exit_context:
             main()
-        assert e.value.code == 1
+        assert exit_context.value.code == 1
         
+        # We ensure standard error buffers captured the full stack trace diagnostic logs.
         captured = capsys.readouterr()
         assert "CRITICAL ERROR: Auth Exploded" in captured.err
+
 
 @patch("src.io.state_manager.TokenManager")
 @patch("src.io.state_manager.dropbox.Dropbox")
 @patch("src.io.state_manager.check_file_exists")
 def test_main_success_found(mock_check, mock_dbx, mock_tm, monkeypatch, capsys):
-    """
-    Narrative: Verify the execution path when the file is successfully found.
-    The system must print 'state_status=found' to standard output (Line 54).
-    """
-    # We supply all mandatory credentials to fulfill the environment guard rails.
+    """Verify runtime signal production paths when target files exist."""
+    # We assign credentials to fulfill security constraints.
     monkeypatch.setenv("DROPBOX_APP_KEY", "key_value")
     monkeypatch.setenv("DROPBOX_APP_SECRET", "secret_value")
     monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "token_value")
     
-    # We mock command line arguments targeting our target folder and file.
+    # We construct a functional array of input flags matching command line operations.
     with patch("sys.argv", ["script_name", "--folder", "simulators", "--filename", "output.zip"]):
-        # We explicitly configure the file checker to return True.
+        # We mock our checker method to simulate a found asset.
         mock_check.return_value = True
         
-        # We execute the orchestrator entry point.
+        # We run the application main orchestrator workflow.
         main()
         
-        # Forensic Audit: Verify that standard output received the correct CI/CD signal.
+        # We read the program output stream to confirm our positive target signal was logged.
         captured = capsys.readouterr()
         assert "state_status=found" in captured.out
 
@@ -173,23 +183,20 @@ def test_main_success_found(mock_check, mock_dbx, mock_tm, monkeypatch, capsys):
 @patch("src.io.state_manager.dropbox.Dropbox")
 @patch("src.io.state_manager.check_file_exists")
 def test_main_success_not_found(mock_check, mock_dbx, mock_tm, monkeypatch, capsys):
-    """
-    Narrative: Verify the execution path when the file does not exist.
-    The system must print 'state_status=not_found' to standard output (Line 56).
-    """
-    # We supply all mandatory credentials to fulfill the environment guard rails.
+    """Verify runtime signal production paths when target files are missing."""
+    # We assign credentials to fulfill security constraints.
     monkeypatch.setenv("DROPBOX_APP_KEY", "key_value")
     monkeypatch.setenv("DROPBOX_APP_SECRET", "secret_value")
     monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "token_value")
     
-    # We mock command line arguments targeting our target folder and file.
+    # We construct a functional array of input flags matching command line operations.
     with patch("sys.argv", ["script_name", "--folder", "simulators", "--filename", "output.zip"]):
-        # We explicitly configure the file checker to return False.
+        # We mock our checker method to simulate a missing asset.
         mock_check.return_value = False 
         
-        # We execute the orchestrator entry point.
+        # We run the application main orchestrator workflow.
         main()
         
-        # Forensic Audit: Verify that standard output received the correct CI/CD signal.
+        # We read the program output stream to confirm our negative target signal was logged.
         captured = capsys.readouterr()
         assert "state_status=not_found" in captured.out
