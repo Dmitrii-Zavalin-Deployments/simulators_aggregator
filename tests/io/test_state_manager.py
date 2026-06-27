@@ -1,7 +1,6 @@
 # tests/io/test_state_manager.py
 
 import os
-import sys
 import pytest
 from unittest.mock import MagicMock, patch
 import dropbox
