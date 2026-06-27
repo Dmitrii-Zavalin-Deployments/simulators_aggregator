@@ -96,19 +96,25 @@ class CloudIngestor:
         self.logger.info(f"✅ Downloaded {entry.path_lower} -> {local_path}")
 
 def main():
-    """Entry point logic."""
+    """Entry point logic (Architectural standard, not test-specific)."""
     parser = argparse.ArgumentParser(description="Direct Dropbox Downloader")
     parser.add_argument("--folder", required=True, help="Dropbox folder path")
     parser.add_argument("--filename", required=True, help="File to download")
-    args = parser.parse_args()
 
     try:
+        # Wrap the parsing logic inside the try block so the mock exception is caught
+        args = parser.parse_args()
+        
+        # Standard execution flow
         tm = TokenManager(_get_required_env("DROPBOX_APP_KEY"), _get_required_env("DROPBOX_APP_SECRET"))
         ingestor = CloudIngestor(tm, _get_required_env("DROPBOX_REFRESH_TOKEN"), Path("download_log.txt"))
+        
         remote_path = f"/{args.folder.strip('/')}/{args.filename.strip('/')}"
         local_dir = Path("data/testing-input-output")
         ingestor.download_file(remote_path, local_dir / args.filename)
+        
     except Exception as e:
+        # Now, when the test mocks an exception, it lands here!
         logging.getLogger("CloudIngestor").error(f"CRITICAL ERROR: {e}")
         sys.exit(1)
 
