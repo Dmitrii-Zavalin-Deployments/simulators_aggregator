@@ -82,12 +82,15 @@ def test_check_file_exists_not_found(mock_dbx):
 @patch("dropbox.Dropbox")
 def test_check_file_exists_other_error(mock_dbx):
     """
-    Narrative: Verify that unexpected API errors (e.g., Authentication issues)
+    Narrative: Verify that unexpected API errors (e.g., Auth issues)
     are re-raised rather than suppressed.
     """
-    # Setup: Mock a generic ApiError (is_path is False).
+    # Setup: Mock a generic ApiError
     mock_error = MagicMock()
-    mock_error.error.is_path.return_value = False
+    
+    # CRITICAL FIX: Explicitly set is_path to False
+    # Without this, the code thinks it's a "path not found" error and returns False.
+    mock_error.error.is_path.return_value = False 
     
     mock_dbx.files_get_metadata.side_effect = dropbox.exceptions.ApiError(
         request_id="123", 
@@ -99,7 +102,6 @@ def test_check_file_exists_other_error(mock_dbx):
     # Audit: We expect the error to bubble up.
     with pytest.raises(dropbox.exceptions.ApiError):
         check_file_exists(mock_dbx, "folder", "file.txt")
-
 
 # --- Main Orchestration Tests ---
 
