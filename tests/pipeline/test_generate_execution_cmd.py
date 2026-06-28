@@ -1,4 +1,6 @@
 import json
+import runpy
+import sys
 import logging
 import pytest
 from unittest.mock import patch
@@ -99,3 +101,48 @@ def test_main_empty_tasks(tmp_path, caplog, capsys):
     assert "no task profiles were configured" in caplog.text
     captured = capsys.readouterr()
     assert "📋 Notice" in captured.out
+
+def test_main_sorting_and_protocol_handling(tmp_path, caplog, capsys):
+    """
+    Narrative: Verify that multiple tasks are sorted by order and that 
+    URLs without 'git@github.com' are processed without modification.
+    """
+    caplog.set_level(logging.INFO)
+    
+    # 1. Setup: Two tasks, reversed order, one with non-git URL
+    state_file = tmp_path / "state.json"
+    data = {
+        "task_details": [
+            {"repository_url": "git@github.com:org/repo_B.git", "order": 2},
+            {"repository_url": "https://github.com/org/repo_A.git", "order": 1}
+        ]
+    }
+    state_file.write_text(json.dumps(data))
+    
+    # 2. Execution
+    with patch("sys.argv", ["script", "--state-file", str(state_file)]):
+        main()
+    
+    # 3. Assertions
+    captured = capsys.readouterr()
+    
+    # Verify sorting: Repo A (order 1) should appear before Repo B (order 2)
+    # Checking the echo sequence in the output
+    assert captured.out.find("repo_A") < captured.out.find("repo_B")
+    
+    # Verify non-replacement: 'https' should remain 'https' (no double replacement)
+    assert "https://github.com/org/repo_A" in captured.out
+
+
+def test_main_entry_point():
+    """
+    Narrative: Simulate execution of the main block to reach 100% coverage.
+    We patch argv and the function call to prevent actual system exit during testing.
+    """
+    test_args = ["script", "--state-file", "non_existent.json"]
+    
+    with patch.object(sys, 'argv', test_args):
+        # We catch SystemExit because main() calls sys.exit()
+        with pytest.raises(SystemExit):
+            # runpy executes the module as if it were the main script
+            runpy.run_path("src/pipeline/generate_execution_cmd.py")
