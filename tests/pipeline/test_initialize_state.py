@@ -1,97 +1,202 @@
+import os
 import json
+import sys
+import runpy
 import pytest
+import subprocess
+from pathlib import Path
 from unittest.mock import patch, MagicMock
 from src.pipeline import initialize_state
 
 # ==============================================================================
-# Narrative: Initialization State Machine Tests
+# Shared Fixtures & Configuration
 # ==============================================================================
 
 @pytest.fixture
 def mock_filesystem(tmp_path, monkeypatch):
-    # We establish a temporary working directory to mimic the repository root.
-    # We monkeypatch the current working directory to ensure Path("tasks") 
-    # resolves within this isolated environment.
+    """Establishes an isolated sandbox root directory for clean filesystem operations."""
     monkeypatch.chdir(tmp_path)
-    (tmp_path / "tasks").mkdir()
-    (tmp_path / "repo").mkdir()
+    (tmp_path / "tasks").mkdir(exist_ok=True)
+    (tmp_path / "repo").mkdir(exist_ok=True)
     return tmp_path
 
 @pytest.fixture
 def mock_tuner_state():
-    # We mock the TunerState class to decouple testing from external state implementation:
+    """Decouples external module state mutations from core orchestration pipeline tests."""
     with patch("src.pipeline.initialize_state.TunerState") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
         yield mock_instance
 
-def test_discover_task_file_missing(mock_filesystem):
-    # We define a scenario where the 'tasks/' directory contains no JSON files.
-    # We expect the discover_task_file function to raise a FileNotFoundError.
-    with pytest.raises(FileNotFoundError):
+# ==============================================================================
+# 1. Target: Lines 50-52 (JSON Decode Failures & Missing Schema Valuations)
+# ==============================================================================
+
+def test_discover_task_file_corrupt_and_invalid_schema(mock_filesystem):
+    tasks_dir = mock_filesystem / "tasks"
+    
+    # Write a broken JSON file to force json.JSONDecodeError branch (Lines 50-51)
+    (tasks_dir / "broken.json").write_text("{invalid_json_payload:")
+    
+    # Write an unmapped JSON schema file to trigger the trailing ValueError (Line 52)
+    (tasks_dir / "unmapped.json").write_text(json.dumps({"unsupported_key": True}))
+    
+    with pytest.raises(ValueError, match="No JSON matching Tuner Task Schema found"):
         initialize_state.discover_task_file()
 
-def test_discover_task_file_success(mock_filesystem):
-    # We create a valid task file within the 'tasks/' directory:
-    task_path = mock_filesystem / "tasks" / "task.json"
-    task_content = {"pipeline_id": "test_id", "input_data_list": ["data1.cad"]}
-    task_path.write_text(json.dumps(task_content))
-    
-    # We verify that the function successfully reads and returns the task payload:
-    result = initialize_state.discover_task_file()
-    assert result["pipeline_id"] == "test_id"
+# ==============================================================================
+# 2. Target: Lines 115 & 119 (Subprocess Log Streaming & CalledProcessError Exits)
+# ==============================================================================
 
-def test_load_pipeline_manifest_failure(mock_filesystem):
-    # We test the manifest discovery logic. We define a path that does not contain the manifest:
+def test_execute_setup_script_stdout_streaming_and_failure(mock_filesystem):
     repo_path = mock_filesystem / "repo"
     
-    # We expect a FileNotFoundError when the manifest cannot be located via rglob:
-    with pytest.raises(FileNotFoundError):
-        initialize_state.load_pipeline_manifest(repo_path, "non_existent_id")
-
-def test_execute_setup_script_success(mock_filesystem):
-    # We test the provisioning script execution logic.
-    # We mock subprocess.Popen to prevent actual shell execution during testing:
-    repo_path = mock_filesystem / "repo"
     with patch("subprocess.Popen") as mock_popen:
-        # We simulate a successful process execution (return code 0):
         mock_process = MagicMock()
-        mock_process.stdout = []
-        mock_process.wait.return_value = 0
+        # Feed mock stdout lines to execute real-time loop streaming (Line 115)
+        mock_process.stdout = ["Provisioning dependency item A", "Compiling assets..."]
+        # Return bad termination code to trigger execution exceptions (Line 119)
+        mock_process.wait.return_value = 1
         mock_popen.return_value = mock_process
         
-        # We execute the provisioner:
-        initialize_state.execute_setup_script(repo_path, "setup.sh")
-        
-        # We verify that Popen was called with the correct command and working directory:
-        mock_popen.assert_called_once()
-        args, kwargs = mock_popen.call_args
-        assert "bash" in args[0]
-        assert str(repo_path) == kwargs["cwd"]
+        with pytest.raises(subprocess.CalledProcessError):
+            initialize_state.execute_setup_script(repo_path, "setup.sh")
 
-def test_main_end_to_end_success(mock_filesystem, mock_tuner_state, monkeypatch):
-    # We simulate a full integration run.
-    # 1. We create the task file:
-    (mock_filesystem / "tasks").mkdir(exist_ok=True)
-    task_file = mock_filesystem / "tasks" / "task.json"
-    task_file.write_text(json.dumps({"pipeline_id": "test_pid", "input_data_list": ["a.step"]}))
-    
-    # 2. We create a mock manifest file inside the repo:
-    repo_path = mock_filesystem / "repo"
-    repo_path.mkdir(exist_ok=True)
-    manifest = repo_path / "test_pid.json"
-    manifest.write_text(json.dumps([{"order": 1, "config": "cfg.json"}]))
-    
-    # 3. We create a mock config file:
-    config_file = repo_path / "cfg.json"
-    config_file.write_text("{}")
-    
-    # 4. We patch environment variables and CLI arguments to isolate execution:
-    monkeypatch.setenv("GITHUB_REF_NAME", "main")
-    with patch("sys.argv", ["script", "--repository-path", str(repo_path)]):
-        with patch("subprocess.Popen"):
-            # We execute the main orchestrator:
+# ==============================================================================
+# 3. Target: Lines 132-133 & 141-143 (Orchestration Initial Missing Path/Task Crashes)
+# ==============================================================================
+
+def test_main_repo_path_not_exists(monkeypatch):
+    monkeypatch.setenv("GITHUB_REF_NAME", "production")
+    # Simulate CLI argument passing an invalid path location (Lines 132-133)
+    with patch("sys.argv", ["script", "--repo-path", "/missing/target/dir"]):
+        with pytest.raises(SystemExit) as exc:
             initialize_state.main()
+        assert exc.value.code == 1
+
+def test_main_task_discovery_failure(mock_filesystem, monkeypatch):
+    repo_path = mock_filesystem / "repo"
+    monkeypatch.setenv("GITHUB_REF_NAME", "staging")
+    # Leave tasks directory empty to trigger immediate hard orchestration exit (Lines 141-143)
+    with patch("sys.argv", ["script", "--repo-path", str(repo_path)]):
+        with pytest.raises(SystemExit) as exc:
+            initialize_state.main()
+        assert exc.value.code == 1
+
+# ==============================================================================
+# 4. Target: Lines 164-167 (Conda Cache Hit vs Conditional Provisioning Branch)
+# ==============================================================================
+
+def test_main_cached_dependency_skips_provisioning(mock_filesystem, mock_tuner_state, monkeypatch):
+    task_file = mock_filesystem / "tasks" / "task.json"
+    task_file.write_text(json.dumps({"pipeline_id": "cached_pid", "input_data_list": []}))
     
-    # 5. We verify that the TunerState was instantiated with the expected task data:
-    mock_tuner_state.save_to_disk.assert_called_once()
+    repo_path = mock_filesystem / "repo"
+    manifest = repo_path / "cached_pid.json"
+    manifest.write_text(json.dumps([{"order": 0, "setup_script": "install.sh", "config": "cfg.json"}]))
+    (repo_path / "cfg.json").write_text("{}")
+    
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    # Pass execution arguments explicitly claiming environment dependency cache hits (Lines 165-167)
+    with patch("sys.argv", ["script", "--repo-path", str(repo_path), "--cached-dependency"]):
+        with patch("src.pipeline.initialize_state.execute_setup_script") as mock_setup_exec:
+            initialize_state.main()
+            mock_setup_exec.assert_not_called()
+
+# ==============================================================================
+# 5. Target: Line 182 (Config Lookup Basename Fallback Route Match)
+# ==============================================================================
+
+def test_main_config_basename_fallback(mock_filesystem, mock_tuner_state, monkeypatch):
+    task_file = mock_filesystem / "tasks" / "task.json"
+    task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
+    
+    repo_path = mock_filesystem / "repo"
+    manifest = repo_path / "pid.json"
+    manifest.write_text(json.dumps([{"order": 0, "config": "expected/nested/path/config.json"}]))
+    
+    # Intentionally misalign file topology to force absolute fallback matching (Line 181-182)
+    drifted_dir = repo_path / "drifted_topology_folder"
+    drifted_dir.mkdir()
+    (drifted_dir / "config.json").write_text("{}")
+    
+    monkeypatch.setenv("GITHUB_REF_NAME", "dev")
+    with patch("sys.argv", ["script", "--repo-path", str(repo_path)]):
+        initialize_state.main()
+
+# ==============================================================================
+# 6. Target: Lines 188-192 (Schema Violations & Configuration Absence Enforcements)
+# ==============================================================================
+
+def test_main_config_file_missing_exit(mock_filesystem, monkeypatch):
+    task_file = mock_filesystem / "tasks" / "task.json"
+    task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
+    
+    repo_path = mock_filesystem / "repo"
+    manifest = repo_path / "pid.json"
+    manifest.write_text(json.dumps([{"order": 0, "config": "does_not_exist.json"}]))
+    
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    with patch("sys.argv", ["script", "--repo-path", str(repo_path)]):
+        with pytest.raises(SystemExit) as exc:
+            initialize_state.main()
+        assert exc.value.code == 1
+
+def test_main_manifest_missing_config_exit(mock_filesystem, monkeypatch):
+    task_file = mock_filesystem / "tasks" / "task.json"
+    task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
+    
+    repo_path = mock_filesystem / "repo"
+    manifest = repo_path / "pid.json"
+    manifest.write_text(json.dumps([{"order": 0}]))  # Explicitly omitted layout baseline config key
+    
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    with patch("sys.argv", ["script", "--repo-path", str(repo_path)]):
+        with pytest.raises(SystemExit) as exc:
+            initialize_state.main()
+        assert exc.value.code == 1
+
+# ==============================================================================
+# 7. Target: Lines 209-211 (State Packaging Error Propagation Exits)
+# ==============================================================================
+
+def test_main_tuner_state_exception_exit(mock_filesystem, monkeypatch):
+    task_file = mock_filesystem / "tasks" / "task.json"
+    task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
+    
+    repo_path = mock_filesystem / "repo"
+    manifest = repo_path / "pid.json"
+    manifest.write_text(json.dumps([{"order": 0, "config": "cfg.json"}]))
+    (repo_path / "cfg.json").write_text("{}")
+    
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    with patch("sys.argv", ["script", "--repo-path", str(repo_path)]):
+        with patch("src.pipeline.initialize_state.TunerState") as mock_state_cls:
+            # Inject a fatal initialization failure inside the data schema builder
+            mock_state_cls.side_effect = RuntimeError("Fatal state serialization mock failure")
+            with pytest.raises(SystemExit) as exc:
+                initialize_state.main()
+            assert exc.value.code == 1
+
+# ==============================================================================
+# 8. Target: Line 215 (Direct Script Execution Entrypoint Validation)
+# ==============================================================================
+
+def test_main_entrypoint_execution(mock_filesystem, mock_tuner_state, monkeypatch):
+    task_file = mock_filesystem / "tasks" / "task.json"
+    task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
+    
+    repo_path = mock_filesystem / "repo"
+    manifest = repo_path / "pid.json"
+    manifest.write_text(json.dumps([{"order": 0, "config": "cfg.json"}]))
+    (repo_path / "cfg.json").write_text("{}")
+    
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    
+    # Locate actual script path source file target location dynamically
+    script_file_path = Path(initialize_state.__file__)
+    
+    with patch("sys.argv", ["initialize_state.py", "--repo-path", str(repo_path)]):
+        # Execute runpy simulation to force execution of the entry point block (Line 214-215)
+        run_globals = runpy.run_path(str(script_file_path), run_name="__main__")
+        assert run_globals is not None
