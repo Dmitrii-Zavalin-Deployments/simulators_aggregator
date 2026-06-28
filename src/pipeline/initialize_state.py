@@ -68,7 +68,8 @@ def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
 
 def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
     """Finds and parses the target JSON manifest recursively within the Library."""
-    search_pattern = pipeline_id
+    # Added wildcard matching here to allow catching files with suffixes/extensions (e.g., 'test_pid.json')
+    search_pattern = f"{pipeline_id}*"
     manifest_matches = list(repo_path.rglob(search_pattern))
     
     if not manifest_matches:
