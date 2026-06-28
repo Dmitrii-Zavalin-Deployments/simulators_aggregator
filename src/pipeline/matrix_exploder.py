@@ -78,5 +78,5 @@ def main():
     logger.info(f"✅ Success: Generated {len(flat_combinations)} permutations.")
     logger.info(f"💾 Output saved to: {args.output_path}")
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
