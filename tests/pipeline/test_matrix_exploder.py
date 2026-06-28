@@ -23,8 +23,8 @@ def test_explode_dict_recursion():
     result = matrix_exploder.explode_dict(input_map)
     
     assert len(result) == 4
-    assert {"x": 1, "y": 10} in result
-    assert {"x": 2, "y": 20} in result
+    assert {"x": 1, "params": {"y": 10}} in result
+    assert {"x": 2, "params": {"y": 20}} in result
 
 # ==============================================================================
 # 2. Main Orchestrator: Failure Modes & Logging
@@ -95,5 +95,5 @@ def test_main_success_path(tmp_path, caplog):
         data = json.load(f)
         assert len(data) == 4
         # Verify the cross-product logic was applied correctly
-        assert {"learning_rate": 0.01, "width": 10} in data
-        assert {"learning_rate": 0.001, "width": 20} in data
+        assert {"learning_rate": 0.01, "boundary_map": {"width": 10}} in data
+        assert {"learning_rate": 0.001, "boundary_map": {"width": 20}} in data
