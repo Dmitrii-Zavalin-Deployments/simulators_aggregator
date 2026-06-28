@@ -1,6 +1,5 @@
 import json
 import pytest
-import os
 from src.state.tuner_state import TunerState
 
 # ==============================================================================
