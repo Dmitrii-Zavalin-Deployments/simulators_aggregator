@@ -7,53 +7,59 @@ from unittest.mock import patch, MagicMock
 from src.pipeline import initialize_state
 
 # ==============================================================================
-# Shared Fixtures & Configuration
+# Infrastructure & Fixtures
 # ==============================================================================
 
+# We establish an isolated sandbox root directory for clean filesystem operations
+# to ensure that tests do not interfere with the host system.
 @pytest.fixture
 def mock_filesystem(tmp_path, monkeypatch):
-    """Establishes an isolated sandbox root directory for clean filesystem operations."""
     monkeypatch.chdir(tmp_path)
     (tmp_path / "tasks").mkdir(exist_ok=True)
     (tmp_path / "repo").mkdir(exist_ok=True)
     return tmp_path
 
+# To test the orchestration logic, we must decouple the initialization of the 
+# TunerState container, replacing complex external state mutations with a 
+# controllable MagicMock.
 @pytest.fixture
 def mock_tuner_state():
-    """Decouples external module state mutations from core orchestration pipeline tests."""
     with patch("src.pipeline.initialize_state.TunerState") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
         yield mock_instance
 
 # ==============================================================================
-# 1. Target: Lines 50-52 (JSON Decode Failures & Missing Schema Valuations)
+# Task Discovery & Schema Validation
 # ==============================================================================
 
+# We verify that the task discovery logic handles malformed data gracefully.
+# If a file contains invalid JSON, the parser must catch the decoder error.
+# If files exist but do not match the expected schema, the system must 
+# raise a ValueError to halt processing.
 def test_discover_task_file_corrupt_and_invalid_schema(mock_filesystem):
     tasks_dir = mock_filesystem / "tasks"
     
-    # Write a broken JSON file to force json.JSONDecodeError branch (Lines 50-51)
     (tasks_dir / "broken.json").write_text("{invalid_json_payload:")
-    
-    # Write an unmapped JSON schema file to trigger the trailing ValueError (Line 52)
     (tasks_dir / "unmapped.json").write_text(json.dumps({"unsupported_key": True}))
     
     with pytest.raises(ValueError, match="No JSON matching Tuner Task Schema found"):
         initialize_state.discover_task_file()
 
 # ==============================================================================
-# 2. Target: Lines 115 & 119 (Subprocess Log Streaming & CalledProcessError Exits)
+# Subprocess Orchestration
 # ==============================================================================
 
+# During the provisioning phase, the system uses subprocess to execute bash scripts.
+# We must ensure that output is correctly streamed for logs and that non-zero
+# exit codes correctly trigger a CalledProcessError, preventing the pipeline 
+# from continuing in a broken state.
 def test_execute_setup_script_stdout_streaming_and_failure(mock_filesystem):
     repo_path = mock_filesystem / "repo"
     
     with patch("subprocess.Popen") as mock_popen:
         mock_process = MagicMock()
-        # Feed mock stdout lines to execute real-time loop streaming (Line 115)
         mock_process.stdout = ["Provisioning dependency item A", "Compiling assets..."]
-        # Return bad termination code to trigger execution exceptions (Line 119)
         mock_process.wait.return_value = 1
         mock_popen.return_value = mock_process
         
@@ -61,12 +67,14 @@ def test_execute_setup_script_stdout_streaming_and_failure(mock_filesystem):
             initialize_state.execute_setup_script(repo_path, "setup.sh")
 
 # ==============================================================================
-# 3. Target: Lines 132-133 & 141-143 (Orchestration Initial Missing Path/Task Crashes)
+# Main Orchestrator Integrity
 # ==============================================================================
 
+# The entry point must enforce strict environment validation. 
+# If the provided repository path does not exist, or if the system cannot locate 
+# any valid tasks to initialize, the main process must terminate with a system exit code of 1.
 def test_main_repo_path_not_exists(monkeypatch):
     monkeypatch.setenv("GITHUB_REF_NAME", "production")
-    # Simulate CLI argument passing an invalid path location (Lines 132-133)
     with patch("sys.argv", ["script", "--repo-path", "/missing/target/dir"]):
         with pytest.raises(SystemExit) as exc:
             initialize_state.main()
@@ -75,16 +83,18 @@ def test_main_repo_path_not_exists(monkeypatch):
 def test_main_task_discovery_failure(mock_filesystem, monkeypatch):
     repo_path = mock_filesystem / "repo"
     monkeypatch.setenv("GITHUB_REF_NAME", "staging")
-    # Leave tasks directory empty to trigger immediate hard orchestration exit (Lines 141-143)
     with patch("sys.argv", ["script", "--repo-path", str(repo_path)]):
         with pytest.raises(SystemExit) as exc:
             initialize_state.main()
         assert exc.value.code == 1
 
 # ==============================================================================
-# 4. Target: Lines 164-167 (Conda Cache Hit vs Conditional Provisioning Branch)
+# Conditional Logic & Caching
 # ==============================================================================
 
+# When the dependency cache is flagged as active (cached_dependency=True), 
+# the pipeline optimization should bypass provisioning scripts. We assert that
+# the setup function is never called when the cache is hit.
 def test_main_cached_dependency_skips_provisioning(mock_filesystem, mock_tuner_state, monkeypatch):
     task_file = mock_filesystem / "tasks" / "task.json"
     task_file.write_text(json.dumps({"pipeline_id": "cached_pid", "input_data_list": []}))
@@ -95,16 +105,18 @@ def test_main_cached_dependency_skips_provisioning(mock_filesystem, mock_tuner_s
     (repo_path / "cfg.json").write_text("{}")
     
     monkeypatch.setenv("GITHUB_REF_NAME", "main")
-    # Pass execution arguments explicitly claiming environment dependency cache hits (Lines 165-167)
     with patch("sys.argv", ["script", "--repo-path", str(repo_path), "--cached-dependency"]):
         with patch("src.pipeline.initialize_state.execute_setup_script") as mock_setup_exec:
             initialize_state.main()
             mock_setup_exec.assert_not_called()
 
 # ==============================================================================
-# 5. Target: Line 182 (Config Lookup Basename Fallback Route Match)
+# Manifest & Configuration Lookups
 # ==============================================================================
 
+# If a configuration file is missing from its expected path, the system performs 
+# an automatic fallback search using the filename. We simulate a drifted topology
+# to verify this fallback succeeds.
 def test_main_config_basename_fallback(mock_filesystem, mock_tuner_state, monkeypatch):
     task_file = mock_filesystem / "tasks" / "task.json"
     task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
@@ -113,7 +125,6 @@ def test_main_config_basename_fallback(mock_filesystem, mock_tuner_state, monkey
     manifest = repo_path / "pid.json"
     manifest.write_text(json.dumps([{"order": 0, "config": "expected/nested/path/config.json"}]))
     
-    # Intentionally misalign file topology to force absolute fallback matching (Line 181-182)
     drifted_dir = repo_path / "drifted_topology_folder"
     drifted_dir.mkdir()
     (drifted_dir / "config.json").write_text("{}")
@@ -122,10 +133,9 @@ def test_main_config_basename_fallback(mock_filesystem, mock_tuner_state, monkey
     with patch("sys.argv", ["script", "--repo-path", str(repo_path)]):
         initialize_state.main()
 
-# ==============================================================================
-# 6. Target: Lines 188-192 (Schema Violations & Configuration Absence Enforcements)
-# ==============================================================================
-
+# When the manifest points to a configuration file that cannot be found 
+# even after fallback, or if the manifest lacks the baseline configuration key,
+# the system must protect the integrity of the run by forcing a SystemExit.
 def test_main_config_file_missing_exit(mock_filesystem, monkeypatch):
     task_file = mock_filesystem / "tasks" / "task.json"
     task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
@@ -146,7 +156,7 @@ def test_main_manifest_missing_config_exit(mock_filesystem, monkeypatch):
     
     repo_path = mock_filesystem / "repo"
     manifest = repo_path / "pid.json"
-    manifest.write_text(json.dumps([{"order": 0}]))  # Explicitly omitted layout baseline config key
+    manifest.write_text(json.dumps([{"order": 0}]))
     
     monkeypatch.setenv("GITHUB_REF_NAME", "main")
     with patch("sys.argv", ["script", "--repo-path", str(repo_path)]):
@@ -155,9 +165,12 @@ def test_main_manifest_missing_config_exit(mock_filesystem, monkeypatch):
         assert exc.value.code == 1
 
 # ==============================================================================
-# 7. Target: Lines 209-211 (State Packaging Error Propagation Exits)
+# Exception Propagation
 # ==============================================================================
 
+# Any failure during the instantiation of the Sovereign State container should 
+# be caught. We simulate a RuntimeError to ensure the orchestrator exits cleanly 
+# rather than propagating the crash to the parent shell.
 def test_main_tuner_state_exception_exit(mock_filesystem, monkeypatch):
     task_file = mock_filesystem / "tasks" / "task.json"
     task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
@@ -170,16 +183,18 @@ def test_main_tuner_state_exception_exit(mock_filesystem, monkeypatch):
     monkeypatch.setenv("GITHUB_REF_NAME", "main")
     with patch("sys.argv", ["script", "--repo-path", str(repo_path)]):
         with patch("src.pipeline.initialize_state.TunerState") as mock_state_cls:
-            # Inject a fatal initialization failure inside the data schema builder
             mock_state_cls.side_effect = RuntimeError("Fatal state serialization mock failure")
             with pytest.raises(SystemExit) as exc:
                 initialize_state.main()
             assert exc.value.code == 1
 
 # ==============================================================================
-# 8. Target: Line 215 (Direct Script Execution Entrypoint Validation)
+# Entrypoint Execution
 # ==============================================================================
 
+# Finally, we confirm the module can be executed directly. By using runpy, 
+# we simulate a shell call to 'python initialize_state.py', ensuring the
+# __name__ == "__main__" block triggers the main logic.
 def test_main_entrypoint_execution(mock_filesystem, mock_tuner_state, monkeypatch):
     task_file = mock_filesystem / "tasks" / "task.json"
     task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
@@ -190,22 +205,20 @@ def test_main_entrypoint_execution(mock_filesystem, mock_tuner_state, monkeypatc
     (repo_path / "cfg.json").write_text("{}")
     
     monkeypatch.setenv("GITHUB_REF_NAME", "main")
-    
-    # Locate actual script path source file target location dynamically
     script_file_path = Path(initialize_state.__file__)
     
     with patch("sys.argv", ["initialize_state.py", "--repo-path", str(repo_path)]):
-        # Execute runpy simulation to force execution of the entry point block (Line 214-215)
         run_globals = runpy.run_path(str(script_file_path), run_name="__main__")
         assert run_globals is not None
 
-
 # ==============================================================================
-# 9. Target: Lines 63-66 (fetch_inputs_from_dropbox Loop)
+# Utility & Coverage Completion
 # ==============================================================================
 
+# We verify the data ingestion layer. When provided a list of input files, the system 
+# must create these files locally in the target workspace, writing standard mock 
+# data to confirm accessibility.
 def test_fetch_inputs_from_dropbox_writes_files(mock_filesystem):
-    """Verifies that input files are actually created in the target directory."""
     input_list = ["test_a.cad", "test_b.step"]
     target_dir = mock_filesystem / "downloads"
     
@@ -215,49 +228,34 @@ def test_fetch_inputs_from_dropbox_writes_files(mock_filesystem):
         assert (target_dir / filename).exists(), f"{filename} was not created"
         assert (target_dir / filename).read_text() == "Mock CAD/Step Data"
 
-# ==============================================================================
-# 10. Target: Lines 76-90 (load_pipeline_manifest Error Handling)
-# ==============================================================================
-
+# When a manifest search fails, we must trigger the specific error logging path, 
+# ensuring the user receives helpful feedback regarding the missing file.
 def test_load_pipeline_manifest_raises_error_when_missing(mock_filesystem):
-    """Triggers the error logging and FileNotFoundError when manifest pattern is empty."""
     repo_path = mock_filesystem / "repo"
-    
-    # We purposefully do not create any file matching the pattern
     with pytest.raises(FileNotFoundError, match="not found"):
         initialize_state.load_pipeline_manifest(repo_path, "missing_pid")
 
-# ==============================================================================
-# 11. Target: Line 121 (execute_setup_script Success Log)
-# ==============================================================================
-
+# We assert that the success logger is invoked when a provisioning script finishes 
+# with a clean return code (0).
 def test_execute_setup_script_success_path(mock_filesystem):
-    """Triggers line 121 by simulating a successful subprocess exit (return code 0)."""
     repo_path = mock_filesystem / "repo"
-    # Create dummy shell script
     script = repo_path / "test_success.sh"
     script.write_text("#!/bin/bash\necho 'done'")
     
     with patch("subprocess.Popen") as mock_popen:
         mock_process = MagicMock()
-        # Mock stdout iterable and return code 0
         mock_process.stdout = ["line1"]
         mock_process.wait.return_value = 0
         mock_popen.return_value = mock_process
         
         initialize_state.execute_setup_script(repo_path, "test_success.sh")
-        # Line 121 (logger.info) is executed here
 
-# ==============================================================================
-# 12. Target: Line 165 (main Provisioning Execution)
-# ==============================================================================
-
+# Finally, we confirm that when the dependency cache is empty, the provisioning 
+# script is correctly executed, ensuring our environment setup logic is functional.
 def test_main_executes_provisioning_when_not_cached(mock_filesystem, monkeypatch, mock_tuner_state):
-    """Triggers line 165 by ensuring cached_dependency is False."""
     repo_path = mock_filesystem / "repo"
     repo_path.mkdir(exist_ok=True)
     
-    # Setup: Task file and Manifest with a setup script
     (mock_filesystem / "tasks").mkdir(exist_ok=True)
     (mock_filesystem / "tasks" / "t.json").write_text(json.dumps({"pipeline_id": "p1", "input_data_list": []}))
     (repo_path / "p1.json").write_text(json.dumps([{"order": 1, "setup_script": "run.sh", "config": "c.json"}]))
@@ -265,8 +263,7 @@ def test_main_executes_provisioning_when_not_cached(mock_filesystem, monkeypatch
     
     monkeypatch.setenv("GITHUB_REF_NAME", "test")
     
-    # Mock CLI args with cached_dependency=False (default behavior)
     with patch("sys.argv", ["main.py", "--repo-path", str(repo_path)]):
         with patch("src.pipeline.initialize_state.execute_setup_script") as mock_exec:
             initialize_state.main()
-            mock_exec.assert_called_once() # Line 165 hit here
+            mock_exec.assert_called_once()
