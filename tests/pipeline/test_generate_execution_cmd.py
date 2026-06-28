@@ -71,7 +71,11 @@ def test_main_valid_execution(tmp_path, caplog, capsys):
     
     # 3. Assertions
     captured = capsys.readouterr()
-    assert "https://github.com/user/sim" in captured.out
+    
+    # Verify the local execution path (replacing the URL assertion)
+    assert 'repositories/sim/src/main.py' in captured.out
+    
+    # Verify the logging message
     assert "Adding task for repository: sim" in caplog.text
 
 
