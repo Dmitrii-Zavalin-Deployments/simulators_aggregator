@@ -1,6 +1,4 @@
-import os
 import json
-import sys
 import runpy
 import pytest
 import subprocess
