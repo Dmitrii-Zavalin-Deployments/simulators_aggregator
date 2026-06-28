@@ -22,20 +22,17 @@ def sandbox_environment(monkeypatch, tmp_path):
 
 def test_main_dormant_state(tmp_path, caplog, capsys):
     """
-    Narrative: Verify that when a 'dormant.flag' file exists in the context directory, 
-    the script gracefully exits with shutdown commands.
+    Narrative: Verify that when a 'dormant.flag' file exists, the script
+    gracefully exits with shutdown commands.
     """
-    # 1. Setup: Create localized dormant flag and force INFO level logging
     dormant_file = tmp_path / "dormant.flag"
     dormant_file.write_text("STATUS: DORMANT")
     caplog.set_level(logging.INFO)
     
-    # 2. Execution
     with patch("sys.argv", ["script", "--state-file", "dummy.json"]):
         with pytest.raises(SystemExit) as e:
             main()
         
-    # 3. Assertions
     assert e.value.code == 0
     assert "Pipeline state is DORMANT" in caplog.text
     captured = capsys.readouterr()
@@ -66,7 +63,6 @@ def test_main_valid_execution(tmp_path, caplog, capsys):
     """
     caplog.set_level(logging.INFO)
     
-    # 1. Setup: Create a valid JSON state
     state_file = tmp_path / "state.json"
     data = {
         "task_details": [
@@ -75,11 +71,9 @@ def test_main_valid_execution(tmp_path, caplog, capsys):
     }
     state_file.write_text(json.dumps(data))
     
-    # 2. Execution
     with patch("sys.argv", ["script", "--state-file", str(state_file)]):
         main()
     
-    # 3. Assertions
     captured = capsys.readouterr()
     
     # Verify the local execution path (replacing the URL assertion)
@@ -95,16 +89,13 @@ def test_main_empty_tasks(tmp_path, caplog, capsys):
     """
     caplog.set_level(logging.INFO)
     
-    # 1. Setup: Create JSON with empty list
     state_file = tmp_path / "state.json"
     state_file.write_text(json.dumps({"task_details": []}))
     
-    # 2. Execution
     with patch("sys.argv", ["script", "--state-file", str(state_file)]):
         with pytest.raises(SystemExit) as e:
             main()
             
-    # 3. Assertions
     assert e.value.code == 0
     assert "no task profiles were configured" in caplog.text
     captured = capsys.readouterr()
@@ -113,12 +104,10 @@ def test_main_empty_tasks(tmp_path, caplog, capsys):
 
 def test_main_sorting_and_protocol_handling(tmp_path, caplog, capsys):
     """
-    Narrative: Verify that multiple tasks are sorted by order and that 
-    URLs without 'git@github.com' are processed without modification.
+    Narrative: Verify sorting order and correct normalization of repository paths.
     """
     caplog.set_level(logging.INFO)
     
-    # 1. Setup: Two tasks, reversed order, one with non-git URL
     state_file = tmp_path / "state.json"
     data = {
         "task_details": [
@@ -128,31 +117,32 @@ def test_main_sorting_and_protocol_handling(tmp_path, caplog, capsys):
     }
     state_file.write_text(json.dumps(data))
     
-    # 2. Execution
     with patch("sys.argv", ["script", "--state-file", str(state_file)]):
         main()
     
-    # 3. Assertions
     captured = capsys.readouterr()
     
     # Verify sorting: Repo A (order 1) should appear before Repo B (order 2)
     assert captured.out.find("repo_A") < captured.out.find("repo_B")
     
-    # Verify non-replacement: 'https' should remain 'https'
-    assert "https://github.com/org/repo_A" in captured.out
+    # Asserting local path normalization (not the original URL)
+    assert "repositories/repo_A/src/main.py" in captured.out
 
 
 def test_main_entry_point():
     """
-    Narrative: Simulate execution of the main block to reach 100% coverage.
-    Explicitly provides `run_name="__main__"` to simulate standard module execution.
+    Narrative: Simulate execution of the main block using absolute pathing.
     """
+    # Calculate absolute path to the production script
+    test_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(os.path.dirname(test_dir))
+    script_path = os.path.join(project_root, "src", "pipeline", "generate_execution_cmd.py")
+    
     test_args = ["script", "--state-file", "non_existent.json"]
     
     with patch.object(sys, 'argv', test_args):
         with pytest.raises(SystemExit) as e:
-            # Setting run_name explicitly ensures the __name__ == "__main__" check evaluates to True
-            runpy.run_path("src/pipeline/generate_execution_cmd.py", run_name="__main__")
+            # Execute using the resolved absolute path
+            runpy.run_path(script_path, run_name="__main__")
             
-    # In a clean sandbox folder without a flag or file, the production script returns exit code 1
     assert e.value.code == 1
