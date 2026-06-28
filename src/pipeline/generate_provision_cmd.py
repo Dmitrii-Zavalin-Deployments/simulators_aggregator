@@ -3,6 +3,15 @@ import json
 import os
 import sys
 import argparse
+import logging
+
+# Configure logging to write to stderr so it doesn't pollute the command stream
+logger = logging.getLogger("provision_generator")
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s: %(message)s',
+    stream=sys.stderr
+)
 
 def main():
     parser = argparse.ArgumentParser(description="Generate repository provisioning commands")
@@ -10,32 +19,40 @@ def main():
     parser.add_argument("--cached-dependency", action="store_true", help="Pass cache hit flag to initializers")
     args = parser.parse_args()
 
+    logger.info(f"🚀 Initializing provisioning for state file: {args.state_file}")
+
     if not os.path.exists(args.state_file):
-        print(f"echo '❌ ERROR: State file {args.state_file} not located.'; exit 1")
+        error_msg = f"❌ ERROR: State file {args.state_file} not located."
+        logger.error(error_msg)
+        print(f"echo '{error_msg}'; exit 1")
         sys.exit(1)
 
     base_dir = os.path.dirname(os.path.abspath(args.state_file))
     combinations_path = os.path.join(base_dir, "config_combinations_array.json")
     
     if not os.path.exists(combinations_path):
-        print(f"echo '❌ ERROR: Matrix file missing at {combinations_path}'; exit 1")
+        error_msg = f"❌ ERROR: Matrix file missing at {combinations_path}"
+        logger.error(error_msg)
+        print(f"echo '{error_msg}'; exit 1")
         sys.exit(1)
 
     with open(combinations_path, "r") as f:
         combinations = json.load(f)
+        logger.info(f"📊 Loaded {len(combinations)} configuration variations.")
 
-    # 🔄 NEW CONDITION: Handle completed matrix gracefully
     if not combinations or not isinstance(combinations, list) or len(combinations) == 0:
+        logger.warning("🏁 All configuration variations exhausted.")
         shutdown_commands = [
             "echo '🏁 Notice: All configuration variations have been completely exhausted.'",
             "echo 'STATUS: DORMANT' > dormant.flag",
             "echo '✅ Successfully set pipeline state to DORMANT inside dormant.flag.'"
         ]
         print(" && ".join(shutdown_commands))
-        sys.exit(0)  # Exit 0 so the GitHub Action step succeeds gracefully
+        sys.exit(0)
 
-    # 🎯 KEY REQUIREMENT STEP: Pop exactly ONE variant for ALL repositories
+    # Pop exactly ONE variant
     current_runtime_config = combinations.pop(0)
+    logger.info("📦 Popped next configuration variant for deployment.")
 
     # Save this single source of truth temporarily
     config_temp_dir = os.path.join(base_dir, "config")
@@ -74,8 +91,9 @@ def main():
         
         target_config_json = f"{repo_dir}/config/config.json"
         staged_configs.append(target_config_json)
+        
+        logger.info(f"🔧 Staging task for repository: {repo_name}")
 
-        # Ensure there is no trailing '&&' and the string is properly formed
         cmd = (
             f"echo '📥 Cloning target simulator repository: {repo_name}...'; "
             f"if [ -d '{repo_dir}' ]; then rm -rf '{repo_dir}'; fi; "
@@ -115,6 +133,7 @@ def main():
     commands.append(verify_script)
 
     print(" && ".join(commands))
+    logger.info("✅ Generation complete. Command chain ready.")
 
 if __name__ == "__main__":
     main()
