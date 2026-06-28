@@ -153,36 +153,44 @@ jobs:
       - name: 🚀 Commit & Push Hygiene Changes + Sync Notes
         if: always()
         run: |
-          # 1. Stash any changes created by autoflake/ruff
-          # We use || true because git stash fails if there are no changes
-          git stash || true
+          # 1. Check if there are local changes to save
+          # We check this at the start so we know if we need to use stash/pop
+          HAS_CHANGES=$(git status --porcelain)
+
+          # 2. Stash ONLY if there are changes
+          if [ -n "$HAS_CHANGES" ]; then
+            git stash
+          fi
           
-          # 2. Fetch and Rebase to get current remote state
+          # 3. Fetch and Rebase
           git fetch origin
+          # We rebase regardless, so we stay up to date
           git rebase origin/${GITHUB_REF_NAME} || {
             echo "⚠️ Conflict during rebase. Aborting."
+            # If we stashed changes, we must pop them back before aborting
+            if [ -n "$HAS_CHANGES" ]; then git stash pop; fi
             git rebase --abort
             exit 1
           }
 
-          # 3. Apply the hygiene changes back
-          # If stash pop has conflicts, we exit safely instead of pushing a corrupted state
-          git stash pop || {
-            echo "⚠️ Conflict during stash pop. Manual intervention required."
-            exit 1
-          }
+          # 4. Apply the hygiene changes back ONLY if we stashed them
+          if [ -n "$HAS_CHANGES" ]; then
+            git stash pop || {
+              echo "⚠️ Conflict during stash pop. Manual intervention required."
+              exit 1
+            }
+          fi
 
-          # 4. Perform the commit
-          git add .
+          # 5. Perform the commit (only if there are changes after the rebase)
           if [ -n "$(git status --porcelain)" ]; then
             git commit -m "🤖 robot: auto-clean hygiene update [Engine]"
             TARGET_COMMIT=$(git rev-parse HEAD)
 
-            # 5. Sync notes
+            # 6. Sync notes
             git fetch origin refs/notes/commits:refs/notes/commits || true
             git notes add -f -m "robot: true" "$TARGET_COMMIT"
 
-            # 6. Push
+            # 7. Push
             git push origin HEAD
             git push --force origin refs/notes/commits
           else
