@@ -1,9 +1,3 @@
-<<<<<<< Updated upstream
-=======
-# tests/pipeline/test_generate_execution_cmd.py
-
-import os
->>>>>>> Stashed changes
 import json
 import logging
 import pytest
