@@ -13,9 +13,10 @@ def setup_logging():
     )
     return logging.getLogger("pipeline_generator")
 
-logger = setup_logging()
-
 def main():
+    # logger initialized inside main to ensure capture by pytest fixtures
+    logger = setup_logging() 
+
     parser = argparse.ArgumentParser(description="Generate repository execution commands")
     parser.add_argument("--state-file", required=True, help="Path to the state.json file")
     args = parser.parse_args()
