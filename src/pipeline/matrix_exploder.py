@@ -3,6 +3,16 @@ import argparse
 import json
 import itertools
 import os
+import logging
+import sys
+
+# Configure logging to output to stdout (ideal for GitHub Actions console)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger("MatrixExploder")
 
 def explode_dict(target_dict):
     """Recursively computes the Cartesian product of a dictionary containing lists."""
@@ -33,11 +43,19 @@ def main():
     parser.add_argument("--output-path", required=True, help="Target destination for output array")
     args = parser.parse_args()
 
-    if not os.path.exists(args.config_path):
-        raise FileNotFoundError(f"Source configuration file not found at: {args.config_path}")
+    logger.info(f"🚀 Initializing Matrix Exploder. Reading: {args.config_path}")
 
-    with open(args.config_path, "r") as f:
-        raw_config = json.load(f)
+    if not os.path.exists(args.config_path):
+        error_msg = f"❌ Configuration file not found: {args.config_path}"
+        logger.error(error_msg)
+        sys.exit(1)
+
+    try:
+        with open(args.config_path, "r") as f:
+            raw_config = json.load(f)
+    except json.JSONDecodeError as e:
+        logger.error(f"❌ Failed to parse JSON: {e}")
+        sys.exit(1)
 
     keys, values = [], []
     for k, v in raw_config.items():
@@ -57,7 +75,8 @@ def main():
     with open(args.output_path, "w") as f:
         json.dump(flat_combinations, f, indent=4)
         
-    print(f"✅ Matrix exploder completed. Saved {len(flat_combinations)} unique entries to {args.output_path}")
+    logger.info(f"✅ Success: Generated {len(flat_combinations)} permutations.")
+    logger.info(f"💾 Output saved to: {args.output_path}")
 
 if __name__ == "__main__":
     main()
