@@ -89,3 +89,30 @@ def test_main_failure_path(tmp_path, caplog):
         data = json.load(f)
         assert data["status"] == "failed"
         assert data["error_log"] == "CRITICAL ERROR: Simulation crashed"
+
+# Scenario: The simulator reported a failure, but the expected log file is missing.
+# This covers the critical error branch at line 52 where the system logs that 
+# the log file could not be found.
+def test_main_failure_missing_log_file(tmp_path, caplog):
+    # Setup necessary file structure so we pass the "dormant" and "file exist" checks
+    base_dir = tmp_path / "sim_run"
+    config_dir = base_dir / "config"
+    config_dir.mkdir(parents=True)
+    
+    state_file = base_dir / "state.json"
+    config_file = config_dir / "config_temp.json"
+    config_file.write_text('{"params": "failure_mode"}')
+    
+    # Path for a log file that definitely does not exist
+    missing_log = base_dir / "missing_file.log"
+    
+    with caplog.at_level(logging.ERROR):
+        # We pass exit-code 1 to trigger the "failed" status
+        with patch("sys.argv", ["script", "--state-file", str(state_file), "--exit-code", "1", "--log-file", str(missing_log)]):
+            with pytest.raises(SystemExit) as exc:
+                record_telemetry.main()
+            # Assert failure code 1
+            assert exc.value.code == 1
+    
+    # Assert the specific error log line (Line 52) was triggered
+    assert "❌ Simulation failed but log file not found" in caplog.text
