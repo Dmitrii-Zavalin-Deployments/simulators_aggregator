@@ -135,5 +135,5 @@ def main():
     print(" && ".join(commands))
     logger.info("✅ Generation complete. Command chain ready.")
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
