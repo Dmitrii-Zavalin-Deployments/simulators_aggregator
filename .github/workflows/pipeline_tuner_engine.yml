@@ -181,9 +181,14 @@ jobs:
             }
           fi
 
-          # 5. Perform the commit (only if there are changes after the rebase)
+          # 5. Perform the commit
+          # Check for changes, then stage and commit them
           if [ -n "$(git status --porcelain)" ]; then
-            git commit -m "🤖 robot: auto-clean hygiene update [Engine]"
+            git add . 
+            # We use git commit -m ... || true to prevent the script from failing 
+            # if git somehow finds nothing to commit after the add
+            git commit -m "🤖 robot: auto-clean hygiene update [Engine]" || echo "No changes to commit"
+            
             TARGET_COMMIT=$(git rev-parse HEAD)
 
             # 6. Sync notes
