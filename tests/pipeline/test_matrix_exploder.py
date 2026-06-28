@@ -97,3 +97,31 @@ def test_main_success_path(tmp_path, caplog):
         # Verify the cross-product logic was applied correctly
         assert {"learning_rate": 0.01, "boundary_map": {"width": 10}} in data
         assert {"learning_rate": 0.001, "boundary_map": {"width": 20}} in data
+
+# Covers Line 20: Input to recursive function is not a dictionary
+def test_explode_dict_non_dict_input():
+    # Passing an integer should just return it wrapped in a list
+    assert matrix_exploder.explode_dict(100) == [100]
+
+# Covers Line 30: Inside the dictionary, a value is a scalar (not list/dict)
+def test_explode_dict_scalar_value():
+    # Input has a scalar '5', which falls into the 'else' block
+    input_data = {"key": 5}
+    assert matrix_exploder.explode_dict(input_data) == [{"key": 5}]
+
+# Covers Line 68: Root-level key is a scalar (not a list, not 'boundary_map')
+def test_main_with_scalar_values(tmp_path):
+    config_path = tmp_path / "config.json"
+    output_path = tmp_path / "result.json"
+    
+    # "learning_rate" is a scalar, forcing the code into the 'else' block
+    config_data = {"learning_rate": 0.01} 
+    config_path.write_text(json.dumps(config_data))
+    
+    with patch("sys.argv", ["script", "--config-path", str(config_path), "--output-path", str(output_path)]):
+        matrix_exploder.main()
+        
+    with open(output_path, "r") as f:
+        data = json.load(f)
+        # Should create a list with one dict containing the scalar
+        assert data == [{"learning_rate": 0.01}]
