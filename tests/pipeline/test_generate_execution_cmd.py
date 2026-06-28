@@ -1,3 +1,4 @@
+import os
 import json
 import runpy
 import sys
@@ -7,22 +8,30 @@ from unittest.mock import patch
 from src.pipeline.generate_execution_cmd import main
 
 # ==============================================================================
-# Narrative: Pipeline Generation Logic Tests
+# Narrative: Pipeline Generation Logic Tests with Automated Sandbox Isolation
 # ==============================================================================
 
-def test_main_dormant_state(tmp_path, caplog, capsys, monkeypatch):
+@pytest.fixture(autouse=True)
+def sandbox_environment(monkeypatch, tmp_path):
     """
-    Narrative: Verify that when a 'dormant.flag' file exists, the script
-    gracefully exits with shutdown commands. Uses monkeypatch for CWD safety.
+    Enforces a strict local sandbox for every test execution block.
+    Automatically moves the current working directory away from the project root
+    so that tests never accidentally see or mutate the production 'dormant.flag'.
     """
-    # 1. Setup: Create dormant flag and force INFO level logging
+    monkeypatch.chdir(tmp_path)
+
+
+def test_main_dormant_state(tmp_path, caplog, capsys):
+    """
+    Narrative: Verify that when a 'dormant.flag' file exists in the context directory, 
+    the script gracefully exits with shutdown commands.
+    """
+    # 1. Setup: Create localized dormant flag and force INFO level logging
     dormant_file = tmp_path / "dormant.flag"
     dormant_file.write_text("STATUS: DORMANT")
     caplog.set_level(logging.INFO)
     
-    # 2. Execution: Patch CWD using monkeypatch (automatically reverts after test)
-    monkeypatch.chdir(tmp_path)
-    
+    # 2. Execution
     with patch("sys.argv", ["script", "--state-file", "dummy.json"]):
         with pytest.raises(SystemExit) as e:
             main()
@@ -102,6 +111,7 @@ def test_main_empty_tasks(tmp_path, caplog, capsys):
     captured = capsys.readouterr()
     assert "📋 Notice" in captured.out
 
+
 def test_main_sorting_and_protocol_handling(tmp_path, caplog, capsys):
     """
     Narrative: Verify that multiple tasks are sorted by order and that 
@@ -127,22 +137,23 @@ def test_main_sorting_and_protocol_handling(tmp_path, caplog, capsys):
     captured = capsys.readouterr()
     
     # Verify sorting: Repo A (order 1) should appear before Repo B (order 2)
-    # Checking the echo sequence in the output
     assert captured.out.find("repo_A") < captured.out.find("repo_B")
     
-    # Verify non-replacement: 'https' should remain 'https' (no double replacement)
+    # Verify non-replacement: 'https' should remain 'https'
     assert "https://github.com/org/repo_A" in captured.out
 
 
 def test_main_entry_point():
     """
     Narrative: Simulate execution of the main block to reach 100% coverage.
-    We patch argv and the function call to prevent actual system exit during testing.
+    Explicitly provides `run_name="__main__"` to simulate standard module execution.
     """
     test_args = ["script", "--state-file", "non_existent.json"]
     
     with patch.object(sys, 'argv', test_args):
-        # We catch SystemExit because main() calls sys.exit()
-        with pytest.raises(SystemExit):
-            # runpy executes the module as if it were the main script
-            runpy.run_path("src/pipeline/generate_execution_cmd.py")
+        with pytest.raises(SystemExit) as e:
+            # Setting run_name explicitly ensures the __name__ == "__main__" check evaluates to True
+            runpy.run_path("src/pipeline/generate_execution_cmd.py", run_name="__main__")
+            
+    # In a clean sandbox folder without a flag or file, the production script returns exit code 1
+    assert e.value.code == 1
