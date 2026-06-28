@@ -198,3 +198,75 @@ def test_main_entrypoint_execution(mock_filesystem, mock_tuner_state, monkeypatc
         # Execute runpy simulation to force execution of the entry point block (Line 214-215)
         run_globals = runpy.run_path(str(script_file_path), run_name="__main__")
         assert run_globals is not None
+
+
+# ==============================================================================
+# 9. Target: Lines 63-66 (fetch_inputs_from_dropbox Loop)
+# ==============================================================================
+
+def test_fetch_inputs_from_dropbox_writes_files(mock_filesystem):
+    """Verifies that input files are actually created in the target directory."""
+    input_list = ["test_a.cad", "test_b.step"]
+    target_dir = mock_filesystem / "downloads"
+    
+    initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
+    
+    for filename in input_list:
+        assert (target_dir / filename).exists(), f"{filename} was not created"
+        assert (target_dir / filename).read_text() == "Mock CAD/Step Data"
+
+# ==============================================================================
+# 10. Target: Lines 76-90 (load_pipeline_manifest Error Handling)
+# ==============================================================================
+
+def test_load_pipeline_manifest_raises_error_when_missing(mock_filesystem):
+    """Triggers the error logging and FileNotFoundError when manifest pattern is empty."""
+    repo_path = mock_filesystem / "repo"
+    
+    # We purposefully do not create any file matching the pattern
+    with pytest.raises(FileNotFoundError, match="not found"):
+        initialize_state.load_pipeline_manifest(repo_path, "missing_pid")
+
+# ==============================================================================
+# 11. Target: Line 121 (execute_setup_script Success Log)
+# ==============================================================================
+
+def test_execute_setup_script_success_path(mock_filesystem):
+    """Triggers line 121 by simulating a successful subprocess exit (return code 0)."""
+    repo_path = mock_filesystem / "repo"
+    # Create dummy shell script
+    script = repo_path / "test_success.sh"
+    script.write_text("#!/bin/bash\necho 'done'")
+    
+    with patch("subprocess.Popen") as mock_popen:
+        mock_process = MagicMock()
+        # Mock stdout iterable and return code 0
+        mock_process.stdout = ["line1"]
+        mock_process.wait.return_value = 0
+        mock_popen.return_value = mock_process
+        
+        initialize_state.execute_setup_script(repo_path, "test_success.sh")
+        # Line 121 (logger.info) is executed here
+
+# ==============================================================================
+# 12. Target: Line 165 (main Provisioning Execution)
+# ==============================================================================
+
+def test_main_executes_provisioning_when_not_cached(mock_filesystem, monkeypatch, mock_tuner_state):
+    """Triggers line 165 by ensuring cached_dependency is False."""
+    repo_path = mock_filesystem / "repo"
+    repo_path.mkdir(exist_ok=True)
+    
+    # Setup: Task file and Manifest with a setup script
+    (mock_filesystem / "tasks").mkdir(exist_ok=True)
+    (mock_filesystem / "tasks" / "t.json").write_text(json.dumps({"pipeline_id": "p1", "input_data_list": []}))
+    (repo_path / "p1.json").write_text(json.dumps([{"order": 1, "setup_script": "run.sh", "config": "c.json"}]))
+    (repo_path / "c.json").write_text("{}")
+    
+    monkeypatch.setenv("GITHUB_REF_NAME", "test")
+    
+    # Mock CLI args with cached_dependency=False (default behavior)
+    with patch("sys.argv", ["main.py", "--repo-path", str(repo_path)]):
+        with patch("src.pipeline.initialize_state.execute_setup_script") as mock_exec:
+            initialize_state.main()
+            mock_exec.assert_called_once() # Line 165 hit here
