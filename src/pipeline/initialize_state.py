@@ -8,6 +8,8 @@ import argparse
 import subprocess
 from pathlib import Path
 from src.state.tuner_state import TunerState
+from src.io.dropbox_utils import TokenManager
+from src.io.download_from_dropbox import CloudIngestor
 
 # Configure explicit logging
 logging.basicConfig(
@@ -54,22 +56,48 @@ def discover_task_file() -> dict:
 
 def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
     """
-    Input synchronization verification layer.
-    Iterates through the input_data_list and verifies that each authentic asset 
-    is physically present in the target directory. Raises a hard error if missing.
+    Input synchronization layer.
+    Iterates through the input_data_list and verifies presence.
+    If a required asset is missing from the local workspace directory,
+    it automatically instantiates the CloudIngestor to download it from Dropbox.
     """
     logger.info("Verifying integrity and presence of required input data assets...")
     target_dir.mkdir(parents=True, exist_ok=True)
+    
+    ingestor = None
+    
     for filename in input_data_list:
         target_path = target_dir / filename
-
-        logger.info(f"DEBUG: Attempting to locate asset at path: {target_path.resolve()}")
+        logger.info(f"DEBUG: Checking for asset at path: {target_path.resolve()}")
         
         if not target_path.exists():
-            raise FileNotFoundError(
-                f"❌ CRITICAL: Required input asset '{filename}' is missing from the target environment workspace: {target_dir}"
-            )
+            logger.info(f"⚠️ Asset '{filename}' is missing locally. Initiating direct Dropbox download...")
             
+            # Lazily initialize CloudIngestor only if a download is required
+            if ingestor is None:
+                app_key = os.environ.get("DROPBOX_APP_KEY")
+                app_secret = os.environ.get("DROPBOX_APP_SECRET")
+                refresh_token = os.environ.get("DROPBOX_REFRESH_TOKEN")
+                dropbox_folder = os.environ.get("DROPBOX_FOLDER", "simulators").strip("/")
+                
+                if not all([app_key, app_secret, refresh_token]):
+                    raise EnvironmentError(
+                        "❌ CRITICAL: Missing required Dropbox credentials (DROPBOX_APP_KEY, "
+                        "DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN) in environment."
+                    )
+                
+                tm = TokenManager(app_key, app_secret)
+                # Keep logs grouped by sending the ingestor logs to stdout/file cleanly
+                ingestor = CloudIngestor(tm, refresh_token, target_dir.parent / "dropbox_download.log")
+            
+            remote_path = f"/{dropbox_folder}/{filename}"
+            try:
+                ingestor.download_file(remote_path, target_path)
+            except Exception as e:
+                raise FileNotFoundError(
+                    f"❌ CRITICAL: Failed to download asset '{filename}' from Dropbox path '{remote_path}'. Error: {e}"
+                )
+                
         logger.info(f"   ↳ [Verified] Authentic input asset present: {filename}")
 
 
