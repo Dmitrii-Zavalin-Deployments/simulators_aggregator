@@ -12,6 +12,7 @@
 • tests/pipeline/test_record_telemetry.py
 • tests/pipeline/test_initialize_state.py
 • tests/pipeline/test_generate_provision_cmd.py
+• pytest.ini
 • README.md
 • schema/tuner_task_schema.json
 • schema/tuner_results_schema.json
@@ -34,7 +35,8 @@
 • src/pipeline/initialize_state.py
 • src/pipeline/matrix_exploder.py
 • src/pipeline/record_telemetry.py
-• debug/forensic_audit.sh
+• debug/forensic_audit_testing.sh
+• debug/forensic_audit_production.sh
 -------------------------------------------
 
 ========== START OF FILE: tests/__init__.py ==========
@@ -921,7 +923,7 @@ def test_main_valid_execution(tmp_path, caplog, capsys):
         main()
     
     captured = capsys.readouterr()
-    assert 'repositories/sim/src/main.py' in captured.out
+    assert 'python3 -m src.main' in captured.out
     assert "Adding task for repository: sim" in caplog.text
 
 
@@ -969,7 +971,7 @@ def test_main_sorting_and_protocol_handling(tmp_path, caplog, capsys):
     assert captured.out.find("repo_A") < captured.out.find("repo_B")
     
     # Asserting local path normalization (not the original URL)
-    assert "repositories/repo_A/src/main.py" in captured.out
+    assert "python3 -m src.main" in captured.out
 
 
 def test_main_entry_point():
@@ -1273,6 +1275,7 @@ import subprocess
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from src.pipeline import initialize_state
+from src.pipeline.initialize_state import main
 
 # ==============================================================================
 # Infrastructure & Fixtures
@@ -1483,18 +1486,33 @@ def test_main_entrypoint_execution(mock_filesystem, mock_tuner_state, monkeypatc
 # Utility & Coverage Completion
 # ==============================================================================
 
-# We verify the data ingestion layer. When provided a list of input files, the system 
-# must create these files locally in the target workspace, writing standard mock 
-# data to confirm accessibility.
-def test_fetch_inputs_from_dropbox_writes_files(mock_filesystem):
+def test_fetch_inputs_from_dropbox_preserves_existing_files(mock_filesystem):
+    """Verifies that the function respects/preserves authentic assets that already exist."""
     input_list = ["test_a.cad", "test_b.step"]
     target_dir = mock_filesystem / "downloads"
-    
-    initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
-    
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    # 1. Pre-seed the environment with authentic data
     for filename in input_list:
-        assert (target_dir / filename).exists(), f"{filename} was not created"
-        assert (target_dir / filename).read_text() == "Mock CAD/Step Data"
+        (target_dir / filename).write_text("Authentic CAD Data")
+
+    # 2. Act
+    initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
+
+    # 3. Assert they were not touched/overwritten/deleted
+    for filename in input_list:
+        assert (target_dir / filename).exists(), f"{filename} was lost during verification"
+        assert (target_dir / filename).read_text() == "Authentic CAD Data"
+
+def test_fetch_inputs_from_dropbox_raises_error_if_missing(mock_filesystem):
+    """Verifies that the system raises a hard error if input assets are missing."""
+    input_list = ["non_existent_file.cad"]
+    target_dir = mock_filesystem / "empty_dir"
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    # Assert that the logic now correctly blocks execution if files are missing
+    with pytest.raises(FileNotFoundError, match="missing from the target environment"):
+        initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
 
 # When a manifest search fails, we must trigger the specific error logging path, 
 # ensuring the user receives helpful feedback regarding the missing file.
@@ -1534,7 +1552,48 @@ def test_main_executes_provisioning_when_not_cached(mock_filesystem, monkeypatch
     with patch("sys.argv", ["main.py", "--repo-path", str(repo_path)]):
         with patch("src.pipeline.initialize_state.execute_setup_script") as mock_exec:
             initialize_state.main()
-            mock_exec.assert_called_once()========== END OF FILE: tests/pipeline/test_initialize_state.py ==========
+            mock_exec.assert_called_once()
+
+# ==============================================================================
+# Input Missing Diagnostic Test
+# ==============================================================================
+
+@patch("src.pipeline.initialize_state.load_pipeline_manifest")
+@patch("src.pipeline.initialize_state.sys.exit")
+@patch("src.pipeline.initialize_state.fetch_inputs_from_dropbox")
+@patch("src.pipeline.initialize_state.discover_task_file")
+@patch("src.pipeline.initialize_state.parse_arguments")
+@patch("src.pipeline.initialize_state.Path.exists")
+def test_main_exits_when_inputs_missing(
+    mock_exists,        # Maps to Path.exists
+    mock_args,          # Maps to parse_arguments
+    mock_discover,      # Maps to discover_task_file
+    mock_fetch,         # Maps to fetch_inputs_from_dropbox
+    mock_exit,          # Maps to sys.exit
+    mock_manifest       # Maps to load_pipeline_manifest
+):
+    """Verifies that a FileNotFoundError in input fetching triggers an explicit exit(1)."""
+    # 1. Configure deterministic mock behaviors
+    mock_exists.return_value = True
+    mock_args.return_value = MagicMock(repo_path="dummy/repo", cached_dependency=False)
+    mock_discover.return_value = {
+        "pipeline_id": "test_id", 
+        "input_data_list": ["missing.cad"]
+    }
+    
+    # 2. Force the targeted structural exception
+    mock_fetch.side_effect = FileNotFoundError("CRITICAL: Input missing")
+
+    # 3. Force mock_exit to raise SystemExit to mimic real process termination
+    mock_exit.side_effect = SystemExit
+
+    # 4. Execute entrypoint within exception wrapper
+    with pytest.raises(SystemExit):
+        main()
+
+    # 5. Assert defensive boundary conditions
+    mock_exit.assert_called_once_with(1)
+    mock_manifest.assert_not_called()========== END OF FILE: tests/pipeline/test_initialize_state.py ==========
 
 ========== START OF FILE: tests/pipeline/test_generate_provision_cmd.py ==========
 import json
@@ -1669,6 +1728,12 @@ def test_sorting_logic(tmp_path, capsys):
     # We verify that the command string respects the sort order (Task B < Task A):
     captured = capsys.readouterr()
     assert captured.out.find("B") < captured.out.find("A")========== END OF FILE: tests/pipeline/test_generate_provision_cmd.py ==========
+
+========== START OF FILE: pytest.ini ==========
+[pytest]
+filterwarnings =
+    # Ignore the specific pkg_resources deprecation warning from the dropbox library
+    ignore::DeprecationWarning:pkg_resources.*========== END OF FILE: pytest.ini ==========
 
 ========== START OF FILE: README.md ==========
 # artifact_driven_simulation_engine========== END OF FILE: README.md ==========
@@ -2500,6 +2565,312 @@ Public License instead of this License.  But first, please read
 ========== START OF FILE: performance_audit.md ==========
 # 🛰️ Simulators Aggregator Performance Audit
 
+### Audit: 2026-06-29 20:27:46 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.3%
+- **Memory Usage:** 1978/15989MB
+---
+
+### Audit: 2026-06-29 20:10:12 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.2%
+- **Memory Usage:** 1885/15989MB
+---
+
+### Audit: 2026-06-29 20:06:41 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 4.6%
+- **Memory Usage:** 2098/15989MB
+---
+
+### Audit: 2026-06-29 19:58:02 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 1850/15989MB
+### Audit: 2026-06-29 20:02:45 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.3%
+- **Memory Usage:** 1849/15989MB
+---
+
+### Audit: 2026-06-29 19:47:05 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 1890/15989MB
+---
+
+### Audit: 2026-06-29 19:42:55 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.3%
+- **Memory Usage:** 1925/15989MB
+### Audit: 2026-06-29 19:43:19 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 2097/15993MB
+---
+
+### Audit: 2026-06-29 19:19:01 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.3%
+- **Memory Usage:** 2122/15989MB
+---
+
+### Audit: 2026-06-29 19:12:44 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 1997/15989MB
+---
+
+### Audit: 2026-06-29 18:16:24 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 4.6%
+- **Memory Usage:** 1928/15989MB
+---
+
+### Audit: 2026-06-29 18:04:05 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** success
+- **CPU Load:** 2.4%
+- **Memory Usage:** 1289/15989MB
+### Audit: 2026-06-29 18:06:56 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 2079/15993MB
+---
+
+### Audit: 2026-06-29 17:49:33 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 2056/15989MB
+---
+
+### Audit: 2026-06-29 17:46:01 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.4%
+- **Memory Usage:** 2037/15989MB
+---
+
+### Audit: 2026-06-29 17:41:32 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.4%
+- **Memory Usage:** 2059/15993MB
+---
+
+### Audit: 2026-06-29 16:55:30 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 5%
+- **Memory Usage:** 1913/15989MB
+---
+
+### Audit: 2026-06-29 15:57:44 UTC
+### Audit: 2026-06-29 16:51:42 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.4%
+- **Memory Usage:** 2000/15989MB
+- **Memory Usage:** 1868/15989MB
+---
+
+### Audit: 2026-06-29 15:04:59 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 4.6%
+- **Memory Usage:** 2016/15989MB
+### Audit: 2026-06-29 15:42:00 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 2038/15988MB
+---
+
+### Audit: 2026-06-29 14:06:55 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 4.7%
+- **Memory Usage:** 1998/15989MB
+---
+
+### Audit: 2026-06-29 13:35:53 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 2096/15988MB
+---
+
+### Audit: 2026-06-29 13:30:18 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.3%
+- **Memory Usage:** 1775/15989MB
+---
+
+### Audit: 2026-06-29 13:19:43 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** success
+- **CPU Load:** 2.3%
+- **Memory Usage:** 1259/15989MB
+### Audit: 2026-06-29 13:23:28 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 4.6%
+- **Memory Usage:** 1937/15989MB
+---
+
+### Audit: 2026-06-29 13:05:53 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 1297/15989MB
+---
+
+### Audit: 2026-06-29 12:54:50 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 4.4%
+- **Memory Usage:** 1131/15989MB
+---
+
+### Audit: 2026-06-29 11:46:13 UTC
+### Audit: 2026-06-29 12:21:10 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 1985/15989MB
+- **Memory Usage:** 1909/15989MB
+---
+
+### Audit: 2026-06-29 11:12:56 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 1924/15989MB
+---
+
+### Audit: 2026-06-29 10:13:00 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 4.4%
+- **Memory Usage:** 1886/15989MB
+---
+
+### Audit: 2026-06-29 09:42:53 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.3%
+- **Memory Usage:** 1941/15993MB
+---
+
+### Audit: 2026-06-29 07:06:02 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 1897/15988MB
+---
+
+### Audit: 2026-06-29 02:13:25 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 2047/15993MB
+---
+
+### Audit: 2026-06-28 23:53:57 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 2243/15993MB
+---
+
+### Audit: 2026-06-28 22:47:28 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 4.2%
+- **Memory Usage:** 2080/15993MB
+---
+
+### Audit: 2026-06-28 21:48:01 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 1787/15993MB
+---
+
+### Audit: 2026-06-28 20:46:45 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.3%
+- **Memory Usage:** 1875/15989MB
+---
+
+### Audit: 2026-06-28 19:29:31 UTC
+- **Pipeline:** `mesh_pipeline_c592753.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.1%
+- **Memory Usage:** 1862/15989MB
+---
+
+### Audit: 2026-06-28 19:13:11 UTC
+- **Pipeline:** `mesh_pipeline_c592753.json`
+- **Branch:** `main`
+- **Status:** success
+- **CPU Load:** 6.1%
+- **Memory Usage:** 2041/15989MB
+---
+
 ### Audit: 2026-06-28 18:53:08 UTC
 - **Pipeline:** `mesh_pipeline_c592753.json`
 - **Branch:** `main`
@@ -3073,14 +3444,14 @@ class PipelineInterface(Protocol):
 
 ========== START OF FILE: tasks/mesh_generator_task.json ==========
 {
-  "pipeline_id": "mesh_pipeline_c592753.json",
+  "pipeline_id": "mesh_pipeline_3ed2a0a.json",
   "input_data_list": [
-    "sample_geometry.step"
+    "cube_50-50-50.step"
   ]
 }========== END OF FILE: tasks/mesh_generator_task.json ==========
 
 ========== START OF FILE: dormant.flag ==========
-STATUS: DORMANT
+STATUS: ACTIVE
 ========== END OF FILE: dormant.flag ==========
 
 ========== START OF FILE: requirements.txt ==========
@@ -3641,9 +4012,7 @@ def main():
         logger.info(f"Adding task for repository: {repo_name}")
         cmd = (
             f"echo '🚀 Running simulator engine execution block: {repo_name}...'; "
-            f"python3 {repo_dir}/src/main.py "
-            f"--input_folder {inputs_outputs_dir} "
-            f"--output_folder {inputs_outputs_dir}"
+            f"(cd {repo_dir} && python3 -m src.main --input_output_folder {inputs_outputs_dir})"
         )
         commands.append(cmd)
 
@@ -3855,16 +4224,23 @@ def discover_task_file() -> dict:
 
 def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
     """
-    Simulated Dropbox integration layer.
-    Iterates through the input_data_list and downloads them to the target_dir.
+    Input synchronization verification layer.
+    Iterates through the input_data_list and verifies that each authentic asset 
+    is physically present in the target directory. Raises a hard error if missing.
     """
-    logger.info("Initiating Dropbox synchronization for input data...")
+    logger.info("Verifying integrity and presence of required input data assets...")
     target_dir.mkdir(parents=True, exist_ok=True)
     for filename in input_data_list:
         target_path = target_dir / filename
-        logger.info(f"    ↳ Downloading: {filename}")
-        with open(target_path, 'w') as f:
-            f.write("Mock CAD/Step Data")
+
+        logger.info(f"DEBUG: Attempting to locate asset at path: {target_path.resolve()}")
+        
+        if not target_path.exists():
+            raise FileNotFoundError(
+                f"❌ CRITICAL: Required input asset '{filename}' is missing from the target environment workspace: {target_dir}"
+            )
+            
+        logger.info(f"   ↳ [Verified] Authentic input asset present: {filename}")
 
 
 def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
@@ -3899,8 +4275,8 @@ def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
 
 def execute_setup_script(repo_path: Path, script_path: str):
     full_script_path = repo_path / script_path
-    print(f"::group::⚙️ Provisioning: {script_path}")
-    logger.info(f"⚙️ Executing provisioning script: {script_path}")
+    print(f"::group::⚙ Provisioning: {script_path}")
+    logger.info(f"⚙ Executing provisioning script: {script_path}")
     
     try:
         # Popen streams logs in real-time
@@ -3913,7 +4289,7 @@ def execute_setup_script(repo_path: Path, script_path: str):
         )
 
         for line in process.stdout:
-            print(f"   [Bash]: {line.strip()}")
+            print(f"    [Bash]: {line.strip()}")
             
         return_code = process.wait()
         if return_code != 0:
@@ -3948,9 +4324,13 @@ def main():
     workspace_dir.mkdir(parents=True, exist_ok=True)
     inputs_dir = workspace_dir / "inputs-outputs"
     
-    # 3. Download Inputs from Dropbox
-    fetch_inputs_from_dropbox(task_data["input_data_list"], inputs_dir)
-    
+    # 3. Verify Inputs are Present (Deterministic Asset Validation)
+    try:
+        fetch_inputs_from_dropbox(task_data["input_data_list"], inputs_dir)
+    except FileNotFoundError as e:
+        logger.error(str(e))
+        sys.exit(1)
+        
     # 4. Discover Library Manifest & Extract Configurations
     manifest_steps = load_pipeline_manifest(repo_path, task_data["pipeline_id"])
     
@@ -4012,7 +4392,7 @@ def main():
         sys.exit(1)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()========== END OF FILE: src/pipeline/initialize_state.py ==========
 
 ========== START OF FILE: src/pipeline/matrix_exploder.py ==========
@@ -4187,10 +4567,70 @@ def main():
 if __name__ == "__main__":  # pragma: no cover
     main()========== END OF FILE: src/pipeline/record_telemetry.py ==========
 
-========== START OF FILE: debug/forensic_audit.sh ==========
+========== START OF FILE: debug/forensic_audit_testing.sh ==========
 #!/bin/bash
 # Description: Automated forensic audit for ACE solver failures.
 # Status: Dormant (All systems nominal)
 exit 0
-========== END OF FILE: debug/forensic_audit.sh ==========
+========== END OF FILE: debug/forensic_audit_testing.sh ==========
+
+========== START OF FILE: debug/forensic_audit_production.sh ==========
+#!/bin/bash
+# ==============================================================================
+# 🔍 FORENSIC AUDIT: WORKSPACE HYDRATION FAILURE
+# ==============================================================================
+
+TARGET_DIR="data/testing-input-output/tuning_main"
+TARGET_INPUTS="$TARGET_DIR/inputs-outputs"
+
+echo "========================================================================"
+echo "🔎 DIAGNOSTICS: Workspace & Environment Context"
+echo "========================================================================"
+echo "Current Working Directory: $(pwd)"
+echo "Listing root directory structure:"
+ls -F
+
+echo -e "\n🔎 Searching for missing assets globally:"
+find . -name "state.json"
+find . -name "cube_50-50-50.step"
+
+echo -e "\n========================================================================"
+echo "🔎 SMOKING-GUN AUDIT: Scaffolding Logic"
+echo "========================================================================"
+# Check if the setup script exists and is executable
+if [ -d "repositories/fluid_dynamics_simulator/setup_scripts" ]; then
+    echo "Found setup scripts directory. Checking permissions:"
+    ls -l repositories/fluid_dynamics_simulator/setup_scripts/
+else
+    echo "⚠️ Setup scripts directory not found in repository."
+fi
+
+echo -e "\n========================================================================"
+echo "🔧 AUTOMATED REPAIRS: Emergency Seeding & Path Correction"
+echo "========================================================================"
+# If assets are found elsewhere in the repo, seed them into the target directory
+# to allow the pipeline to proceed (Emergency Fallback)
+
+# Attempt to locate and seed state.json
+STATE_FILE=$(find . -name "state.json" | head -n 1)
+if [ ! -z "$STATE_FILE" ] && [ ! -f "$TARGET_DIR/state.json" ]; then
+    echo "Found state.json at $STATE_FILE. Copying to $TARGET_DIR..."
+    mkdir -p "$TARGET_DIR"
+    cp "$STATE_FILE" "$TARGET_DIR/state.json"
+fi
+
+# Attempt to locate and seed the step file
+STEP_FILE=$(find . -name "cube_50-50-50.step" | head -n 1)
+if [ ! -z "$STEP_FILE" ] && [ ! -f "$TARGET_INPUTS/cube_50-50-50.step" ]; then
+    echo "Found step file at $STEP_FILE. Copying to $TARGET_INPUTS..."
+    mkdir -p "$TARGET_INPUTS"
+    cp "$STEP_FILE" "$TARGET_INPUTS/cube_50-50-50.step"
+fi
+
+# # sed -i 's|relative/path/to/data|data/testing-input-output/tuning_main|g' src/pipeline/initialize_state.py
+# # sed -i 's|os.getcwd()|"/home/runner/work/simulators_aggregator/simulators_aggregator"|g' src/io/state_manager.py
+
+echo "========================================================================"
+echo "🏁 FORENSIC AUDIT SEQUENCE COMPLETE"
+echo "========================================================================"========== END OF FILE: debug/forensic_audit_production.sh ==========
 
