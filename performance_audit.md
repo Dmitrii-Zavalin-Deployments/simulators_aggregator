@@ -1,5 +1,13 @@
 # 🛰️ Simulators Aggregator Performance Audit
 
+### Audit: 2026-06-29 20:06:41 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 4.6%
+- **Memory Usage:** 2098/15989MB
+---
+
 ### Audit: 2026-06-29 19:58:02 UTC
 - **Pipeline:** `mesh_pipeline_3ed2a0a.json`
 - **Branch:** `main`
