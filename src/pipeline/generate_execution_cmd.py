@@ -66,8 +66,7 @@ def main():
         logger.info(f"Adding task for repository: {repo_name}")
         cmd = (
             f"echo '🚀 Running simulator engine execution block: {repo_name}...'; "
-            f"python3 {repo_dir}/src/main.py "
-            f"--input_output_folder {inputs_outputs_dir}"
+            f"(cd {repo_dir} && python3 -m src.main --input_output_folder {inputs_outputs_dir})"
         )
         commands.append(cmd)
 
