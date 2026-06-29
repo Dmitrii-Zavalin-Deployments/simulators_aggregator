@@ -111,7 +111,7 @@ jobs:
             fi
 
   pre_flight_tests:
-    name: "🧪 Pre-Flight"
+    name: "🧪 Pre-Flight Tests"
     needs: gatekeeper
     if: needs.gatekeeper.outputs.status == 'active'
     runs-on: ubuntu-latest

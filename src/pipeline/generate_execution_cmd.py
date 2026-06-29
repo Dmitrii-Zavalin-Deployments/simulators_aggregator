@@ -67,8 +67,7 @@ def main():
         cmd = (
             f"echo '🚀 Running simulator engine execution block: {repo_name}...'; "
             f"python3 {repo_dir}/src/main.py "
-            f"--input_folder {inputs_outputs_dir} "
-            f"--output_folder {inputs_outputs_dir}"
+            f"--input_output_folder {inputs_outputs_dir}"
         )
         commands.append(cmd)
 
