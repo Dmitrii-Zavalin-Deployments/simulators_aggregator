@@ -218,7 +218,7 @@ jobs:
           echo "🚀 Initiating: $TEST_COMMAND"
           $TEST_COMMAND
       
-      - name: 🔍 Forensic Audit
+      - name: 🔍 Forensic Audit Testing
         if: always()
         run: |
           if [[ "${{ job.status }}" == "success" ]]; then
@@ -467,6 +467,37 @@ jobs:
               --folder "${{ env.DROPBOX_FOLDER }}" \
               --filename "${{ env.TUNER_STATE_ARCHIVE }}"
           fi
+        
+      - name: 🔍 Forensic Audit Production
+        if: always()
+        run: |
+          if [[ "${{ job.status }}" == "success" ]]; then
+            echo "✅ All systems nominal. No anomalies detected."
+            cat <<EOF > debug/forensic_audit_production.sh
+          #!/bin/bash
+          # Description: Automated forensic audit for ACE solver failures.
+          # Status: Dormant (All systems nominal)
+          exit 0
+          EOF
+            chmod +x debug/forensic_audit_production.sh
+            echo "🧹 Diagnostic script reset to Dormant mode."
+          else
+            echo "⚠️ CI Failure Detected. Initiating Deep Forensic Audit..."
+            echo "============================================================"
+            echo "ls -R output:"
+            ls -R
+            echo "============================================================"
+            echo "debug/forensic_audit_production.sh run results:"
+            if [ -f "debug/forensic_audit_production.sh" ]; then
+              bash debug/forensic_audit_production.sh
+            else
+              echo "❌ Critical: Diagnostic script 'debug/forensic_audit_production.sh' not found."
+            fi
+            echo "============================================================"
+            echo "📉 RE-RUNNING FAILED TEST FOR FINAL SIGNAL"
+            $TEST_COMMAND || true
+            exit 1
+          fi
 
       - name: 📊 Audit Performance Ledger & Sync (Assemble & Tuning)
         if: always()
@@ -538,7 +569,7 @@ jobs:
 
           # 5️⃣ ISOLATED COMMIT & PUSH
           # Explicitly target only the public ledger for the final commit
-          git add performance_audit.md dormant.flag
+          git add performance_audit.md dormant.flag debug/forensic_audit_production.sh
 
           if [ -n "$(git status --porcelain performance_audit.md)" ]; then
             git commit -m "🤖 robot: audit ledger update [$STATUS]"
