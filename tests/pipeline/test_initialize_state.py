@@ -2,7 +2,6 @@ import json
 import runpy
 import pytest
 import subprocess
-import sys
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from src.pipeline import initialize_state
