@@ -54,56 +54,8 @@ def discover_task_file() -> dict:
     raise ValueError("❌ CRITICAL: No JSON matching Tuner Task Schema found.")
 
 
-def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
-    """
-    Input synchronization layer.
-    Iterates through the input_data_list and verifies presence.
-    If a required asset is missing from the local workspace directory,
-    it automatically instantiates the CloudIngestor to download it from Dropbox.
-    """
-    logger.info("Verifying integrity and presence of required input data assets...")
-    target_dir.mkdir(parents=True, exist_ok=True)
-    
-    ingestor = None
-    
-    for filename in input_data_list:
-        target_path = target_dir / filename
-        logger.info(f"DEBUG: Checking for asset at path: {target_path.resolve()}")
-        
-        if not target_path.exists():
-            logger.info(f"⚠️ Asset '{filename}' is missing locally. Initiating direct Dropbox download...")
-            
-            # Lazily initialize CloudIngestor only if a download is required
-            if ingestor is None:
-                app_key = os.environ.get("DROPBOX_APP_KEY")
-                app_secret = os.environ.get("DROPBOX_APP_SECRET")
-                refresh_token = os.environ.get("DROPBOX_REFRESH_TOKEN")
-                dropbox_folder = os.environ.get("DROPBOX_FOLDER", "simulators").strip("/")
-                
-                if not all([app_key, app_secret, refresh_token]):
-                    raise EnvironmentError(
-                        "❌ CRITICAL: Missing required Dropbox credentials (DROPBOX_APP_KEY, "
-                        "DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN) in environment."
-                    )
-                
-                tm = TokenManager(app_key, app_secret)
-                # Keep logs grouped by sending the ingestor logs to stdout/file cleanly
-                ingestor = CloudIngestor(tm, refresh_token, target_dir.parent / "dropbox_download.log")
-            
-            remote_path = f"/{dropbox_folder}/{filename}"
-            try:
-                ingestor.download_file(remote_path, target_path)
-            except Exception as e:
-                raise FileNotFoundError(
-                    f"❌ CRITICAL: Failed to download asset '{filename}' from Dropbox path '{remote_path}'. Error: {e}"
-                )
-                
-        logger.info(f"   ↳ [Verified] Authentic input asset present: {filename}")
-
-
 def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
     """Finds and parses the target JSON manifest recursively within the Library."""
-    # Added wildcard matching here to allow catching files with suffixes/extensions (e.g., 'test_pid.json')
     search_pattern = f"{pipeline_id}*"
     manifest_matches = list(repo_path.rglob(search_pattern))
     
@@ -132,6 +84,7 @@ def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
 
 
 def execute_setup_script(repo_path: Path, script_path: str):
+    """Executes the downstream repository initialization script to provision environment modules."""
     full_script_path = repo_path / script_path
     print(f"::group::⚙ Provisioning: {script_path}")
     logger.info(f"⚙ Executing provisioning script: {script_path}")
@@ -159,6 +112,54 @@ def execute_setup_script(repo_path: Path, script_path: str):
         print("::endgroup::")
 
 
+def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
+    """
+    Input synchronization layer.
+    Guaranteed to run post-provisioning. Safely pulls down assets using dynamic 
+    lazy imports that resolve cleanly now that dependencies are present.
+    """
+    logger.info("Verifying integrity and presence of required input data assets...")
+    target_dir.mkdir(parents=True, exist_ok=True)
+    
+    ingestor = None
+    
+    for filename in input_data_list:
+        target_path = target_dir / filename
+        logger.info(f"DEBUG: Checking for asset at path: {target_path.resolve()}")
+        
+        if not target_path.exists():
+            logger.info(f"⚠️ Asset '{filename}' is missing locally. Initiating direct Dropbox download...")
+            
+            # Lazily initialize Dropbox modules. Safely evaluates since setup scripts have completed.
+            if ingestor is None:
+                from src.io.dropbox_utils import TokenManager
+                from src.io.download_from_dropbox import CloudIngestor
+                
+                app_key = os.environ.get("DROPBOX_APP_KEY")
+                app_secret = os.environ.get("DROPBOX_APP_SECRET")
+                refresh_token = os.environ.get("DROPBOX_REFRESH_TOKEN")
+                dropbox_folder = os.environ.get("DROPBOX_FOLDER", "simulators").strip("/")
+                
+                if not all([app_key, app_secret, refresh_token]):
+                    raise EnvironmentError(
+                        "❌ CRITICAL: Missing required Dropbox credentials (DROPBOX_APP_KEY, "
+                        "DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN) in environment."
+                    )
+                
+                tm = TokenManager(app_key, app_secret)
+                ingestor = CloudIngestor(tm, refresh_token, target_dir.parent / "dropbox_download.log")
+            
+            remote_path = f"/{dropbox_folder}/{filename}"
+            try:
+                ingestor.download_file(remote_path, target_path)
+            except Exception as e:
+                raise FileNotFoundError(
+                    f"❌ CRITICAL: Failed to download asset '{filename}' from Dropbox path '{remote_path}'. Error: {e}"
+                )
+                
+        logger.info(f"   ↳ [Verified] Authentic input asset present: {filename}")
+
+
 def main():
     args = parse_arguments()
     repo_path = Path(args.repo_path)
@@ -177,37 +178,37 @@ def main():
         logger.error(str(e))
         sys.exit(1)
         
-    # 2. Create Clean-Room Isolated Workspace
-    workspace_dir = Path("data/testing-input-output") / f"tuning_{branch_name}"
-    workspace_dir.mkdir(parents=True, exist_ok=True)
-    inputs_dir = workspace_dir / "inputs-outputs"
-    
-    # 3. Verify Inputs are Present (Deterministic Asset Validation)
-    try:
-        fetch_inputs_from_dropbox(task_data["input_data_list"], inputs_dir)
-    except FileNotFoundError as e:
-        logger.error(str(e))
-        sys.exit(1)
-        
-    # 4. Discover Library Manifest & Extract Configurations
+    # 2. Discover Library Manifest
     manifest_steps = load_pipeline_manifest(repo_path, task_data["pipeline_id"])
     
     target_config_path = None
     
-    # 5. Process Manifest Steps (Conditional Setup Scripts & Config Key Capture)
+    # 3. CRITICAL ENVIRONMENT HYDRATION: Execute Provisioning Scripts BEFORE I/O operations
     for step in sorted(manifest_steps, key=lambda x: x.get("order", 0)):
         logger.info(f"Processing Step {step.get('order')} for repository: {step.get('repository_url')}")
         
-        # Execute provisioning ONLY if dependencies are NOT cached
+        # Execute provisioning setup scripts immediately if dependencies are not cached
         if "setup_script" in step:
             if not args.cached_dependency:
                 execute_setup_script(repo_path, step["setup_script"])
             else:
                 logger.info(f"⏩ Skipping provisioning script (Cache Hit: True): {step['setup_script']}")
             
-        # Capture the unified config file location
+        # Track the configuration path location for step 5
         if "config" in step:
             target_config_path = step["config"]
+
+    # 4. Create Clean-Room Isolated Workspace Structures
+    workspace_dir = Path("data/testing-input-output") / f"tuning_{branch_name}"
+    workspace_dir.mkdir(parents=True, exist_ok=True)
+    inputs_dir = workspace_dir / "inputs-outputs"
+    
+    # 5. Verify Inputs are Present (Now fully insulated against missing dependency exceptions)
+    try:
+        fetch_inputs_from_dropbox(task_data["input_data_list"], inputs_dir)
+    except FileNotFoundError as e:
+        logger.error(str(e))
+        sys.exit(1)
             
     # 6. Stage Unified Config to Workspace (Deterministic Direct Copy)
     if target_config_path:
@@ -215,7 +216,7 @@ def main():
         configs_dir.mkdir(parents=True, exist_ok=True)
         config_filename = os.path.basename(target_config_path)
         
-        # Look for the exact path match first, then fall back to basename rglob if structures drift
+        # Look for the exact path match first, then fall back to rglob if structures drift
         matches = list(repo_path.rglob(target_config_path))
         if not matches:
             matches = list(repo_path.rglob(config_filename))
@@ -230,7 +231,7 @@ def main():
         logger.error("❌ CRITICAL: Manifest schema violation. No 'config' baseline file specified.")
         sys.exit(1)
     
-    # 7. Instantiate Sovereign State Container
+    # 7. Instantiate Sovereign State Container (Delayed to protect against internal compilation dependencies)
     try:
         state_container = TunerState(
             pipeline_id=task_data["pipeline_id"],
