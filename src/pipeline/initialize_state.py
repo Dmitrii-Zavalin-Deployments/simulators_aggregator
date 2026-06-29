@@ -62,6 +62,8 @@ def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
     target_dir.mkdir(parents=True, exist_ok=True)
     for filename in input_data_list:
         target_path = target_dir / filename
+
+        logger.info(f"DEBUG: Attempting to locate asset at path: {target_path.resolve()}")
         
         if not target_path.exists():
             raise FileNotFoundError(
