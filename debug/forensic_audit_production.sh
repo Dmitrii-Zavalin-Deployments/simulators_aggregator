@@ -1,45 +1,46 @@
 #!/bin/bash
 # ==============================================================================
-# 🔍 DEEP FORENSIC AUDIT: STEP HEADER SYNTAX VALIDATION & RUNTIME REPAIR
+# 🔍 FORENSIC AUDIT: INPUT ASSET HYDRATION FAILURE
 # ==============================================================================
 
-STEP_FILE="data/testing-input-output/tuning_main/inputs-outputs/cube_50-50-50.step"
-INGESTION_STEP="data/testing-input-output/repositories/mesh_generator/src/steps/ingestion.py"
+TARGET_ASSET="cube_50-50-50.step"
+TARGET_DIR="data/testing-input-output/tuning_main/inputs-outputs"
+INITIALIZATION_LOGIC="src/pipeline/initialize_state.py"
 
 echo "========================================================================"
-echo "🔎 DIAGNOSTICS: Inspecting Codebase Context & Asset Signatures"
+echo "🔎 DIAGNOSTICS: Asset Hunt & Path Verification"
 echo "========================================================================"
-# Scan for where this mock asset is referenced or generated
-echo "Checking tracking references across test files:"
-grep -rn "cube_50-50-50.step" tests/ src/ 2>/dev/null || echo "No static references found."
+
+# 1. Search for the file in the entire repository to check for misplacement
+echo "Searching for '$TARGET_ASSET' anywhere in workspace..."
+find . -name "$TARGET_ASSET" -not -path '*/.*'
+
+# 2. Check the contents of the expected directory
+echo -e "\nListing contents of expected target directory: $TARGET_DIR"
+ls -lah "$TARGET_DIR" 2>/dev/null || echo "Target directory does not exist yet."
 
 echo -e "\n========================================================================"
-echo "🔎 SMOKING-GUN SOURCE AUDIT: Target Asset Geometry vs Parser Bounds"
+echo "🔎 SMOKING-GUN SOURCE AUDIT: Path Validation Logic"
 echo "========================================================================"
-if [ -f "$STEP_FILE" ]; then
-    echo "Line-by-line breakdown of corrupted CAD asset ($STEP_FILE):"
-    cat -n "$STEP_FILE"
-else
-    echo "⚠️ Target STEP asset not found at workspace path: $STEP_FILE"
-fi
-
-echo -e "\nInbound Ingestion Engine Guardrail Rules:"
-if [ -f "$INGESTION_STEP" ]; then
-    cat -n "$INGESTION_STEP" | grep -A 15 "reader = STEPControl_Reader()"
-else
-    echo "⚠️ Ingestion engine step file not found at: $INGESTION_STEP"
-fi
+# 3. Locate the error message in the codebase to see how it checks existence
+echo "Inspecting '$INITIALIZATION_LOGIC' for file validation logic:"
+grep -n "Required input asset" "$INITIALIZATION_LOGIC"
+echo -e "\nSnippet of validation block:"
+cat -n "$INITIALIZATION_LOGIC" | grep -A 10 "Required input asset"
 
 echo -e "\n========================================================================"
 echo "🔧 AUTOMATED REPAIRS VIA SED INJECTIONS"
 echo "========================================================================"
-echo "Preparing standard-compliant syntax topology replacement patterns..."
+echo "If the file is misaligned, use these to fix paths or force creation:"
 
-# Solution A: Overwrite plain text directly with a minimal compliant structural map
-# # sed -i 's|Mock CAD/Step Data|ISO-10303-21;\nHEADER;\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;|g' "$STEP_FILE"
+# # Repair: If the path is hardcoded incorrectly in the orchestrator, fix the base path:
+# # sed -i 's|old_path/inputs-outputs|data/testing-input-output/tuning_main/inputs-outputs|g' "$INITIALIZATION_LOGIC"
 
-# Solution B: Alternate escape-sequence syntax if target platform uses strict BSD sed
-# # sed -i '' 's|Mock CAD/Step Data|ISO-10303-21;\nHEADER;\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;|g' "$STEP_FILE"
+# # Repair: If the asset is buried in a subfolder (e.g., 'dummies'), pull it to the target:
+# # cp tests/dummies/sample_geometry.step "$TARGET_DIR/$TARGET_ASSET"
+
+# # Repair: Create a placeholder file if the pipeline requires existence but not specific data:
+# # touch "$TARGET_DIR/$TARGET_ASSET"
 
 echo "========================================================================"
 echo "🏁 FORENSIC AUDIT SEQUENCE COMPLETE"
