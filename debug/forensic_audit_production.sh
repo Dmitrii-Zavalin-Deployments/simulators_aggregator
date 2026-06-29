@@ -1,46 +1,57 @@
 #!/bin/bash
 # ==============================================================================
-# 🔍 FORENSIC AUDIT: INPUT ASSET HYDRATION FAILURE
+# 🔍 FORENSIC AUDIT: WORKSPACE HYDRATION FAILURE
 # ==============================================================================
 
-TARGET_ASSET="cube_50-50-50.step"
-TARGET_DIR="data/testing-input-output/tuning_main/inputs-outputs"
-INITIALIZATION_LOGIC="src/pipeline/initialize_state.py"
+TARGET_DIR="data/testing-input-output/tuning_main"
+TARGET_INPUTS="$TARGET_DIR/inputs-outputs"
 
 echo "========================================================================"
-echo "🔎 DIAGNOSTICS: Asset Hunt & Path Verification"
+echo "🔎 DIAGNOSTICS: Workspace & Environment Context"
 echo "========================================================================"
+echo "Current Working Directory: $(pwd)"
+echo "Listing root directory structure:"
+ls -F
 
-# 1. Search for the file in the entire repository to check for misplacement
-echo "Searching for '$TARGET_ASSET' anywhere in workspace..."
-find . -name "$TARGET_ASSET" -not -path '*/.*'
-
-# 2. Check the contents of the expected directory
-echo -e "\nListing contents of expected target directory: $TARGET_DIR"
-ls -lah "$TARGET_DIR" 2>/dev/null || echo "Target directory does not exist yet."
+echo -e "\n🔎 Searching for missing assets globally:"
+find . -name "state.json"
+find . -name "cube_50-50-50.step"
 
 echo -e "\n========================================================================"
-echo "🔎 SMOKING-GUN SOURCE AUDIT: Path Validation Logic"
+echo "🔎 SMOKING-GUN AUDIT: Scaffolding Logic"
 echo "========================================================================"
-# 3. Locate the error message in the codebase to see how it checks existence
-echo "Inspecting '$INITIALIZATION_LOGIC' for file validation logic:"
-grep -n "Required input asset" "$INITIALIZATION_LOGIC"
-echo -e "\nSnippet of validation block:"
-cat -n "$INITIALIZATION_LOGIC" | grep -A 10 "Required input asset"
+# Check if the setup script exists and is executable
+if [ -d "repositories/fluid_dynamics_simulator/setup_scripts" ]; then
+    echo "Found setup scripts directory. Checking permissions:"
+    ls -l repositories/fluid_dynamics_simulator/setup_scripts/
+else
+    echo "⚠️ Setup scripts directory not found in repository."
+fi
 
 echo -e "\n========================================================================"
-echo "🔧 AUTOMATED REPAIRS VIA SED INJECTIONS"
+echo "🔧 AUTOMATED REPAIRS: Emergency Seeding & Path Correction"
 echo "========================================================================"
-echo "If the file is misaligned, use these to fix paths or force creation:"
+# If assets are found elsewhere in the repo, seed them into the target directory
+# to allow the pipeline to proceed (Emergency Fallback)
 
-# # Repair: If the path is hardcoded incorrectly in the orchestrator, fix the base path:
-# # sed -i 's|old_path/inputs-outputs|data/testing-input-output/tuning_main/inputs-outputs|g' "$INITIALIZATION_LOGIC"
+# Attempt to locate and seed state.json
+STATE_FILE=$(find . -name "state.json" | head -n 1)
+if [ ! -z "$STATE_FILE" ] && [ ! -f "$TARGET_DIR/state.json" ]; then
+    echo "Found state.json at $STATE_FILE. Copying to $TARGET_DIR..."
+    mkdir -p "$TARGET_DIR"
+    cp "$STATE_FILE" "$TARGET_DIR/state.json"
+fi
 
-# # Repair: If the asset is buried in a subfolder (e.g., 'dummies'), pull it to the target:
-# # cp tests/dummies/sample_geometry.step "$TARGET_DIR/$TARGET_ASSET"
+# Attempt to locate and seed the step file
+STEP_FILE=$(find . -name "cube_50-50-50.step" | head -n 1)
+if [ ! -z "$STEP_FILE" ] && [ ! -f "$TARGET_INPUTS/cube_50-50-50.step" ]; then
+    echo "Found step file at $STEP_FILE. Copying to $TARGET_INPUTS..."
+    mkdir -p "$TARGET_INPUTS"
+    cp "$STEP_FILE" "$TARGET_INPUTS/cube_50-50-50.step"
+fi
 
-# # Repair: Create a placeholder file if the pipeline requires existence but not specific data:
-# # touch "$TARGET_DIR/$TARGET_ASSET"
+# # sed -i 's|relative/path/to/data|data/testing-input-output/tuning_main|g' src/pipeline/initialize_state.py
+# # sed -i 's|os.getcwd()|"/home/runner/work/simulators_aggregator/simulators_aggregator"|g' src/io/state_manager.py
 
 echo "========================================================================"
 echo "🏁 FORENSIC AUDIT SEQUENCE COMPLETE"
