@@ -5,53 +5,58 @@ echo "========================================================================"
 echo "🔍 PHASE 1: FORENSIC DIAGNOSTICS & CONTEXT DRIFT SCANNING"
 echo "========================================================================"
 
-# 1. Verify if 'dropbox' is properly documented as an authentic dependency
-echo "Checking requirements.txt for target dependency entry..."
-if grep -qi "dropbox" requirements.txt; then
-    echo "✅ Success: 'dropbox' found in requirements.txt manifest:"
-    grep -in "dropbox" requirements.txt
-else
-    echo "❌ CRITICAL: 'dropbox' is completely missing from requirements.txt!"
-fi
+# 1. Audit structural requirements configuration
+echo "Checking requirements.txt for core dependency definitions..."
+for pkg in "requests" "dropbox"; do
+    if grep -qi "$pkg" requirements.txt; then
+        echo "✅ Success: '$pkg' manifest definition found:"
+        grep -in "$pkg" requirements.txt
+    else
+        echo "❌ CRITICAL: '$pkg' is completely missing from requirements.txt!"
+    fi
+done
 
-echo -e "\nEvaluating current active Python path and available modules..."
-echo "Active Python binary location: $(which python3 || echo 'Not Found')"
+echo -e "\nEvaluating active Python interpreter path and landscape details..."
+echo "Active Python path: $(which python3 || echo 'Not Found')"
 echo "Active Python version: $(python3 --version || echo 'Not Found')"
+echo "Current Conda Environment Indicator: ${CONDA_DEFAULT_ENV:-None (Global Runner Context)}"
 
-# 2. Check if the package exists in the immediate shell runtime layer
-echo -e "\nScanning active environment pip cache for 'dropbox'..."
-if pip list 2>/dev/null | grep -qi "dropbox"; then
-    echo "⚠️ Observation: 'dropbox' is present in the CURRENT shell layer, but likely missing in Conda."
-else
-    echo "❌ Observation: 'dropbox' is missing from the current active runtime layer."
-fi
+# 2. Track missing wheels inside the current environment layer
+echo -e "\nScanning active layer package cache for critical targets..."
+for pkg in "requests" "dropbox"; do
+    if pip list 2>/dev/null | grep -qi "$pkg"; then
+        echo "⚠️ Note: '$pkg' is present in this layer, but execution context boundary is dropping it."
+    else
+        echo "❌ Observation: '$pkg' is fully missing from this active environment pip table."
+    fi
+done
 
 echo "========================================================================"
 echo "🚬 PHASE 2: SMOKING-GUN SOURCE CODE AUDITS"
 echo "========================================================================"
 
-# Locate workflow configuration files containing the cold start configuration steps
+# Find the orchestration workflow file running this automation
 WORKFLOW_FILE=$(find .github/workflows/ -type f \( -name "*.yml" -o -name "*.yaml" \) | head -n 1)
 
 if [ -n "$WORKFLOW_FILE" ]; then
     echo "Targeting smoking-gun configuration sequence inside: $WORKFLOW_FILE"
-    # Show the environment provisioning sequence with exact line numbers
-    cat -n "$WORKFLOW_FILE" | grep -A 25 -B 5 "Initialize Pipeline State (Cold Start)" || true
+    # Display the conda setup and dependency caching step with explicit line positioning
+    cat -n "$WORKFLOW_FILE" | grep -A 35 -B 5 "Set up Conda Environment" || cat -n "$WORKFLOW_FILE"
 else
-    echo "❌ Error: No GitHub Action workflow template files located under .github/workflows/"
+    echo "❌ Error: No GitHub Action workflow configuration located under .github/workflows/"
 fi
 
 echo "========================================================================"
 echo "🛠️ PHASE 3: AUTOMATED IN-ENVIRONMENT WORKFLOW REPAIRS"
 echo "========================================================================"
-echo "The following sed patterns demonstrate deterministic repairs to sync the layers."
-echo "Uncomment these lines in emergency situations to force direct orchestration patch updates."
+echo "The following sed routines demonstrate automated fixes to lock environment parity."
+echo "Uncomment to run as emergency automated repairs in your workflow sequence."
 
-# Repair Strategy A: Inject an explicit pip synchronization script right after conda environment activation
+# Repair Option A: Force immediate dependency installations after conda activation inside the cold start step
 # sed -i '/conda activate tuner-env/a \          pip install -r requirements.txt' "$WORKFLOW_FILE"
 
-# Repair Strategy B: Explicitly append a dedicated dependency syncing layer prior to execution
-# sed -i '/- name: ⚙️ Initialize Pipeline State (Cold Start)/i \      - name: 📦 Sync Conda Env Dependencies\n        shell: bash -el {0}\n        run: |\n          conda activate tuner-env\n          pip install -r requirements.txt\n' "$WORKFLOW_FILE"
+# Repair Option B: Re-write the caching sequence key to incorporate hash testing of requirements.txt
+# sed -i 's/key: \${{ hashFiles.*/key: conda-v2-\${{ hashFiles('\''requirements.txt'\'') }}-\${{ github.ref_name }}/g' "$WORKFLOW_FILE"
 
 echo "========================================================================"
 echo "🎉 Forensic audit phase execution complete."
