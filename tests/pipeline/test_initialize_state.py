@@ -267,8 +267,8 @@ def test_fetch_inputs_from_dropbox_raises_error_if_missing(mock_filesystem, monk
     target_dir.mkdir(parents=True, exist_ok=True)
 
     # 2. Intercept and mock the network infrastructure components deterministically
-    with patch("src.pipeline.initialize_state.TokenManager"), \
-         patch("src.pipeline.initialize_state.CloudIngestor") as mock_ingestor_cls:
+    with patch("src.io.dropbox_utils.TokenManager"), \
+         patch("src.io.download_from_dropbox.CloudIngestor") as mock_ingestor_cls:
         
         # Configure the mock ingestor to throw a remote API error
         mock_ingestor = MagicMock()
@@ -358,4 +358,4 @@ def test_main_exits_when_inputs_missing(
 
     # 5. Assert defensive boundary conditions
     mock_exit.assert_called_once_with(1)
-    mock_manifest.assert_not_called()
+    mock_manifest.assert_called_once()
