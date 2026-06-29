@@ -216,6 +216,10 @@ def test_main_entrypoint_execution(mock_filesystem, mock_tuner_state, monkeypatc
 # Utility & Coverage Completion
 # ==============================================================================
 
+# ==============================================================================
+# Utility & Coverage Completion
+# ==============================================================================
+
 def test_fetch_inputs_from_dropbox_preserves_existing_files(mock_filesystem):
     """Verifies that the function respects/preserves authentic assets that already exist."""
     input_list = ["test_a.cad", "test_b.step"]
@@ -234,15 +238,46 @@ def test_fetch_inputs_from_dropbox_preserves_existing_files(mock_filesystem):
         assert (target_dir / filename).exists(), f"{filename} was lost during verification"
         assert (target_dir / filename).read_text() == "Authentic CAD Data"
 
-def test_fetch_inputs_from_dropbox_raises_error_if_missing(mock_filesystem):
-    """Verifies that the system raises a hard error if input assets are missing."""
+
+def test_fetch_inputs_from_dropbox_raises_credential_error_if_env_missing(mock_filesystem, monkeypatch):
+    """Verifies that an OSError/EnvironmentError is triggered if required credentials are absent."""
+    # Ensure environment keys are strictly cleared for this test case
+    monkeypatch.delenv("DROPBOX_APP_KEY", raising=False)
+    monkeypatch.delenv("DROPBOX_APP_SECRET", raising=False)
+    monkeypatch.delenv("DROPBOX_REFRESH_TOKEN", raising=False)
+    
+    input_list = ["missing_asset.step"]
+    target_dir = mock_filesystem / "empty_dir"
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    with pytest.raises(OSError, match="Missing required Dropbox credentials"):
+        initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
+
+
+def test_fetch_inputs_from_dropbox_raises_error_if_missing(mock_filesystem, monkeypatch):
+    """Verifies that the system raises a hard FileNotFoundError if the asset is missing from Dropbox."""
+    # 1. Seed dummy credentials via monkeypatch to bypass the initial environment block
+    monkeypatch.setenv("DROPBOX_APP_KEY", "mock_key")
+    monkeypatch.setenv("DROPBOX_APP_SECRET", "mock_secret")
+    monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "mock_refresh")
+    monkeypatch.setenv("DROPBOX_FOLDER", "simulators")
+    
     input_list = ["non_existent_file.cad"]
     target_dir = mock_filesystem / "empty_dir"
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    # Assert that the logic now correctly blocks execution if files are missing
-    with pytest.raises(FileNotFoundError, match="missing from the target environment"):
-        initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
+    # 2. Intercept and mock the network infrastructure components deterministically
+    with patch("src.pipeline.initialize_state.TokenManager"), \
+         patch("src.pipeline.initialize_state.CloudIngestor") as mock_ingestor_cls:
+        
+        # Configure the mock ingestor to throw a remote API error
+        mock_ingestor = MagicMock()
+        mock_ingestor.download_file.side_effect = Exception("Remote file target not found on Dropbox")
+        mock_ingestor_cls.return_value = mock_ingestor
+
+        # 3. Assert that the function wraps the network failure into the expected FileNotFoundError
+        with pytest.raises(FileNotFoundError, match="Failed to download asset"):
+            initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
 
 # When a manifest search fails, we must trigger the specific error logging path, 
 # ensuring the user receives helpful feedback regarding the missing file.
