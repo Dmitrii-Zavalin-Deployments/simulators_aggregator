@@ -305,7 +305,7 @@ jobs:
           python-version: "3.11"
 
       - name: 📦 Install Engine Pip Dependencies
-        run: pip install -r requirements.txt
+        run: python -m pip install --no-cache-dir -r requirements.txt
       
       # 📥 STATE IMPORT: Check if a prior state zip exists on Dropbox
       - name: 📥 Check Pipeline State Existence
