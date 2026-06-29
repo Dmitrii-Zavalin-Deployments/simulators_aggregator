@@ -1,5 +1,13 @@
 # 🛰️ Simulators Aggregator Performance Audit
 
+### Audit: 2026-06-29 17:49:33 UTC
+- **Pipeline:** `mesh_pipeline_3ed2a0a.json`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 2056/15989MB
+---
+
 ### Audit: 2026-06-29 17:46:01 UTC
 - **Pipeline:** `mesh_pipeline_3ed2a0a.json`
 - **Branch:** `main`
