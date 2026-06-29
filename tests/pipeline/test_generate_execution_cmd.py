@@ -73,7 +73,7 @@ def test_main_valid_execution(tmp_path, caplog, capsys):
         main()
     
     captured = capsys.readouterr()
-    assert 'repositories/sim/src/main.py' in captured.out
+    assert 'python3 -m src.main' in captured.out
     assert "Adding task for repository: sim" in caplog.text
 
 
@@ -121,7 +121,7 @@ def test_main_sorting_and_protocol_handling(tmp_path, caplog, capsys):
     assert captured.out.find("repo_A") < captured.out.find("repo_B")
     
     # Asserting local path normalization (not the original URL)
-    assert "repositories/repo_A/src/main.py" in captured.out
+    assert "python3 -m src.main" in captured.out
 
 
 def test_main_entry_point():
