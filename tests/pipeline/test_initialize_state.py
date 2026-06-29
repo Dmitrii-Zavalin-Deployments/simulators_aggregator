@@ -284,6 +284,10 @@ def test_main_executes_provisioning_when_not_cached(mock_filesystem, monkeypatch
             initialize_state.main()
             mock_exec.assert_called_once()
 
+import pytest
+from unittest.mock import patch, MagicMock
+from src.pipeline.initialize_state import main
+
 @patch("src.pipeline.initialize_state.load_pipeline_manifest")
 @patch("src.pipeline.initialize_state.sys.exit")
 @patch("src.pipeline.initialize_state.fetch_inputs_from_dropbox")
@@ -310,9 +314,13 @@ def test_main_exits_when_inputs_missing(
     # 2. Force the targeted structural exception
     mock_fetch.side_effect = FileNotFoundError("CRITICAL: Input missing")
 
-    # 3. Execute entrypoint
-    main()
+    # 3. Force mock_exit to raise SystemExit to mimic real process termination
+    mock_exit.side_effect = SystemExit
 
-    # 4. Assert defensive boundary conditions
+    # 4. Execute entrypoint within exception wrapper
+    with pytest.raises(SystemExit):
+        main()
+
+    # 5. Assert defensive boundary conditions
     mock_exit.assert_called_once_with(1)
     mock_manifest.assert_not_called()
