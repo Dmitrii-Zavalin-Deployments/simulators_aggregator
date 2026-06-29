@@ -1,54 +1,47 @@
 #!/bin/bash
 # ==============================================================================
-# 🔍 DEEP FORENSIC AUDIT: SIMULATOR EXECUTION PATH MATCH ENGINE
+# 🔍 DEEP FORENSIC AUDIT: CAD STEP FILE GEOMETRY INGESTION MISMATCH
 # ==============================================================================
 
 echo "========================================================================"
-echo "🔍 DIAGNOSTICS: Shell Execution Context & Working Directories"
+echo "📂 DIAGNOSTICS: Target Asset Presence & File Properties"
 echo "========================================================================"
-echo "Current Aggregator Working Directory (CWD): $(pwd)"
-echo "Checking Aggregator Root contents: $(ls -F | grep -E 'data/|src/|config/|tasks/')"
+TARGET_STEP="data/testing-input-output/tuning_main/inputs-outputs/sample_geometry.step"
+INGESTION_CODE="data/testing-input-output/repositories/mesh_generator/src/steps/ingestion.py"
 
-# Define absolute paths to targets inside the sub-repository structure
-TARGET_REPO_DIR="data/testing-input-output/repositories/mesh_generator"
-TARGET_MAIN="$TARGET_REPO_DIR/src/main.py"
-TARGET_CONFIG="$TARGET_REPO_DIR/config/config.json"
-
-echo -e "\n--- 📂 PROBING TARGET SUB-REPOSITORY PATHS ---"
-if [ -d "$TARGET_REPO_DIR" ]; then
-    echo "✅ Found sub-repository workspace directory at: $TARGET_REPO_DIR"
+if [ -f "$TARGET_STEP" ]; then
+    echo "✅ Target asset located at: $TARGET_STEP"
+    echo "File Size: $(wc -c < "$TARGET_STEP") bytes"
 else
-    echo "❌ ERROR: Target sub-repository workspace directory does not exist at: $TARGET_REPO_DIR"
-fi
-
-if [ -f "$TARGET_CONFIG" ]; then
-    echo "✅ Target configuration asset located: $TARGET_CONFIG"
-else
-    echo "❌ ERROR: Target configuration asset missing at expected path: $TARGET_CONFIG"
+    echo "❌ CRITICAL ERROR: Target STEP file asset missing at: $TARGET_STEP"
 fi
 
 echo "========================================================================"
-echo "🔎 SMOKING GUN: Source Code Line-by-Line Path Evaluation Audit"
+echo "🔎 SMOKING GUN: Step File Header & Syntax Line Audit"
 echo "========================================================================"
-if [ -f "$TARGET_MAIN" ]; then
-    echo "Sub-Repository Main Entry Point: $TARGET_MAIN"
+if [ -f "$TARGET_STEP" ]; then
+    echo "Top 10 lines of $TARGET_STEP:"
     echo "------------------------------------------------------------------------"
-    # Print the lines around file opens to identify un-anchored relative paths
-    cat -n "$TARGET_MAIN" | grep -C 7 -E "open\(|config\.json"
+    cat -n "$TARGET_STEP" | head -n 10
 else
-    echo "❌ CRITICAL ERROR: Unable to locate sub-repository entry point: $TARGET_MAIN"
+    echo "❌ Cannot perform syntax audit; file does not exist."
+fi
+
+echo -e "\n--- Checking Ingestion Error Anchor Logic ---"
+if [ -f "$INGESTION_CODE" ]; then
+    cat -n "$INGESTION_CODE" | grep -C 5 "RuntimeError"
+else
+    echo "⚠️ Ingestion step source file not accessible at this path context."
 fi
 
 echo "========================================================================"
-echo "🔧 AUTOMATED REPAIRS (Sed Injections)"
+echo "🔧 AUTOMATED REPAIRS (Sed & Echo Asset Injections)"
 echo "========================================================================"
-echo "To fix this mismatch in your CI pipeline automatically, uncomment the fields below:"
+echo "If your sample_geometry.step is a placeholder string that is breaking the CAD"
+echo "kernel parser, uncomment the command below to inject a valid, minimal STEP file structure:"
 echo ""
-echo "# Strategy A: Enforce contextual directory nesting before execution inside generating blocks"
-echo "# sed -i \"s|python3 \${repo_dir}/src/main.py|(cd \${repo_dir} \&\& python3 -m src.main)|g\" src/pipeline/generate_execution_cmd.py"
-echo ""
-echo "# Strategy B: Direct hotfix inline string adjustment for hardcoded file opens inside sub-repo main"
-echo "# sed -i 's|open(\"config/config.json\"|open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), \"config/config.json\"))|g' $TARGET_MAIN"
+echo "# Strategy: Overwrite the mock file with a syntactically correct, empty ISO-10303-21 schema envelope"
+echo "# echo -e \"ISO-10303-21;\\nHEADER;\\nFILE_DESCRIPTION(('STRICT_MOCK'),'2;1');\\nFILE_NAME('sample.step','2026-06-29',('Dmitrii'),('Zavalin Engineering'),'','','');\\nFILE_SCHEMA(('AUTOMOTIVE_DESIGN_CC2'));\\nENDSEC;\\nDATA;\\nENDSEC;\\nEND-ISO-10303-21;\" > $TARGET_STEP"
 
 echo "========================================================================"
 echo "🏁 DEEP FORENSIC AUDIT SEQUENCE COMPLETE"
