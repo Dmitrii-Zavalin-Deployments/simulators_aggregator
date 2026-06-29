@@ -2,6 +2,7 @@ import json
 import runpy
 import pytest
 import subprocess
+import sys
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from src.pipeline import initialize_state
@@ -11,8 +12,6 @@ from src.pipeline.initialize_state import main
 # Infrastructure & Fixtures
 # ==============================================================================
 
-# We establish an isolated sandbox root directory for clean filesystem operations
-# to ensure that tests do not interfere with the host system.
 @pytest.fixture
 def mock_filesystem(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
@@ -20,9 +19,6 @@ def mock_filesystem(tmp_path, monkeypatch):
     (tmp_path / "repo").mkdir(exist_ok=True)
     return tmp_path
 
-# To test the orchestration logic, we must decouple the initialization of the 
-# TunerState container, replacing complex external state mutations with a 
-# controllable MagicMock.
 @pytest.fixture
 def mock_tuner_state():
     with patch("src.pipeline.initialize_state.TunerState") as mock_class:
@@ -34,10 +30,6 @@ def mock_tuner_state():
 # Task Discovery & Schema Validation
 # ==============================================================================
 
-# We verify that the task discovery logic handles malformed data gracefully.
-# If a file contains invalid JSON, the parser must catch the decoder error.
-# If files exist but do not match the expected schema, the system must 
-# raise a ValueError to halt processing.
 def test_discover_task_file_corrupt_and_invalid_schema(mock_filesystem):
     tasks_dir = mock_filesystem / "tasks"
     
@@ -51,10 +43,6 @@ def test_discover_task_file_corrupt_and_invalid_schema(mock_filesystem):
 # Subprocess Orchestration
 # ==============================================================================
 
-# During the provisioning phase, the system uses subprocess to execute bash scripts.
-# We must ensure that output is correctly streamed for logs and that non-zero
-# exit codes correctly trigger a CalledProcessError, preventing the pipeline 
-# from continuing in a broken state.
 def test_execute_setup_script_stdout_streaming_and_failure(mock_filesystem):
     repo_path = mock_filesystem / "repo"
     
@@ -71,9 +59,6 @@ def test_execute_setup_script_stdout_streaming_and_failure(mock_filesystem):
 # Main Orchestrator Integrity
 # ==============================================================================
 
-# The entry point must enforce strict environment validation. 
-# If the provided repository path does not exist, or if the system cannot locate 
-# any valid tasks to initialize, the main process must terminate with a system exit code of 1.
 def test_main_repo_path_not_exists(monkeypatch):
     monkeypatch.setenv("GITHUB_REF_NAME", "production")
     with patch("sys.argv", ["script", "--repo-path", "/missing/target/dir"]):
@@ -93,9 +78,6 @@ def test_main_task_discovery_failure(mock_filesystem, monkeypatch):
 # Conditional Logic & Caching
 # ==============================================================================
 
-# When the dependency cache is flagged as active (cached_dependency=True), 
-# the pipeline optimization should bypass provisioning scripts. We assert that
-# the setup function is never called when the cache is hit.
 def test_main_cached_dependency_skips_provisioning(mock_filesystem, mock_tuner_state, monkeypatch):
     task_file = mock_filesystem / "tasks" / "task.json"
     task_file.write_text(json.dumps({"pipeline_id": "cached_pid", "input_data_list": []}))
@@ -115,9 +97,6 @@ def test_main_cached_dependency_skips_provisioning(mock_filesystem, mock_tuner_s
 # Manifest & Configuration Lookups
 # ==============================================================================
 
-# If a configuration file is missing from its expected path, the system performs 
-# an automatic fallback search using the filename. We simulate a drifted topology
-# to verify this fallback succeeds.
 def test_main_config_basename_fallback(mock_filesystem, mock_tuner_state, monkeypatch):
     task_file = mock_filesystem / "tasks" / "task.json"
     task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
@@ -134,9 +113,6 @@ def test_main_config_basename_fallback(mock_filesystem, mock_tuner_state, monkey
     with patch("sys.argv", ["script", "--repo-path", str(repo_path)]):
         initialize_state.main()
 
-# When the manifest points to a configuration file that cannot be found 
-# even after fallback, or if the manifest lacks the baseline configuration key,
-# the system must protect the integrity of the run by forcing a SystemExit.
 def test_main_config_file_missing_exit(mock_filesystem, monkeypatch):
     task_file = mock_filesystem / "tasks" / "task.json"
     task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
@@ -169,9 +145,6 @@ def test_main_manifest_missing_config_exit(mock_filesystem, monkeypatch):
 # Exception Propagation
 # ==============================================================================
 
-# Any failure during the instantiation of the Sovereign State container should 
-# be caught. We simulate a RuntimeError to ensure the orchestrator exits cleanly 
-# rather than propagating the crash to the parent shell.
 def test_main_tuner_state_exception_exit(mock_filesystem, monkeypatch):
     task_file = mock_filesystem / "tasks" / "task.json"
     task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
@@ -193,9 +166,6 @@ def test_main_tuner_state_exception_exit(mock_filesystem, monkeypatch):
 # Entrypoint Execution
 # ==============================================================================
 
-# Finally, we confirm the module can be executed directly. By using runpy, 
-# we simulate a shell call to 'python initialize_state.py', ensuring the
-# __name__ == "__main__" block triggers the main logic.
 def test_main_entrypoint_execution(mock_filesystem, mock_tuner_state, monkeypatch):
     task_file = mock_filesystem / "tasks" / "task.json"
     task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
@@ -217,42 +187,32 @@ def test_main_entrypoint_execution(mock_filesystem, mock_tuner_state, monkeypatc
 # ==============================================================================
 
 def test_fetch_inputs_from_dropbox_preserves_existing_files(mock_filesystem):
-    """Verifies that the function respects/preserves authentic assets that already exist."""
     input_list = ["test_a.cad", "test_b.step"]
     target_dir = mock_filesystem / "downloads"
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Pre-seed the environment with authentic data
     for filename in input_list:
         (target_dir / filename).write_text("Authentic CAD Data")
 
-    # 2. Act
     initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
 
-    # 3. Assert they were not touched/overwritten/deleted
     for filename in input_list:
         assert (target_dir / filename).exists(), f"{filename} was lost during verification"
         assert (target_dir / filename).read_text() == "Authentic CAD Data"
 
 def test_fetch_inputs_from_dropbox_raises_error_if_missing(mock_filesystem):
-    """Verifies that the system raises a hard error if input assets are missing."""
     input_list = ["non_existent_file.cad"]
     target_dir = mock_filesystem / "empty_dir"
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    # Assert that the logic now correctly blocks execution if files are missing
     with pytest.raises(FileNotFoundError, match="missing from the target environment"):
         initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
 
-# When a manifest search fails, we must trigger the specific error logging path, 
-# ensuring the user receives helpful feedback regarding the missing file.
 def test_load_pipeline_manifest_raises_error_when_missing(mock_filesystem):
     repo_path = mock_filesystem / "repo"
     with pytest.raises(FileNotFoundError, match="not found"):
         initialize_state.load_pipeline_manifest(repo_path, "missing_pid")
 
-# We assert that the success logger is invoked when a provisioning script finishes 
-# with a clean return code (0).
 def test_execute_setup_script_success_path(mock_filesystem):
     repo_path = mock_filesystem / "repo"
     script = repo_path / "test_success.sh"
@@ -266,8 +226,6 @@ def test_execute_setup_script_success_path(mock_filesystem):
         
         initialize_state.execute_setup_script(repo_path, "test_success.sh")
 
-# Finally, we confirm that when the dependency cache is empty, the provisioning 
-# script is correctly executed, ensuring our environment setup logic is functional.
 def test_main_executes_provisioning_when_not_cached(mock_filesystem, monkeypatch, mock_tuner_state):
     repo_path = mock_filesystem / "repo"
     repo_path.mkdir(exist_ok=True)
@@ -284,9 +242,9 @@ def test_main_executes_provisioning_when_not_cached(mock_filesystem, monkeypatch
             initialize_state.main()
             mock_exec.assert_called_once()
 
-import pytest
-from unittest.mock import patch, MagicMock
-from src.pipeline.initialize_state import main
+# ==============================================================================
+# Input Missing Diagnostic Test
+# ==============================================================================
 
 @patch("src.pipeline.initialize_state.load_pipeline_manifest")
 @patch("src.pipeline.initialize_state.sys.exit")
@@ -295,15 +253,15 @@ from src.pipeline.initialize_state import main
 @patch("src.pipeline.initialize_state.parse_arguments")
 @patch("src.pipeline.initialize_state.Path.exists")
 def test_main_exits_when_inputs_missing(
-    mock_exists,        # Maps to Path.exists
-    mock_args,          # Maps to parse_arguments
-    mock_discover,      # Maps to discover_task_file
-    mock_fetch,         # Maps to fetch_inputs_from_dropbox
-    mock_exit,          # Maps to sys.exit
-    mock_manifest       # Maps to load_pipeline_manifest
+    mock_exists,
+    mock_args,
+    mock_discover,
+    mock_fetch,
+    mock_exit,
+    mock_manifest
 ):
-    """Verifies that a FileNotFoundError in input fetching triggers an explicit exit(1)."""
-    # 1. Configure deterministic mock behaviors
+    """Verifies that a FileNotFoundError in input fetching halts execution immediately."""
+    # 1. Setup deterministic mock behaviors
     mock_exists.return_value = True
     mock_args.return_value = MagicMock(repo_path="dummy/repo", cached_dependency=False)
     mock_discover.return_value = {
