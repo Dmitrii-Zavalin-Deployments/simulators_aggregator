@@ -344,9 +344,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /usr/share/miniconda/envs/tuner-env
-          key: ${{ hashFiles('tasks/**') }}-${{ github.ref_name }}
+          key: conda-${{ hashFiles('requirements.txt') }}-${{ hashFiles('tasks/**') }}-${{ github.ref_name }}
           restore-keys: |
-            ${{ hashFiles('tasks/**') }}-${{ github.ref_name }}-
+            conda-${{ hashFiles('requirements.txt') }}-${{ hashFiles('tasks/**') }}-
+
+      - name: 📦 Sync Conda Env Dependencies
+        if: steps.cache-conda.outputs.cache-hit != 'true'
+        shell: bash -el {0}
+        run: |
+          conda activate tuner-env
+          pip install -r requirements.txt
 
       # ⚙️ COLD START ONLY (Initialization & Parameter Explosion)
       - name: ⚙️ Initialize Pipeline State (Cold Start)
