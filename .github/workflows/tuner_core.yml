@@ -273,8 +273,8 @@ jobs:
 
   production_run:
     name: "🛠️ Assemble & Tuning"
-    needs: pre_flight_tests
-    # needs: gatekeeper
+    # needs: pre_flight_tests
+    needs: gatekeeper
     # if: needs.gatekeeper.outputs.status == 'active'
     runs-on: ubuntu-latest
     env:
