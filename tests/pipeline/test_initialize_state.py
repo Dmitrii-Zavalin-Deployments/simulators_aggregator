@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from src.pipeline import initialize_state
+from src.pipeline.initialize_state import main
 
 # ==============================================================================
 # Infrastructure & Fixtures
@@ -282,3 +283,43 @@ def test_main_executes_provisioning_when_not_cached(mock_filesystem, monkeypatch
         with patch("src.pipeline.initialize_state.execute_setup_script") as mock_exec:
             initialize_state.main()
             mock_exec.assert_called_once()
+
+@patch("src.pipeline.initialize_state.sys.exit")
+@patch("src.pipeline.initialize_state.logger")
+@patch("src.pipeline.initialize_state.fetch_inputs_from_dropbox")
+@patch("src.pipeline.initialize_state.discover_task_file")
+@patch("src.pipeline.initialize_state.parse_arguments")
+@patch("src.pipeline.initialize_state.Path.exists")
+def test_main_exits_when_inputs_missing(
+    mock_exists, 
+    mock_args, 
+    mock_discover, 
+    mock_fetch, 
+    mock_logger, 
+    mock_exit
+):
+    """
+    Test that the pipeline correctly logs an error and exits when 
+    fetch_inputs_from_dropbox raises a FileNotFoundError.
+    Targets lines 158-160.
+    """
+    # 1. Setup Mocks
+    mock_exists.return_value = True
+    mock_args.return_value = MagicMock(repo_path="dummy/repo")
+    mock_discover.return_value = {
+        "pipeline_id": "test_id", 
+        "input_data_list": ["missing.cad"]
+    }
+    
+    # Simulate the FileNotFoundError that triggers the 'except' block
+    mock_fetch.side_effect = FileNotFoundError("❌ CRITICAL: Required input asset 'missing.cad' is missing")
+
+    # 2. Run Main
+    main()
+
+    # 3. Assertions
+    # Verify we entered the 'except' block
+    mock_logger.error.assert_called()
+    
+    # Verify sys.exit(1) was called
+    mock_exit.assert_called_once_with(1)
