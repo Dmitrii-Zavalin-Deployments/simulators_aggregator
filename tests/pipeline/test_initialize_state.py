@@ -215,18 +215,33 @@ def test_main_entrypoint_execution(mock_filesystem, mock_tuner_state, monkeypatc
 # Utility & Coverage Completion
 # ==============================================================================
 
-# We verify the data ingestion layer. When provided a list of input files, the system 
-# must create these files locally in the target workspace, writing standard mock 
-# data to confirm accessibility.
-def test_fetch_inputs_from_dropbox_writes_files(mock_filesystem):
+def test_fetch_inputs_from_dropbox_preserves_existing_files(mock_filesystem):
+    """Verifies that the function respects/preserves authentic assets that already exist."""
     input_list = ["test_a.cad", "test_b.step"]
     target_dir = mock_filesystem / "downloads"
-    
-    initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
-    
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    # 1. Pre-seed the environment with authentic data
     for filename in input_list:
-        assert (target_dir / filename).exists(), f"{filename} was not created"
-        assert (target_dir / filename).read_text() == "Mock CAD/Step Data"
+        (target_dir / filename).write_text("Authentic CAD Data")
+
+    # 2. Act
+    initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
+
+    # 3. Assert they were not touched/overwritten/deleted
+    for filename in input_list:
+        assert (target_dir / filename).exists(), f"{filename} was lost during verification"
+        assert (target_dir / filename).read_text() == "Authentic CAD Data"
+
+def test_fetch_inputs_from_dropbox_raises_error_if_missing(mock_filesystem):
+    """Verifies that the system raises a hard error if input assets are missing."""
+    input_list = ["non_existent_file.cad"]
+    target_dir = mock_filesystem / "empty_dir"
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    # Assert that the logic now correctly blocks execution if files are missing
+    with pytest.raises(FileNotFoundError, match="missing from the target environment"):
+        initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
 
 # When a manifest search fails, we must trigger the specific error logging path, 
 # ensuring the user receives helpful feedback regarding the missing file.
