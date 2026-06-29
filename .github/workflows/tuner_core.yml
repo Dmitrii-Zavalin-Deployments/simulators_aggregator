@@ -1,12 +1,11 @@
-name: "🛰️ Simulators Pipeline Tuning Engine"
+name: "🛰️ Simulators Pipeline Tuning Engine (Core Logic)"
 
 on:
+  workflow_call:    # This allows other files to trigger this entire pipeline
   push:
     branches:
       - "**"
   workflow_dispatch:
-  schedule:
-    - cron: "* * * * *"
 
 jobs:
   hourly_guard:

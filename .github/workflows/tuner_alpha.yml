@@ -1,0 +1,10 @@
+name: "🛰️ Simulators Pipeline Tuning Pulse (Alpha)"
+
+on:
+  schedule:
+    - cron: "14 * * * *"
+
+jobs:
+  call_core_pipeline:
+    uses: ./.github/workflows/tuner_core.yml
+    secrets: inherit  # Crucial: Shares secrets automatically
