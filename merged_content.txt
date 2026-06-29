@@ -1486,6 +1486,10 @@ def test_main_entrypoint_execution(mock_filesystem, mock_tuner_state, monkeypatc
 # Utility & Coverage Completion
 # ==============================================================================
 
+# ==============================================================================
+# Utility & Coverage Completion
+# ==============================================================================
+
 def test_fetch_inputs_from_dropbox_preserves_existing_files(mock_filesystem):
     """Verifies that the function respects/preserves authentic assets that already exist."""
     input_list = ["test_a.cad", "test_b.step"]
@@ -1504,15 +1508,46 @@ def test_fetch_inputs_from_dropbox_preserves_existing_files(mock_filesystem):
         assert (target_dir / filename).exists(), f"{filename} was lost during verification"
         assert (target_dir / filename).read_text() == "Authentic CAD Data"
 
-def test_fetch_inputs_from_dropbox_raises_error_if_missing(mock_filesystem):
-    """Verifies that the system raises a hard error if input assets are missing."""
+
+def test_fetch_inputs_from_dropbox_raises_credential_error_if_env_missing(mock_filesystem, monkeypatch):
+    """Verifies that an OSError/EnvironmentError is triggered if required credentials are absent."""
+    # Ensure environment keys are strictly cleared for this test case
+    monkeypatch.delenv("DROPBOX_APP_KEY", raising=False)
+    monkeypatch.delenv("DROPBOX_APP_SECRET", raising=False)
+    monkeypatch.delenv("DROPBOX_REFRESH_TOKEN", raising=False)
+    
+    input_list = ["missing_asset.step"]
+    target_dir = mock_filesystem / "empty_dir"
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    with pytest.raises(OSError, match="Missing required Dropbox credentials"):
+        initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
+
+
+def test_fetch_inputs_from_dropbox_raises_error_if_missing(mock_filesystem, monkeypatch):
+    """Verifies that the system raises a hard FileNotFoundError if the asset is missing from Dropbox."""
+    # 1. Seed dummy credentials via monkeypatch to bypass the initial environment block
+    monkeypatch.setenv("DROPBOX_APP_KEY", "mock_key")
+    monkeypatch.setenv("DROPBOX_APP_SECRET", "mock_secret")
+    monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "mock_refresh")
+    monkeypatch.setenv("DROPBOX_FOLDER", "simulators")
+    
     input_list = ["non_existent_file.cad"]
     target_dir = mock_filesystem / "empty_dir"
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    # Assert that the logic now correctly blocks execution if files are missing
-    with pytest.raises(FileNotFoundError, match="missing from the target environment"):
-        initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
+    # 2. Intercept and mock the network infrastructure components deterministically
+    with patch("src.pipeline.initialize_state.TokenManager"), \
+         patch("src.pipeline.initialize_state.CloudIngestor") as mock_ingestor_cls:
+        
+        # Configure the mock ingestor to throw a remote API error
+        mock_ingestor = MagicMock()
+        mock_ingestor.download_file.side_effect = Exception("Remote file target not found on Dropbox")
+        mock_ingestor_cls.return_value = mock_ingestor
+
+        # 3. Assert that the function wraps the network failure into the expected FileNotFoundError
+        with pytest.raises(FileNotFoundError, match="Failed to download asset"):
+            initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
 
 # When a manifest search fails, we must trigger the specific error logging path, 
 # ensuring the user receives helpful feedback regarding the missing file.
@@ -1731,9 +1766,9 @@ def test_sorting_logic(tmp_path, capsys):
 
 ========== START OF FILE: pytest.ini ==========
 [pytest]
+testpaths = tests
 filterwarnings =
-    # Ignore the specific pkg_resources deprecation warning from the dropbox library
-    ignore::DeprecationWarning:pkg_resources.*========== END OF FILE: pytest.ini ==========
+    ignore:pkg_resources is deprecated as an API:DeprecationWarning========== END OF FILE: pytest.ini ==========
 
 ========== START OF FILE: README.md ==========
 # artifact_driven_simulation_engine========== END OF FILE: README.md ==========
@@ -2564,6 +2599,78 @@ Public License instead of this License.  But first, please read
 
 ========== START OF FILE: performance_audit.md ==========
 # 🛰️ Simulators Aggregator Performance Audit
+
+### Audit: 2026-06-29 22:02:50 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 11.4%
+- **Memory Usage:** 1175/15993MB
+---
+
+### Audit: 2026-06-29 21:57:44 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.2%
+- **Memory Usage:** 1144/15989MB
+---
+
+### Audit: 2026-06-29 21:53:53 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 1203/15989MB
+---
+
+### Audit: 2026-06-29 21:51:00 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 20%
+- **Memory Usage:** 1245/15993MB
+---
+
+### Audit: 2026-06-29 21:43:47 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.3%
+- **Memory Usage:** 1861/15989MB
+---
+
+### Audit: 2026-06-29 21:38:09 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 1998/15989MB
+---
+
+### Audit: 2026-06-29 21:36:23 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.3%
+- **Memory Usage:** 1786/15989MB
+---
+
+### Audit: 2026-06-29 21:13:07 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 2.2%
+- **Memory Usage:** 1886/15993MB
+---
+
+### Audit: 2026-06-29 21:07:07 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `main`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 1754/15989MB
+---
 
 ### Audit: 2026-06-29 20:27:46 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
@@ -4178,6 +4285,8 @@ import argparse
 import subprocess
 from pathlib import Path
 from src.state.tuner_state import TunerState
+from src.io.dropbox_utils import TokenManager
+from src.io.download_from_dropbox import CloudIngestor
 
 # Configure explicit logging
 logging.basicConfig(
@@ -4224,22 +4333,48 @@ def discover_task_file() -> dict:
 
 def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
     """
-    Input synchronization verification layer.
-    Iterates through the input_data_list and verifies that each authentic asset 
-    is physically present in the target directory. Raises a hard error if missing.
+    Input synchronization layer.
+    Iterates through the input_data_list and verifies presence.
+    If a required asset is missing from the local workspace directory,
+    it automatically instantiates the CloudIngestor to download it from Dropbox.
     """
     logger.info("Verifying integrity and presence of required input data assets...")
     target_dir.mkdir(parents=True, exist_ok=True)
+    
+    ingestor = None
+    
     for filename in input_data_list:
         target_path = target_dir / filename
-
-        logger.info(f"DEBUG: Attempting to locate asset at path: {target_path.resolve()}")
+        logger.info(f"DEBUG: Checking for asset at path: {target_path.resolve()}")
         
         if not target_path.exists():
-            raise FileNotFoundError(
-                f"❌ CRITICAL: Required input asset '{filename}' is missing from the target environment workspace: {target_dir}"
-            )
+            logger.info(f"⚠️ Asset '{filename}' is missing locally. Initiating direct Dropbox download...")
             
+            # Lazily initialize CloudIngestor only if a download is required
+            if ingestor is None:
+                app_key = os.environ.get("DROPBOX_APP_KEY")
+                app_secret = os.environ.get("DROPBOX_APP_SECRET")
+                refresh_token = os.environ.get("DROPBOX_REFRESH_TOKEN")
+                dropbox_folder = os.environ.get("DROPBOX_FOLDER", "simulators").strip("/")
+                
+                if not all([app_key, app_secret, refresh_token]):
+                    raise EnvironmentError(
+                        "❌ CRITICAL: Missing required Dropbox credentials (DROPBOX_APP_KEY, "
+                        "DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN) in environment."
+                    )
+                
+                tm = TokenManager(app_key, app_secret)
+                # Keep logs grouped by sending the ingestor logs to stdout/file cleanly
+                ingestor = CloudIngestor(tm, refresh_token, target_dir.parent / "dropbox_download.log")
+            
+            remote_path = f"/{dropbox_folder}/{filename}"
+            try:
+                ingestor.download_file(remote_path, target_path)
+            except Exception as e:
+                raise FileNotFoundError(
+                    f"❌ CRITICAL: Failed to download asset '{filename}' from Dropbox path '{remote_path}'. Error: {e}"
+                )
+                
         logger.info(f"   ↳ [Verified] Authentic input asset present: {filename}")
 
 
@@ -4575,62 +4710,67 @@ exit 0
 ========== END OF FILE: debug/forensic_audit_testing.sh ==========
 
 ========== START OF FILE: debug/forensic_audit_production.sh ==========
-#!/bin/bash
-# ==============================================================================
-# 🔍 FORENSIC AUDIT: WORKSPACE HYDRATION FAILURE
-# ==============================================================================
-
-TARGET_DIR="data/testing-input-output/tuning_main"
-TARGET_INPUTS="$TARGET_DIR/inputs-outputs"
+#!/usr/bin/env bash
+set -euo pipefail
 
 echo "========================================================================"
-echo "🔎 DIAGNOSTICS: Workspace & Environment Context"
+echo "🔍 PHASE 1: REUSABLE CORE DIAGNOSTICS & PATH DRIFT ANALYSIS"
 echo "========================================================================"
-echo "Current Working Directory: $(pwd)"
-echo "Listing root directory structure:"
-ls -F
 
-echo -e "\n🔎 Searching for missing assets globally:"
-find . -name "state.json"
-find . -name "cube_50-50-50.step"
+# 1. Verify existence and integrity of manifest definitions
+echo "Checking project requirements.txt for baseline dependencies..."
+for package in "requests" "dropbox"; do
+    if grep -qi "^${package}" requirements.txt; then
+        echo "✅ Found explicit manifest declaration for: $package"
+        grep -in "^${package}" requirements.txt
+    else
+        echo "❌ CRITICAL: '$package' definition not found or formatted incorrectly in requirements.txt"
+    fi
+done
 
-echo -e "\n========================================================================"
-echo "🔎 SMOKING-GUN AUDIT: Scaffolding Logic"
+echo -e "\nExtracting runtime landscape data..."
+echo "Current Shell User Space Python: $(which python3 || echo 'Not Bound')"
+echo "Current Shell Interpreter Version: $(python3 --version || echo 'Not Bound')"
+echo "Conda Virtual Environment Identifier: ${CONDA_DEFAULT_ENV:-None (Global System Context)}"
+
+# 2. Query environment package maps
+echo -e "\nTesting package presence in the current executing runtime layer..."
+for package in "requests" "dropbox"; do
+    if pip list 2>/dev/null | grep -qi "^${package}"; then
+        echo "⚠️ Note: '$package' is visible in this specific shell layer, but missing from the simulator sandbox."
+    else
+        echo "❌ Target Package Deficit: '$package' is completely missing here."
+    fi
+done
+
 echo "========================================================================"
-# Check if the setup script exists and is executable
-if [ -d "repositories/fluid_dynamics_simulator/setup_scripts" ]; then
-    echo "Found setup scripts directory. Checking permissions:"
-    ls -l repositories/fluid_dynamics_simulator/setup_scripts/
+echo "🚬 PHASE 2: REUSABLE WORKFLOW SMOKING-GUN SOURCE AUDIT"
+echo "========================================================================"
+
+CORE_WORKFLOW=".github/workflows/tuner_core.yml"
+
+if [ -f "$CORE_WORKFLOW" ]; then
+    echo "Inspecting execution context definitions within: $CORE_WORKFLOW"
+    echo "------------------------------------------------------------------------"
+    # Isolate step blocks related to conda environment provisioning and caching
+    cat -n "$CORE_WORKFLOW" | grep -A 30 -B 3 "Set up Conda Environment" || cat -n "$CORE_WORKFLOW" | head -n 100
 else
-    echo "⚠️ Setup scripts directory not found in repository."
+    echo "❌ CRITICAL: The core reusable workflow file '$CORE_WORKFLOW' could not be found."
 fi
-
-echo -e "\n========================================================================"
-echo "🔧 AUTOMATED REPAIRS: Emergency Seeding & Path Correction"
-echo "========================================================================"
-# If assets are found elsewhere in the repo, seed them into the target directory
-# to allow the pipeline to proceed (Emergency Fallback)
-
-# Attempt to locate and seed state.json
-STATE_FILE=$(find . -name "state.json" | head -n 1)
-if [ ! -z "$STATE_FILE" ] && [ ! -f "$TARGET_DIR/state.json" ]; then
-    echo "Found state.json at $STATE_FILE. Copying to $TARGET_DIR..."
-    mkdir -p "$TARGET_DIR"
-    cp "$STATE_FILE" "$TARGET_DIR/state.json"
-fi
-
-# Attempt to locate and seed the step file
-STEP_FILE=$(find . -name "cube_50-50-50.step" | head -n 1)
-if [ ! -z "$STEP_FILE" ] && [ ! -f "$TARGET_INPUTS/cube_50-50-50.step" ]; then
-    echo "Found step file at $STEP_FILE. Copying to $TARGET_INPUTS..."
-    mkdir -p "$TARGET_INPUTS"
-    cp "$STEP_FILE" "$TARGET_INPUTS/cube_50-50-50.step"
-fi
-
-# # sed -i 's|relative/path/to/data|data/testing-input-output/tuning_main|g' src/pipeline/initialize_state.py
-# # sed -i 's|os.getcwd()|"/home/runner/work/simulators_aggregator/simulators_aggregator"|g' src/io/state_manager.py
 
 echo "========================================================================"
-echo "🏁 FORENSIC AUDIT SEQUENCE COMPLETE"
+echo "🛠️ PHASE 3: AUTOMATED IN-ENVIRONMENT WORKFLOW REPAIRS"
+echo "========================================================================"
+echo "The following sed routines demonstrate automated fixes to lock environment parity."
+echo "Uncomment to run as emergency automated repairs in your workflow sequence."
+
+# Repair Action A: Inject deep environment sync straight after Conda environment configuration step
+# sed -i '/conda-incubator\/setup-miniconda/I!b;n;c\          auto-update-conda: true\n          python-version: "3.10"\n          activate-environment: tuner-env' "$CORE_WORKFLOW"
+
+# Repair Action B: Force pipeline dependency provisioning inside the activated login shell execution block
+# sed -i '/- name: 📥 Cold Start Detected/i \      - name: 📦 Direct Conda Layer Sync\n        shell: bash -el {0}\n        run: |\n          conda activate tuner-env\n          pip install -r requirements.txt\n' "$CORE_WORKFLOW"
+
+echo "========================================================================"
+echo "🎉 Forensic audit phase execution complete."
 echo "========================================================================"========== END OF FILE: debug/forensic_audit_production.sh ==========
 
