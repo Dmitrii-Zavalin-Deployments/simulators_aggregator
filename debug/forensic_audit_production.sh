@@ -1,26 +1,55 @@
 #!/bin/bash
 # ==============================================================================
-# FORENSIC AUDIT: Path Resolution Diagnostics
+# 🔍 DEEP FORENSIC AUDIT: SIMULATOR EXECUTION PATH MATCH ENGINE
 # ==============================================================================
 
-echo "--- 🔍 CWD and FILE PROBE ---"
-echo "Current Working Directory: $(pwd)"
-echo "Checking for config/config.json in CWD: $(ls config/config.json 2>/dev/null || echo 'NOT FOUND')"
-echo "Checking for mesh_generator/config/config.json: $(ls data/testing-input-output/repositories/mesh_generator/config/config.json 2>/dev/null || echo 'NOT FOUND')"
+echo "========================================================================"
+echo "🔍 DIAGNOSTICS: Shell Execution Context & Working Directories"
+echo "========================================================================"
+echo "Current Aggregator Working Directory (CWD): $(pwd)"
+echo "Checking Aggregator Root contents: $(ls -F | grep -E 'data/|src/|config/|tasks/')"
 
-echo -e "\n--- 🔎 SMOKING GUN: src/main.py (Failing Lines) ---"
-cat -n src/main.py | grep -C 5 "open("
+# Define absolute paths to targets inside the sub-repository structure
+TARGET_REPO_DIR="data/testing-input-output/repositories/mesh_generator"
+TARGET_MAIN="$TARGET_REPO_DIR/src/main.py"
+TARGET_CONFIG="$TARGET_REPO_DIR/config/config.json"
 
-echo -e "\n--- 🛠️ AUTOMATED REPAIRS (Copy-Paste these to fix) ---"
-echo "Strategy: Define REPO_ROOT and prepend to all file opens."
+echo -e "\n--- 📂 PROBING TARGET SUB-REPOSITORY PATHS ---"
+if [ -d "$TARGET_REPO_DIR" ]; then
+    echo "✅ Found sub-repository workspace directory at: $TARGET_REPO_DIR"
+else
+    echo "❌ ERROR: Target sub-repository workspace directory does not exist at: $TARGET_REPO_DIR"
+fi
 
-# 1. Define REPO_ROOT at the top of src/main.py (Line 8)
-# sed -i '8i REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))' src/main.py
+if [ -f "$TARGET_CONFIG" ]; then
+    echo "✅ Target configuration asset located: $TARGET_CONFIG"
+else
+    echo "❌ ERROR: Target configuration asset missing at expected path: $TARGET_CONFIG"
+fi
 
-# 2. Fix the config loading line (requires manual check of line number)
-# sed -i 's|open("config/config.json"|open(os.path.join(REPO_ROOT, "config/config.json")|g' src/main.py
+echo "========================================================================"
+echo "🔎 SMOKING GUN: Source Code Line-by-Line Path Evaluation Audit"
+echo "========================================================================"
+if [ -f "$TARGET_MAIN" ]; then
+    echo "Sub-Repository Main Entry Point: $TARGET_MAIN"
+    echo "------------------------------------------------------------------------"
+    # Print the lines around file opens to identify un-anchored relative paths
+    cat -n "$TARGET_MAIN" | grep -C 7 -E "open\(|config\.json"
+else
+    echo "❌ CRITICAL ERROR: Unable to locate sub-repository entry point: $TARGET_MAIN"
+fi
 
-# 3. Fix the schema loading line
-# sed -i 's|open(schema_path|open(os.path.join(REPO_ROOT, schema_path)|g' src/main.py
+echo "========================================================================"
+echo "🔧 AUTOMATED REPAIRS (Sed Injections)"
+echo "========================================================================"
+echo "To fix this mismatch in your CI pipeline automatically, uncomment the fields below:"
+echo ""
+echo "# Strategy A: Enforce contextual directory nesting before execution inside generating blocks"
+echo "# sed -i \"s|python3 \${repo_dir}/src/main.py|(cd \${repo_dir} \&\& python3 -m src.main)|g\" src/pipeline/generate_execution_cmd.py"
+echo ""
+echo "# Strategy B: Direct hotfix inline string adjustment for hardcoded file opens inside sub-repo main"
+echo "# sed -i 's|open(\"config/config.json\"|open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), \"config/config.json\"))|g' $TARGET_MAIN"
 
-echo -e "\n--- 🏁 FORENSIC AUDIT COMPLETE ---"
+echo "========================================================================"
+echo "🏁 DEEP FORENSIC AUDIT SEQUENCE COMPLETE"
+echo "========================================================================"
