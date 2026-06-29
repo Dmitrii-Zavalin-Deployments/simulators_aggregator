@@ -54,16 +54,21 @@ def discover_task_file() -> dict:
 
 def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
     """
-    Simulated Dropbox integration layer.
-    Iterates through the input_data_list and downloads them to the target_dir.
+    Input synchronization verification layer.
+    Iterates through the input_data_list and verifies that each authentic asset 
+    is physically present in the target directory. Raises a hard error if missing.
     """
-    logger.info("Initiating Dropbox synchronization for input data...")
+    logger.info("Verifying integrity and presence of required input data assets...")
     target_dir.mkdir(parents=True, exist_ok=True)
     for filename in input_data_list:
         target_path = target_dir / filename
-        logger.info(f"    ↳ Downloading: {filename}")
-        with open(target_path, 'w') as f:
-            f.write("Mock CAD/Step Data")
+        
+        if not target_path.exists():
+            raise FileNotFoundError(
+                f"❌ CRITICAL: Required input asset '{filename}' is missing from the target environment workspace: {target_dir}"
+            )
+            
+        logger.info(f"   ↳ [Verified] Authentic input asset present: {filename}")
 
 
 def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
@@ -98,8 +103,8 @@ def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
 
 def execute_setup_script(repo_path: Path, script_path: str):
     full_script_path = repo_path / script_path
-    print(f"::group::⚙️ Provisioning: {script_path}")
-    logger.info(f"⚙️ Executing provisioning script: {script_path}")
+    print(f"::group::⚙ Provisioning: {script_path}")
+    logger.info(f"⚙ Executing provisioning script: {script_path}")
     
     try:
         # Popen streams logs in real-time
@@ -112,7 +117,7 @@ def execute_setup_script(repo_path: Path, script_path: str):
         )
 
         for line in process.stdout:
-            print(f"   [Bash]: {line.strip()}")
+            print(f"    [Bash]: {line.strip()}")
             
         return_code = process.wait()
         if return_code != 0:
@@ -147,9 +152,13 @@ def main():
     workspace_dir.mkdir(parents=True, exist_ok=True)
     inputs_dir = workspace_dir / "inputs-outputs"
     
-    # 3. Download Inputs from Dropbox
-    fetch_inputs_from_dropbox(task_data["input_data_list"], inputs_dir)
-    
+    # 3. Verify Inputs are Present (Deterministic Asset Validation)
+    try:
+        fetch_inputs_from_dropbox(task_data["input_data_list"], inputs_dir)
+    except FileNotFoundError as e:
+        logger.error(str(e))
+        sys.exit(1)
+        
     # 4. Discover Library Manifest & Extract Configurations
     manifest_steps = load_pipeline_manifest(repo_path, task_data["pipeline_id"])
     

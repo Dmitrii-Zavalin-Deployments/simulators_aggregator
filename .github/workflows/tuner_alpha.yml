@@ -2,9 +2,10 @@ name: "🛰️ Simulators Pipeline Tuning Pulse (Alpha)"
 
 on:
   schedule:
+    # Runs at the 14th minute of every hour
     - cron: "14 * * * *"
 
 jobs:
-  tuner_core:
+  tuner:
     uses: ./.github/workflows/tuner_core.yml
     secrets: inherit
