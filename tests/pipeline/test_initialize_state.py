@@ -291,19 +291,15 @@ def test_main_executes_provisioning_when_not_cached(mock_filesystem, monkeypatch
 @patch("src.pipeline.initialize_state.parse_arguments")
 @patch("src.pipeline.initialize_state.Path.exists")
 def test_main_exits_when_inputs_missing(
-    mock_exists, 
-    mock_args, 
-    mock_discover, 
-    mock_fetch, 
-    mock_exit,
-    mock_manifest,
-    mock_logger
+    mock_exists,        # Maps to Path.exists
+    mock_args,          # Maps to parse_arguments
+    mock_discover,      # Maps to discover_task_file
+    mock_fetch,         # Maps to fetch_inputs_from_dropbox
+    mock_exit,          # Maps to sys.exit
+    mock_manifest       # Maps to load_pipeline_manifest
 ):
-    """
-    Targets lines 158-160: Verifies that a FileNotFoundError in input 
-    fetching triggers a clean exit.
-    """
-    # 1. Setup Mocks
+    """Verifies that a FileNotFoundError in input fetching triggers an explicit exit(1)."""
+    # 1. Configure deterministic mock behaviors
     mock_exists.return_value = True
     mock_args.return_value = MagicMock(repo_path="dummy/repo", cached_dependency=False)
     mock_discover.return_value = {
@@ -311,14 +307,12 @@ def test_main_exits_when_inputs_missing(
         "input_data_list": ["missing.cad"]
     }
     
-    # 2. Trigger the Exception
+    # 2. Force the targeted structural exception
     mock_fetch.side_effect = FileNotFoundError("CRITICAL: Input missing")
 
-    # 3. Execution
+    # 3. Execute entrypoint
     main()
 
-    # 4. Assertions
-    # Ensure it exited
+    # 4. Assert defensive boundary conditions
     mock_exit.assert_called_once_with(1)
-    # Ensure it never tried to load the manifest (prevents the error you saw)
     mock_manifest.assert_not_called()
