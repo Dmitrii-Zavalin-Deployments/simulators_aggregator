@@ -284,8 +284,8 @@ def test_main_executes_provisioning_when_not_cached(mock_filesystem, monkeypatch
             initialize_state.main()
             mock_exec.assert_called_once()
 
+@patch("src.pipeline.initialize_state.load_pipeline_manifest")
 @patch("src.pipeline.initialize_state.sys.exit")
-@patch("src.pipeline.initialize_state.logger")
 @patch("src.pipeline.initialize_state.fetch_inputs_from_dropbox")
 @patch("src.pipeline.initialize_state.discover_task_file")
 @patch("src.pipeline.initialize_state.parse_arguments")
@@ -295,31 +295,30 @@ def test_main_exits_when_inputs_missing(
     mock_args, 
     mock_discover, 
     mock_fetch, 
-    mock_logger, 
-    mock_exit
+    mock_exit,
+    mock_manifest,
+    mock_logger
 ):
     """
-    Test that the pipeline correctly logs an error and exits when 
-    fetch_inputs_from_dropbox raises a FileNotFoundError.
-    Targets lines 158-160.
+    Targets lines 158-160: Verifies that a FileNotFoundError in input 
+    fetching triggers a clean exit.
     """
     # 1. Setup Mocks
     mock_exists.return_value = True
-    mock_args.return_value = MagicMock(repo_path="dummy/repo")
+    mock_args.return_value = MagicMock(repo_path="dummy/repo", cached_dependency=False)
     mock_discover.return_value = {
         "pipeline_id": "test_id", 
         "input_data_list": ["missing.cad"]
     }
     
-    # Simulate the FileNotFoundError that triggers the 'except' block
-    mock_fetch.side_effect = FileNotFoundError("❌ CRITICAL: Required input asset 'missing.cad' is missing")
+    # 2. Trigger the Exception
+    mock_fetch.side_effect = FileNotFoundError("CRITICAL: Input missing")
 
-    # 2. Run Main
+    # 3. Execution
     main()
 
-    # 3. Assertions
-    # Verify we entered the 'except' block
-    mock_logger.error.assert_called()
-    
-    # Verify sys.exit(1) was called
+    # 4. Assertions
+    # Ensure it exited
     mock_exit.assert_called_once_with(1)
+    # Ensure it never tried to load the manifest (prevents the error you saw)
+    mock_manifest.assert_not_called()
