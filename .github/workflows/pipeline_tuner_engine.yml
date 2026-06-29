@@ -223,13 +223,13 @@ jobs:
         run: |
           if [[ "${{ job.status }}" == "success" ]]; then
             echo "✅ All systems nominal. No anomalies detected."
-            cat <<EOF > debug/forensic_audit.sh
+            cat <<EOF > debug/forensic_audit_testing.sh
           #!/bin/bash
           # Description: Automated forensic audit for ACE solver failures.
           # Status: Dormant (All systems nominal)
           exit 0
           EOF
-            chmod +x debug/forensic_audit.sh
+            chmod +x debug/forensic_audit_testing.sh
             echo "🧹 Diagnostic script reset to Dormant mode."
           else
             echo "⚠️ CI Failure Detected. Initiating Deep Forensic Audit..."
@@ -237,11 +237,11 @@ jobs:
             echo "ls -R output:"
             ls -R
             echo "============================================================"
-            echo "debug/forensic_audit.sh run results:"
-            if [ -f "debug/forensic_audit.sh" ]; then
-              bash debug/forensic_audit.sh
+            echo "debug/forensic_audit_testing.sh run results:"
+            if [ -f "debug/forensic_audit_testing.sh" ]; then
+              bash debug/forensic_audit_testing.sh
             else
-              echo "❌ Critical: Diagnostic script 'debug/forensic_audit.sh' not found."
+              echo "❌ Critical: Diagnostic script 'debug/forensic_audit_testing.sh' not found."
             fi
             echo "============================================================"
             echo "📉 RE-RUNNING FAILED TEST FOR FINAL SIGNAL"
@@ -252,8 +252,8 @@ jobs:
       - name: 🧹 Sync Forensic Reset + Sync Notes
         if: success()
         run: |
-          git add debug/forensic_audit.sh
-          if [ -n "$(git status --porcelain debug/forensic_audit.sh)" ]; then
+          git add debug/forensic_audit_testing.sh
+          if [ -n "$(git status --porcelain debug/forensic_audit_testing.sh)" ]; then
             git commit -m "🤖 robot: forensic reset [PASS]"
             TARGET_COMMIT=$(git rev-parse HEAD)
 
