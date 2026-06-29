@@ -344,12 +344,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /usr/share/miniconda/envs/tuner-env
-          key: conda-${{ hashFiles('requirements.txt') }}-${{ hashFiles('tasks/**') }}-${{ github.ref_name }}
+          key: conda-v3-${{ hashFiles('requirements.txt') }}-${{ hashFiles('tasks/**') }}-${{ github.ref_name }}
           restore-keys: |
-            conda-${{ hashFiles('requirements.txt') }}-${{ hashFiles('tasks/**') }}-
+            conda-v3-${{ hashFiles('requirements.txt') }}-${{ hashFiles('tasks/**') }}-
 
       - name: 📦 Sync Conda Env Dependencies
-        if: steps.cache-conda.outputs.cache-hit != 'true'
         shell: bash -el {0}
         run: |
           conda activate tuner-env
