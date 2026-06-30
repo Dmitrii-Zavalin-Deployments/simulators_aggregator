@@ -22,7 +22,7 @@ def main():
     args = parser.parse_args()
 
     logger.info("========================================================================")
-    logger.info(f"🚀 Starting telemetry capture process")
+    logger.info("🚀 Starting telemetry capture process")
     logger.info(f"   Inputs -> --state-file: {args.state_file} | --exit-code: {args.exit_code} | --log-file: {args.log-file}")
     logger.info("========================================================================")
 
@@ -86,7 +86,7 @@ def main():
     
     logger.info(f"📂 Allocating physical destination workspace: {run_context_dir}")
     os.makedirs(run_context_dir, exist_ok=True)
-    logger.info(f"✅ Workspace directory verified/created.")
+    logger.info("✅ Workspace directory verified/created.")
     
     output_path = os.path.join(run_context_dir, "telemetry_results.json")
     logger.info(f"✍️ Writing payload compilation to final storage target: {output_path}")
@@ -96,12 +96,12 @@ def main():
     logger.info(f"✅ Telemetry record successfully generated: {output_path}")
 
     # 6. Housekeeping
-    logger.info(f"🧹 Commencing workspace cleanup tasks...")
+    logger.info("🧹 Commencing workspace cleanup tasks...")
     if os.path.exists(config_temp_path):
         os.remove(config_temp_path)
         logger.info(f"🗑️ Purged staging asset from system: {config_temp_path}")
     else:
-        logger.warning(f"⚠️ Staging asset was removed or modified by an external process before cleanup.")
+        logger.warning("⚠️ Staging asset was removed or modified by an external process before cleanup.")
 
     # 7. Final status
     if status == "failed":
