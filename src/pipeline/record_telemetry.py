@@ -21,37 +21,56 @@ def main():
     parser.add_argument("--log-file", required=True, help="Path to the captured log file")
     args = parser.parse_args()
 
-    logger.info(f"🚀 Starting telemetry capture for state file: {args.state_file}")
+    logger.info("========================================================================")
+    logger.info(f"🚀 Starting telemetry capture process")
+    logger.info(f"   Inputs -> --state-file: {args.state_file} | --exit-code: {args.exit_code} | --log-file: {args.log-file}")
+    logger.info("========================================================================")
 
     # Resolve context paths
     base_dir = os.path.dirname(os.path.abspath(args.state_file))
-    # [FIX 1] Align with actual Dropbox folder name ("configs" plural)
+    logger.info(f"🔍 Resolved system base_dir: {base_dir}")
+    
     config_temp_path = os.path.join(base_dir, "configs", "config_temp.json")
+    logger.info(f"🔍 Target config path expected by engine: {config_temp_path}")
+
+    # Comprehensive structural pre-flight diagnostic scan
+    configs_parent_dir = os.path.join(base_dir, "configs")
+    if os.path.exists(configs_parent_dir):
+        logger.info(f"📂 Found 'configs' directory. Listing contents: {os.listdir(configs_parent_dir)}")
+    else:
+        logger.warning(f"❌ Physical 'configs' directory does not exist at: {configs_parent_dir}")
 
     # Handle dormant state
+    logger.info(f"⚙️ Checking for existence of staging asset: {config_temp_path}")
     if not os.path.exists(config_temp_path):
+        logger.info(f"❌ Verification failed: {config_temp_path} is missing.")
         logger.info("📋 Notice: No temporary config file found. Skipping telemetry mapping (Dormant state).")
+        logger.info("🛑 Exiting gracefully with system status code 0.")
         sys.exit(0)
 
     # 1. Read configuration
+    logger.info(f"📖 Reading configuration contents from staging file: {config_temp_path}")
     with open(config_temp_path, "r") as f:
         config_content = f.read()
+    logger.info(f"✅ Configuration data ingested successfully ({len(config_content)} characters).")
 
     # 2. Determine execution state
     status = "success" if args.exit_code == 0 else "failed"
-    logger.info(f"📊 Execution status: {status.upper()}")
+    logger.info(f"📊 Evaluated simulator outcome status: {status.upper()}")
 
     # 3. Capture logs on failure
     error_log = None
     if status == "failed":
+        logger.info(f"🔎 Status is FAILED. Investigating simulation log file at: {args.log_file}")
         if os.path.exists(args.log_file):
             with open(args.log_file, "r") as f:
                 error_log = f.read()
-            logger.warning("⚠️ Simulation failed. Error logs captured.")
+            logger.warning(f"⚠️ Simulation failure logs ingested successfully ({len(error_log)} characters).")
         else:
-            logger.error(f"❌ Simulation failed but log file not found at: {args.log_file}")
+            logger.error(f"❌ Environmental Mismatch: Simulation failed but log file not found at: {args.log_file}")
 
     # 4. Build telemetry object
+    logger.info("🏗️ Assembling structured telemetry JSON schema payload...")
     telemetry_data = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "title": "Tuner Results Schema",
@@ -61,30 +80,35 @@ def main():
     }
 
     # 5. Write output
-    # [FIX 2] Dynamically point to the correct governance layer archive folder
     target_archive = "successful_runs_archive" if status == "success" else "failed_runs_archive"
     timestamp = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    
-    # [FIX 3] Create isolated nested run directory and write standard filename
     run_context_dir = os.path.join(base_dir, target_archive, f"run_{timestamp}")
+    
+    logger.info(f"📂 Allocating physical destination workspace: {run_context_dir}")
     os.makedirs(run_context_dir, exist_ok=True)
+    logger.info(f"✅ Workspace directory verified/created.")
     
     output_path = os.path.join(run_context_dir, "telemetry_results.json")
+    logger.info(f"✍️ Writing payload compilation to final storage target: {output_path}")
 
     with open(output_path, "w") as f:
         json.dump(telemetry_data, f, indent=4)
     logger.info(f"✅ Telemetry record successfully generated: {output_path}")
 
     # 6. Housekeeping
+    logger.info(f"🧹 Commencing workspace cleanup tasks...")
     if os.path.exists(config_temp_path):
         os.remove(config_temp_path)
-        logger.info("🗑️ Cleaned up workspace: Staging asset 'config_temp.json' removed.")
+        logger.info(f"🗑️ Purged staging asset from system: {config_temp_path}")
+    else:
+        logger.warning(f"⚠️ Staging asset was removed or modified by an external process before cleanup.")
 
     # 7. Final status
     if status == "failed":
-        logger.error("🚫 Exiting with error status 1.")
+        logger.error("🚫 Terminating processing stream with escalation status 1.")
         sys.exit(1)
     
+    logger.info("🎉 Telemetry pipeline execution cycle finished nominally. Exiting with status 0.")
     sys.exit(0)
 
 if __name__ == "__main__":  # pragma: no cover
