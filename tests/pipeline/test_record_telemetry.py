@@ -14,7 +14,7 @@ from src.pipeline import record_telemetry
 # is required, without raising an exception.
 def test_main_dormant_state(tmp_path, caplog):
     # We simulate a state file path, but intentionally do not generate 
-    # the 'config/config_temp.json' file.
+    # the 'configs/config_temp.json' file.
     state_file = tmp_path / "state.json"
     log_file = tmp_path / "dummy.log"
     
@@ -39,9 +39,9 @@ def test_main_dormant_state(tmp_path, caplog):
 #     3. Perform housekeeping by removing the temporary configuration file.
 def test_main_success_path(tmp_path, caplog):
     # Setup: Create the standard directory structure required by the pipeline.
-    #     base_dir/config/config_temp.json
+    #     base_dir/configs/config_temp.json
     base_dir = tmp_path / "sim_run"
-    config_dir = base_dir / "config"
+    config_dir = base_dir / "configs"
     config_dir.mkdir(parents=True)
     
     state_file = base_dir / "state.json"
@@ -57,10 +57,10 @@ def test_main_success_path(tmp_path, caplog):
             assert exc.value.code == 0
             
     # Verification:
-    # 1. A new run record must exist in the 'successful_runs' directory.
-    runs_dir = base_dir / "successful_runs"
+    # 1. A new run record must exist inside a subfolder in the 'successful_runs_archive' directory.
+    runs_dir = base_dir / "successful_runs_archive"
     assert runs_dir.exists()
-    assert len(list(runs_dir.glob("run_*_success.json"))) == 1
+    assert len(list(runs_dir.glob("run_*/telemetry_results.json"))) == 1
     
     # 2. The temporary configuration file must be purged.
     assert not config_file.exists()
@@ -75,7 +75,7 @@ def test_main_success_path(tmp_path, caplog):
 def test_main_failure_path(tmp_path, caplog):
     # Setup: Create a filesystem environment containing an error log.
     base_dir = tmp_path / "sim_run"
-    config_dir = base_dir / "config"
+    config_dir = base_dir / "configs"
     config_dir.mkdir(parents=True)
     
     state_file = base_dir / "state.json"
@@ -95,8 +95,8 @@ def test_main_failure_path(tmp_path, caplog):
             assert exc.value.code == 1
     
     # Verification: Validate that the telemetry record correctly ingested the error.
-    runs_dir = base_dir / "successful_runs"
-    telemetry_file = list(runs_dir.glob("run_*_failed.json"))[0]
+    runs_dir = base_dir / "failed_runs_archive"
+    telemetry_file = list(runs_dir.glob("run_*/telemetry_results.json"))[0]
     
     with open(telemetry_file, "r") as f:
         data = json.load(f)
@@ -114,7 +114,7 @@ def test_main_failure_path(tmp_path, caplog):
 def test_main_failure_missing_log_file(tmp_path, caplog):
     # Setup: Create config but provide a path to a non-existent log file.
     base_dir = tmp_path / "sim_run"
-    config_dir = base_dir / "config"
+    config_dir = base_dir / "configs"
     config_dir.mkdir(parents=True)
     
     state_file = base_dir / "state.json"
