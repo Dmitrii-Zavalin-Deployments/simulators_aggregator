@@ -25,8 +25,8 @@ def main():
 
     # Resolve context paths
     base_dir = os.path.dirname(os.path.abspath(args.state_file))
-    config_temp_path = os.path.join(base_dir, "config", "config_temp.json")
-    successful_runs_dir = os.path.join(base_dir, "successful_runs")
+    # [FIX 1] Align with actual Dropbox folder name ("configs" plural)
+    config_temp_path = os.path.join(base_dir, "configs", "config_temp.json")
 
     # Handle dormant state
     if not os.path.exists(config_temp_path):
@@ -61,10 +61,15 @@ def main():
     }
 
     # 5. Write output
-    os.makedirs(successful_runs_dir, exist_ok=True)
+    # [FIX 2] Dynamically point to the correct governance layer archive folder
+    target_archive = "successful_runs_archive" if status == "success" else "failed_runs_archive"
     timestamp = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    output_filename = f"run_{timestamp}_{status}.json"
-    output_path = os.path.join(successful_runs_dir, output_filename)
+    
+    # [FIX 3] Create isolated nested run directory and write standard filename
+    run_context_dir = os.path.join(base_dir, target_archive, f"run_{timestamp}")
+    os.makedirs(run_context_dir, exist_ok=True)
+    
+    output_path = os.path.join(run_context_dir, "telemetry_results.json")
 
     with open(output_path, "w") as f:
         json.dump(telemetry_data, f, indent=4)
