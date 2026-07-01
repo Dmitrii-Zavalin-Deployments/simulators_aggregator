@@ -344,9 +344,20 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /usr/share/miniconda/envs/tuner-env
-          key: ${{ hashFiles('tasks/**') }}-${{ github.ref_name }}
+          key: conda-env-${{ hashFiles('requirements.txt', 'tasks/**') }}-${{ github.ref_name }}
           restore-keys: |
-            ${{ hashFiles('tasks/**') }}-${{ github.ref_name }}-
+            conda-env-${{ hashFiles('requirements.txt', 'tasks/**') }}-
+            conda-env-
+
+      # 🛠️ DEPENDENCY ASSURANCE GATE: Guarantees runtime packages inside the target conda environment context
+      - name: 🛠️ Sync Conda Environment Dependencies
+        shell: bash -el {0}
+        run: |
+          echo "🔗 Verifying conda pipeline environment baseline packages..."
+          pip install jsonschema
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          fi
 
       # ⚙️ COLD START ONLY (Initialization & Parameter Explosion)
       - name: ⚙️ Initialize Pipeline State (Cold Start)
@@ -365,7 +376,6 @@ jobs:
           echo "✅ Repository staged successfully."
 
           echo "🚀 Running state initialization logic..."
-          conda activate tuner-env
 
           # Build the command dynamically without risking the Python string evaluation trap
           CMD="python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator"
