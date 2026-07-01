@@ -23,7 +23,7 @@ def main():
 
     logger.info("========================================================================")
     logger.info("🚀 Starting telemetry capture process")
-    logger.info(f"   Inputs -> --state-file: {args.state_file} | --exit-code: {args.exit_code} | --log-file: {args.log-file}")
+    logger.info(f"   Inputs -> --state-file: {args.state_file} | --exit-code: {args.exit_code} | --log-file: {args.log_file}")
     logger.info("========================================================================")
 
     # Resolve context paths
