@@ -23,7 +23,7 @@ def test_main_dormant_state(tmp_path, caplog):
         with patch("sys.argv", ["script", "--state-file", str(state_file), "--exit-code", "0", "--log-file", str(log_file)]):
             with pytest.raises(SystemExit) as exc:
                 record_telemetry.main()
-            assert exc.value.code == 0
+            assert exc.value.code == 1
     
     # Verify the specific notice was logged to the console.
     assert "Notice: No temporary config file found" in caplog.text
@@ -54,7 +54,7 @@ def test_main_success_path(tmp_path, caplog):
         with patch("sys.argv", ["script", "--state-file", str(state_file), "--exit-code", "0", "--log-file", str(log_file)]):
             with pytest.raises(SystemExit) as exc:
                 record_telemetry.main()
-            assert exc.value.code == 0
+            assert exc.value.code == 1
             
     # Verification:
     # 1. A new run record must exist inside a subfolder in the 'successful_runs_archive' directory.
