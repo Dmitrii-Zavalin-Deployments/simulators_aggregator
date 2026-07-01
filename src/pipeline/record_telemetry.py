@@ -43,10 +43,10 @@ def main():
     # Handle dormant state
     logger.info(f"⚙️ Checking for existence of staging asset: {config_temp_path}")
     if not os.path.exists(config_temp_path):
-        logger.info(f"❌ Verification failed: {config_temp_path} is missing.")
-        logger.info("📋 Notice: No temporary config file found. Skipping telemetry mapping (Dormant state).")
-        logger.info("🛑 Exiting gracefully with system status code 0.")
-        sys.exit(0)
+        logger.error(f"❌ CRITICAL: Verification failed: {config_temp_path} is missing.")
+        logger.error("📋 Notice: Temporary execution configuration file not found. Telemetry mapping aborted.")
+        logger.error("🚫 Terminating processing stream with escalation status 1.")
+        sys.exit(1)
 
     # 1. Read configuration
     logger.info(f"📖 Reading configuration contents from staging file: {config_temp_path}")

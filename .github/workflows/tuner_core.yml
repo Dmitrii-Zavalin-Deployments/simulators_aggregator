@@ -442,10 +442,27 @@ jobs:
         run: |
           echo "🚀 Initiating simulator pipeline execution sequence..."
           
-          # 1. Generate execution command sequences using the engine script
+          # 1. Enforce Contract: The config directory MUST exist
+          if [ ! -d "$WORKSPACE_DIR/configs" ]; then
+              echo "❌ CRITICAL ERROR: Expected directory $WORKSPACE_DIR/configs does not exist."
+              echo "   Pipeline state might be corrupted or improperly restored."
+              exit 1
+          fi
+          
+          # 2. Slice active configuration unit
+          if [ -f "$WORKSPACE_DIR/config_combinations_array.json" ]; then
+              jq '.[0]' "$WORKSPACE_DIR/config_combinations_array.json" > "$WORKSPACE_DIR/configs/config_temp.json"
+              echo "✅ Successfully staged staging asset: $WORKSPACE_DIR/configs/config_temp.json"
+          else
+              echo "❌ CRITICAL ERROR: config_combinations_array.json is missing from state archive."
+              exit 1
+          fi
+          # ==============================================================================
+
+          # 3. Generate execution command sequences using the engine script
           EXEC_CMD=$(python3 src/pipeline/generate_execution_cmd.py --state-file "$WORKSPACE_DIR/state.json")
           
-          # 2. Execute commands, bypassing 'set -e' to safeguard execution metrics
+          # 4. Execute commands, bypassing 'set -e' to safeguard execution metrics
           LOG_FILE="$RUNNER_TEMP/pipeline_execution.log"
           
           set +e # Open error gates to manually process exit telemetry
@@ -453,7 +470,7 @@ jobs:
           RUN_RC=$?
           set -e # Restore default strict environment security
           
-          # 3. Stream logs instantly back to the live GitHub Actions runner console
+          # 5. Stream logs instantly back to the live GitHub Actions runner console
           echo "📋 ========================================================================"
           echo "📋                  --- LIVE PIPELINE EXECUTION LOGS ---"
           echo "📋 ========================================================================"
@@ -464,13 +481,13 @@ jobs:
           fi
           echo "📋 ========================================================================"
           
-          # 4. Invoke the separate telemetry tracking engine to process results
+          # 6. Invoke telemetry tracking engine
           python3 src/pipeline/record_telemetry.py \
             --state-file "$WORKSPACE_DIR/state.json" \
             --exit-code $RUN_RC \
             --log-file "$LOG_FILE"
 
-          # 5. Explicitly fail the workflow step if the simulation pipeline failed
+          # 7. Explicitly fail if simulation failed
           if [ $RUN_RC -ne 0 ]; then
               echo "❌ Execution Failure: Core simulation step returned non-zero code [$RUN_RC]."
               exit $RUN_RC
