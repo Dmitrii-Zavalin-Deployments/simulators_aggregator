@@ -1,9 +1,8 @@
 import json
 import pytest
 import logging
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from src.pipeline import record_telemetry
-from src.pipeline.record_telemetry import main
 
 # ==============================================================================
 # 1. Dormant State Verification
@@ -131,40 +130,4 @@ def test_main_failure_missing_log_file(tmp_path, caplog):
             # Assert failure code 1
             assert exc.value.code == 1
     
-    # Verification: Assert the specific logger.error() call (Line 52) was triggered.
-    assert "❌ Environmental Mismatch: Simulation failed but log file not found" in caplog.text
-
-@patch("src.pipeline.record_telemetry.os.path.exists")
-@patch("src.pipeline.record_telemetry.argparse.ArgumentParser.parse_args")
-@patch("src.pipeline.record_telemetry.open", create=True)
-@patch("src.pipeline.record_telemetry.os.makedirs")
-@patch("src.pipeline.record_telemetry.json.dump")
-def test_main_failure_missing_log_file(mock_json_dump, mock_makedirs, mock_open, mock_args, mock_exists, caplog):
-    """
-    Triggers the missing line 69 by simulating a failed execution (exit_code=1)
-    where the specific log file path does not exist on disk.
-    """
-    # 1. Setup Arguments
-    mock_args.return_value = MagicMock(
-        state_file="path/to/state.json",
-        exit_code=1,
-        log_file="non_existent.log"
-    )
-
-    # 2. Configure mock_exists logic:
-    # - True for directory/config checks (to proceed past initial steps)
-    # - False for the specific log file (to hit line 69)
-    def side_effect_exists(path):
-        if path == "non_existent.log":
-            return False
-        return True
-    mock_exists.side_effect = side_effect_exists
-
-    # 3. Execute main and handle the SystemExit(1) at the end
-    with pytest.raises(SystemExit) as exc:
-        main()
-    
-    assert exc.value.code == 1
-    
-    # 4. Assert the exact error log was triggered
     assert "❌ Environmental Mismatch: Simulation failed but log file not found" in caplog.text
