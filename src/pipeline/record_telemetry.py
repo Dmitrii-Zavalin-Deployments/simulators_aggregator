@@ -74,7 +74,7 @@ def main():
     telemetry_data = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "title": "Tuner Results Schema",
-        "config": config_content,
+        "config": json.loads(config_content),
         "status": status,
         "error_log": error_log
     }
