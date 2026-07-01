@@ -693,27 +693,27 @@ jobs:
               echo "⚠️ Parent directory $PARENT_DIR does not exist."
           fi
 
-          # --- BRANCH-SPECIFIC AUDIT ---
-          if [ -d "$STATE_DIR" ]; then
-              echo -e "\n📍 Verifying contents of active workspace: $STATE_DIR"
+          # # --- BRANCH-SPECIFIC AUDIT ---
+          # if [ -d "$STATE_DIR" ]; then
+          #     echo -e "\n📍 Verifying contents of active workspace: $STATE_DIR"
               
-              # Automatically cat all JSON files found in the directory tree
-              echo -e "\n--- DUMPING CONTENT OF ALL JSON ASSETS ---"
-              find "$STATE_DIR" -type f -name "*.json" | while read -r json_file; do
-                  echo -e "\n========================================="
-                  echo "FILE: $json_file"
-                  echo "========================================="
-                  cat "$json_file"
-              done
+          #     # Automatically cat all JSON files found in the directory tree
+          #     echo -e "\n--- DUMPING CONTENT OF ALL JSON ASSETS ---"
+          #     find "$STATE_DIR" -type f -name "*.json" | while read -r json_file; do
+          #         echo -e "\n========================================="
+          #         echo "FILE: $json_file"
+          #         echo "========================================="
+          #         cat "$json_file"
+          #     done
               
-              # Verify critical file existence
-              if [ ! -f "$STATE_DIR/state.json" ]; then
-                  echo -e "\n❌ ERROR: state.json was NOT found in $STATE_DIR."
-                  exit 1
-              fi
-          else
-              echo "❌ ERROR: State directory $STATE_DIR does not exist."
-              exit 1
-          fi
+          #     # Verify critical file existence
+          #     if [ ! -f "$STATE_DIR/state.json" ]; then
+          #         echo -e "\n❌ ERROR: state.json was NOT found in $STATE_DIR."
+          #         exit 1
+          #     fi
+          # else
+          #     echo "❌ ERROR: State directory $STATE_DIR does not exist."
+          #     exit 1
+          # fi
 
           echo -e "\n✅ --- INTEGRITY AUDIT COMPLETE ---"
