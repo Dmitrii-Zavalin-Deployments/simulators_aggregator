@@ -131,3 +131,33 @@ def test_main_failure_missing_log_file(tmp_path, caplog):
             assert exc.value.code == 1
     
     assert "❌ Environmental Mismatch: Simulation failed but log file not found" in caplog.text
+
+def test_main_failure_missing_log_file(tmp_path, caplog):
+    """
+    Targets line 69-70 branch coverage.
+    Simulates a failed simulation run where the expected log file is missing.
+    """
+    # 1. Setup minimal directory workspace structure
+    base_dir = tmp_path / "sim_run"
+    config_dir = base_dir / "configs"
+    config_dir.mkdir(parents=True)
+    
+    # 2. Setup state file and config staging assets
+    state_file = base_dir / "state.json"
+    config_file = config_dir / "config_temp.json"
+    config_file.write_text('{"params": "failure_mode"}')
+    
+    # Define a log file path but do NOT write it to disk
+    missing_log = base_dir / "missing_file.log"
+    
+    # 3. Execute with simulated sys.argv CLI inputs
+    with caplog.at_level(logging.ERROR):
+        with patch("sys.argv", ["script", "--state-file", str(state_file), "--exit-code", "1", "--log-file", str(missing_log)]):
+            with pytest.raises(SystemExit) as exc:
+                record_telemetry.main()
+            
+            # Confirms the script escalates out with exit code 1
+            assert exc.value.code == 1
+    
+    # 4. Verify the line 70 error handling message was written to the stream
+    assert "❌ Environmental Mismatch: Simulation failed but log file not found" in caplog.text
