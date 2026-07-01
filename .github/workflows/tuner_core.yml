@@ -111,7 +111,7 @@ jobs:
             fi
 
   pre_flight_tests:
-    name: "🧪 Pre-Flight Tests"
+    name: "📋 Pre-Flight Tests"
     needs: gatekeeper
     if: needs.gatekeeper.outputs.status == 'active'
     runs-on: ubuntu-latest
@@ -493,12 +493,25 @@ jobs:
               exit $RUN_RC
           fi
 
-      # 📤 STATE PERSISTENCE: Packaging and uploading updates to Dropbox
       - name: 📤 Package and Upload State Snapshot
-        # if: always()
         run: |
           if [ -d "${{ env.WORKSPACE_DIR }}" ]; then
             echo "📦 Packing active state folder..."
+            
+            # Defensive check and cleanup for the phantom 'config' directory
+            CONFIG_DIR="${{ env.WORKSPACE_DIR }}/config"
+            if [ -d "$CONFIG_DIR" ]; then
+              if rmdir "$CONFIG_DIR" 2>/dev/null; then
+                echo "✅ Phantom 'config' directory found and successfully removed."
+              else
+                echo "❌ CRITICAL: Directory '$CONFIG_DIR' is not empty and cannot be removed."
+                echo "   This indicates an unexpected dependency or data leak."
+                exit 1
+              fi
+            else
+              echo "ℹ️ No phantom 'config' directory detected. Proceeding."
+            fi
+            
             cd data/testing-input-output/
             zip -r "${{ env.TUNER_STATE_ARCHIVE }}" "tuning_${{ github.ref_name }}"
             cd ../..
