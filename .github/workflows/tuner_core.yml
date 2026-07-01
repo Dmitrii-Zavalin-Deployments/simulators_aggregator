@@ -376,6 +376,19 @@ jobs:
           fi
           $CMD
 
+          # --- GARBAGE COLLECTOR (LOG-AND-PURGE) ---
+          echo "🧹 Checking for Dropbox download logs..."
+          LOG_FILE=$(find data/testing-input-output/ -name "dropbox_download.log" | head -n 1)
+          
+          if [ -f "$LOG_FILE" ]; then
+              echo "📋 Found log file. Dumping contents for CI visibility:"
+              cat "$LOG_FILE"
+              echo -e "\n🗑️ Removing log file to maintain clean state."
+              rm "$LOG_FILE"
+          else
+              echo "✅ No dropbox_download.log found (skipping cleanup)."
+          fi
+
       - name: 🧮 Explode Configuration Range Matrix (Cold Start)
         if: steps.import_state.outputs.state_status == 'not_found'
         shell: bash -el {0}
