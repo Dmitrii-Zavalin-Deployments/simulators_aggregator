@@ -131,4 +131,4 @@ def test_main_failure_missing_log_file(tmp_path, caplog):
             assert exc.value.code == 1
     
     # Verification: Assert the specific logger.error() call (Line 52) was triggered.
-    assert "❌ Simulation failed but log file not found" in caplog.text
+    assert "❌ Environmental Mismatch: Simulation failed but log file not found" in caplog.text
