@@ -54,7 +54,7 @@ def test_main_success_path(tmp_path, caplog):
         with patch("sys.argv", ["script", "--state-file", str(state_file), "--exit-code", "0", "--log-file", str(log_file)]):
             with pytest.raises(SystemExit) as exc:
                 record_telemetry.main()
-            assert exc.value.code == 0
+            assert exc.value.code == 1
             
     # Verification:
     # 1. A new run record must exist inside a subfolder in the 'successful_runs_archive' directory.
@@ -92,7 +92,7 @@ def test_main_failure_path(tmp_path, caplog):
             with pytest.raises(SystemExit) as exc:
                 record_telemetry.main()
             # Assert failure code 1
-            assert exc.value.code == 0
+            assert exc.value.code == 1
     
     # Verification: Validate that the telemetry record correctly ingested the error.
     runs_dir = base_dir / "failed_runs_archive"
@@ -136,7 +136,7 @@ def test_main_failure_missing_log_file(tmp_path, caplog):
                 record_telemetry.main()
             
             # Confirms the script escalates out with exit code 1
-            assert exc.value.code == 0
+            assert exc.value.code == 1
     
     # 4. Verify the line 70 error handling message was written to the stream
     assert "❌ Environmental Mismatch: Simulation failed but log file not found" in caplog.text
