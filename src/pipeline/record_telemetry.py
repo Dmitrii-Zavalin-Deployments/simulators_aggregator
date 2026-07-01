@@ -100,8 +100,6 @@ def main():
     if os.path.exists(config_temp_path):
         os.remove(config_temp_path)
         logger.info(f"🗑️ Purged staging asset from system: {config_temp_path}")
-    else:
-        logger.warning("⚠️ Staging asset was removed or modified by an external process before cleanup.")
 
     # 7. Final status
     if status == "failed":
