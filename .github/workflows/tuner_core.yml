@@ -617,9 +617,17 @@ jobs:
           EOF
           )
 
+          # 📦 ISOLATION PHASE 1: Protect current dirty workspace before PULL 1
+          echo "📦 Stashing all local modifications to isolate workspace for baseline sync..."
+          git stash push --include-untracked -m "pre-audit-baseline-isolation" || true
+
           # 🔄 PULL 1: Clear out baseline modifications before injecting text to minimize file drift variance
           echo "📥 Executing First Pull to capture baseline state..."
           git pull origin ${{ github.ref_name }} --rebase -X ours || true
+
+          # 📤 RESTORE PHASE 1: Bring back workspace modifications to prepare for generation
+          echo "📤 Restoring workspace modifications post-baseline sync..."
+          git stash pop || echo "📋 Workspace pristine or no stash required."
 
           # 3️⃣ Inject entry at the top of the file directly under the header
           HEADER="# 🛰️ Simulators Aggregator Performance Audit"
@@ -634,15 +642,15 @@ jobs:
               echo "$NEW_ENTRY" >> performance_audit.md
           fi
 
-          # 4️⃣ THE SIMPLIFIED STASH-PULL-POP LOOP
-          echo "📦 Stashing local modifications to clear workspace for final sync..."
-          git stash push -m "temporary-automation-isolation" performance_audit.md
+          # 📦 ISOLATION PHASE 2: Clear workspace for final sync against concurrent job drift
+          echo "📦 Stashing updated ledger and tracking assets for final serialization sync..."
+          git stash push --include-untracked -m "pre-commit-sync-isolation" || true
 
           # 🔄 PULL 2: Grab updates made by parallel jobs that finished during the local file generation phase
           echo "🔄 Executing Second Pull immediately prior to commit serialization..."
           git pull origin ${{ github.ref_name }} --rebase -X ours
 
-          # Restore modifications cleanly over the updated upstream base
+          # 📤 RESTORE PHASE 2: Restore modifications cleanly over the updated upstream base
           echo "📤 Restoring isolated workspace modifications..."
           git stash pop || echo "📋 Workspace modifications restored safely."
           
