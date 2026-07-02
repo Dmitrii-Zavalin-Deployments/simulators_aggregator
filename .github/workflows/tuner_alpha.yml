@@ -1,5 +1,9 @@
 name: "🛰️ Simulators Pipeline Tuning Pulse (Alpha)"
 
+# This keeps the workflow valid and inactive, but allows manual triggering
+on:
+  workflow_dispatch: {}
+
 # on:
 #   schedule:
 #     # Runs at the 14th minute of every hour
