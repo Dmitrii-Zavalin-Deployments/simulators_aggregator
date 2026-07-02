@@ -603,6 +603,10 @@ jobs:
           EOF
           )
 
+          # 🔄 PULL 1: Clear out baseline modifications before injecting text to minimize file drift variance
+          echo "📥 Executing First Pull to capture baseline state..."
+          git pull origin ${{ github.ref_name }} --rebase -X ours || true
+
           # 3️⃣ Inject entry at the top of the file directly under the header
           HEADER="# 🛰️ Simulators Aggregator Performance Audit"
           if [ -f "performance_audit.md" ]; then
@@ -617,13 +621,15 @@ jobs:
           fi
 
           # 4️⃣ THE SIMPLIFIED STASH-PULL-POP LOOP
-          git stash -m "temporary-automation-isolation"
+          echo "📦 Stashing local modifications to clear workspace for final sync..."
+          git stash push -m "temporary-automation-isolation" performance_audit.md
 
-          # Pull remote updates, but if a conflict occurs, 
-          # we force the use of our local file (ours) over the remote (theirs)
-          git pull origin HEAD --rebase -X ours
+          # 🔄 PULL 2: Grab updates made by parallel jobs that finished during the local file generation phase
+          echo "🔄 Executing Second Pull immediately prior to commit serialization..."
+          git pull origin ${{ github.ref_name }} --rebase -X ours
 
-          # Restore your modifications
+          # Restore modifications cleanly over the updated upstream base
+          echo "📤 Restoring isolated workspace modifications..."
           git stash pop || echo "📋 Workspace modifications restored safely."
           
           # Clean up any potential lingering conflict markers just in case
@@ -643,6 +649,7 @@ jobs:
             git fetch origin refs/notes/commits:refs/notes/commits || true
             git notes add -f -m "robot: true" "$TARGET_COMMIT"
             
+            # Final transmission out to the remote tracking branch
             git push origin HEAD
             git push --force origin refs/notes/commits || true
           else
