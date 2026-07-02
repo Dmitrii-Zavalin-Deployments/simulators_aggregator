@@ -339,32 +339,22 @@ jobs:
           channel-priority: strict
           activate-environment: tuner-env
 
-      - name: 📦 Cache Conda Environment
+      # 📦 REPOSITORY-WIDE DYNAMIC CACHE: Shared across branches, keys uniquely per run ID to allow self-healing rewrites
+      - name: 📦 Repository-Wide Dynamic Conda Cache
         id: cache-conda
         uses: actions/cache@v4
         with:
           path: /usr/share/miniconda/envs/tuner-env
-          key: conda-env-${{ hashFiles('requirements.txt', 'tasks/**') }}-${{ github.ref_name }}
+          key: conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/mesh_gen_setup.sh') }}-${{ github.run_id }}
           restore-keys: |
-            conda-env-${{ hashFiles('requirements.txt', 'tasks/**') }}-
-            conda-env-
+            conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/mesh_gen_setup.sh') }}-
 
-      # 🛠️ DEPENDENCY ASSURANCE GATE: Guarantees runtime packages inside the target conda environment context
-      - name: 🛠️ Sync Conda Environment Dependencies
-        shell: bash -el {0}
-        run: |
-          echo "🔗 Verifying conda pipeline environment baseline packages..."
-          pip install jsonschema
-          if [ -f "requirements.txt" ]; then
-            pip install -r requirements.txt
-          fi
-
-      # ⚙️ COLD START ONLY (Initialization & Parameter Explosion)
-      - name: ⚙️ Initialize Pipeline State (Cold Start)
+      # ⚙️ SELF-HEALING OPTIMISTIC CORE ENGINE (Initialization & Parameter Explosion)
+      - name: ⚙️ Initialize Pipeline State (Optimistic Double-Iteration)
         if: steps.import_state.outputs.state_status == 'not_found'
         shell: bash -el {0}
         run: |
-          echo "📥 Cold Start Detected: Scaffolding baseline files..."
+          echo "📥 Cold Start Initiated: Scaffolding baseline simulation assets..."
           mkdir -p repositories
           rm -rf repositories/fluid_dynamics_simulator
           git clone https://github.com/Dmitrii-Zavalin-Deployments/fluid_dynamics_simulator.git repositories/fluid_dynamics_simulator
@@ -375,28 +365,52 @@ jobs:
           fi
           echo "✅ Repository staged successfully."
 
-          echo "🚀 Running state initialization logic..."
-
-          # Build the command dynamically without risking the Python string evaluation trap
+          # --------------------------------------------------------------------
+          # ITERATION 1: OPTIMISTIC EXECUTION (With Cache Flag)
+          # --------------------------------------------------------------------
+          echo "🚀 [ITERATION 1] Attempting initialization with cache-optimized mode..."
+          
+          # Command: If cache exists, we use the flag to skip provisioning. 
+          # If the cache is broken, Python will error out here.
           CMD="python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator"
           
           if [ "${{ steps.cache-conda.outputs.cache-hit }}" == "true" ]; then
-              echo "💡 Conda cache hit achieved. Appending --cached-dependency to skip setup scripts."
               CMD="$CMD --cached-dependency"
           fi
-          $CMD
 
+          set +e 
+          $CMD
+          ITERATION_1_STATUS=$?
+          set -e
+
+          # --------------------------------------------------------------------
+          # ITERATION 2: FALLBACK SELF-HEALING (Without Cache Flag)
+          # --------------------------------------------------------------------
+          if [ $ITERATION_1_STATUS -ne 0 ]; then
+              echo "⚠️ WARNING: Iteration 1 failed (Exit Code: $ITERATION_1_STATUS)."
+              echo "🔄 [ITERATION 2] Retrying without cache flag to force re-provisioning..."
+              
+              # By removing the --cached-dependency flag, the Python script 
+              # will now run the 'execute_setup_script' logic internally.
+              python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator
+              echo "✅ Iteration 2 finished successfully."
+          else
+              echo "✅ Iteration 1 successful."
+          fi
+
+          # --------------------------------------------------------------------
           # --- GARBAGE COLLECTOR (LOG-AND-PURGE) ---
-          echo "🧹 Checking for Dropbox download logs..."
+          # --------------------------------------------------------------------
+          echo -e "\n🧹 Checking for local Dropbox transaction logs..."
           LOG_FILE=$(find data/testing-input-output/ -name "dropbox_download.log" | head -n 1)
           
           if [ -f "$LOG_FILE" ]; then
-              echo "📋 Found log file. Dumping contents for CI visibility:"
+              echo "📋 Found transaction logs. Extracting contents for CI ledger visibility:"
               cat "$LOG_FILE"
-              echo -e "\n🗑️ Removing log file to maintain clean state."
+              echo -e "\n🗑️ Removing transaction logs to preserve workspace hygiene."
               rm "$LOG_FILE"
           else
-              echo "✅ No dropbox_download.log found (skipping cleanup)."
+              echo "✅ No temporary dropbox_download.log artifacts found (skipping cleanup)."
           fi
 
       - name: 🧮 Explode Configuration Range Matrix (Cold Start)
