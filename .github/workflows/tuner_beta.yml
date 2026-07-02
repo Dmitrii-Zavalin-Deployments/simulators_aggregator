@@ -1,9 +1,9 @@
 name: "🛰️ Simulators Pipeline Tuning Pulse (Beta)"
 
-on:
-  schedule:
-    # Runs at the 29th minute of every hour
-    - cron: "29 * * * *"
+# on:
+#   schedule:
+#     # Runs at the 29th minute of every hour
+#     - cron: "29 * * * *"
 
 jobs:
   tuner:

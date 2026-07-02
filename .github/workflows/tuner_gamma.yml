@@ -1,9 +1,9 @@
 name: "🛰️ Simulators Pipeline Tuning Pulse (Gamma)"
 
-on:
-  schedule:
-    # Runs at the 44th minute of every hour
-    - cron: "44 * * * *"
+# on:
+#   schedule:
+#     # Runs at the 44th minute of every hour
+#     - cron: "44 * * * *"
 
 jobs:
   tuner:
