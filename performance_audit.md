@@ -1,5 +1,13 @@
 # 🛰️ Simulators Aggregator Performance Audit
 
+### Audit: 2026-07-03 18:02:25 UTC
+- **Pipeline:** `mesh_pipeline_df430f0.json`
+- **Branch:** `nozzle`
+- **Status:** failure
+- **CPU Load:** 4.6%
+- **Memory Usage:** 2267/15993MB
+---
+
 ### Audit: 2026-07-03 18:00:34 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle`
