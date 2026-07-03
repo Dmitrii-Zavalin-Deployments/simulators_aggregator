@@ -1,69 +1,50 @@
 # 🛰️ Simulators Aggregator Performance Audit
 
-### Audit: 2026-07-03 12:46:21 UTC
+### Audit: 2026-07-03 12:45:25 UTC
 - **Pipeline:** `mesh_pipeline_fdcc384.json`
-- **Branch:** `main`
+- **Branch:** `robotics_testing_extended`
 - **Status:** success
 - **CPU Load:** 2.3%
-- **Memory Usage:** 1905/15989MB
+- **Memory Usage:** 1983/15989MB
 ---
 
-### Audit: 2026-07-03 11:01:54 UTC
+### Audit: 2026-07-03 11:21:51 UTC
 - **Pipeline:** `mesh_pipeline_fdcc384.json`
-- **Branch:** `cube_50_50_50`
-- **Status:** success
-- **CPU Load:** 4.1%
-- **Memory Usage:** 1861/15989MB
----
-
-### Audit: 2026-07-03 11:00:14 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `cube_50_50_50`
----
-
-### Audit: 2026-07-03 10:55:12 UTC
-- **Pipeline:** `mesh_pipeline_fdcc384.json`
-- **Branch:** `cube_50_50_50`
-- **Status:** success
-- **CPU Load:** 2.2%
-- **Memory Usage:** 1080/15989MB
----
-
-### Audit: 2026-07-03 10:50:05 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `cube_50_50_50`
----
-
-### Audit: 2026-07-03 10:49:34 UTC
-- **Pipeline:** `mesh_pipeline_fdcc384.json`
-- **Branch:** `cube_50_50_50`
+- **Branch:** `robotics_testing_extended`
 - **Status:** success
 - **CPU Load:** 0%
-- **Memory Usage:** 1792/15989MB
+- **Memory Usage:** 2124/15989MB
 ---
 
-### Audit: 2026-07-03 10:45:49 UTC
-- **Pipeline:** `mesh_pipeline_fdcc384.json`
-- **Branch:** `main`
-- **Status:** success
-- **CPU Load:** 2.3%
-- **Memory Usage:** 1861/15989MB
+### Audit: 2026-07-03 11:20:18 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `robotics_testing_extended`
 ---
 
-### Audit: 2026-07-02 19:54:14 UTC
+### Audit: 2026-07-03 11:14:54 UTC
 - **Pipeline:** `mesh_pipeline_fdcc384.json`
-- **Branch:** `main`
+- **Branch:** `robotics_testing_extended`
 - **Status:** success
 - **CPU Load:** 0%
-- **Memory Usage:** 1899/15989MB
+- **Memory Usage:** 1056/15989MB
 ---
 
-### Audit: 2026-07-02 17:31:59 UTC
+### Audit: 2026-07-03 11:10:21 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `robotics_testing_extended`
+---
+
+### Audit: 2026-07-03 11:02:38 UTC
 - **Pipeline:** `mesh_pipeline_fdcc384.json`
-- **Branch:** `main`
+- **Branch:** `robotics_testing_extended`
 - **Status:** success
 - **CPU Load:** 2.3%
-- **Memory Usage:** 1961/15989MB
+- **Memory Usage:** 1518/15993MB
+---
+
+### Audit: 2026-07-03 11:00:24 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `robotics_testing_extended`
 ---
 
 ### Audit: 2026-07-02 17:12:21 UTC
