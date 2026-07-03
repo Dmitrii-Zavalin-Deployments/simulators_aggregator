@@ -1,6 +1,6 @@
 {
-  "pipeline_id": "mesh_pipeline_fdcc384.json",
+  "pipeline_id": "mesh_pipeline_df430f0.json",
   "input_data_list": [
-    "cube_50-50-50_hole_30.step"
+    "cube.step"
   ]
 }
