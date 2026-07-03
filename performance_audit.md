@@ -1,48 +1,37 @@
 # 🛰️ Simulators Aggregator Performance Audit
 
-### Audit: 2026-07-03 11:21:51 UTC
+### Audit: 2026-07-03 11:01:54 UTC
 - **Pipeline:** `mesh_pipeline_fdcc384.json`
-- **Branch:** `cube_50-50-50_hole_30`
+- **Branch:** `cube_50_50_50`
 - **Status:** success
-- **CPU Load:** 4.6%
-- **Memory Usage:** 1790/15993MB
+- **CPU Load:** 4.1%
+- **Memory Usage:** 1861/15989MB
 ---
 
-### Audit: 2026-07-03 11:20:05 UTC
+### Audit: 2026-07-03 11:00:14 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `cube_50-50-50_hole_30`
+- **Branch:** `cube_50_50_50`
 ---
 
-### Audit: 2026-07-03 11:15:29 UTC
+### Audit: 2026-07-03 10:55:12 UTC
 - **Pipeline:** `mesh_pipeline_fdcc384.json`
-- **Branch:** `cube_50-50-50_hole_30`
+- **Branch:** `cube_50_50_50`
 - **Status:** success
-- **CPU Load:** 2.3%
-- **Memory Usage:** 1067/15993MB
+- **CPU Load:** 2.2%
+- **Memory Usage:** 1080/15989MB
 ---
 
-### Audit: 2026-07-03 11:10:05 UTC
+### Audit: 2026-07-03 10:50:05 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `cube_50-50-50_hole_30`
+- **Branch:** `cube_50_50_50`
 ---
 
-### Audit: 2026-07-03 11:02:15 UTC
+### Audit: 2026-07-03 10:49:34 UTC
 - **Pipeline:** `mesh_pipeline_fdcc384.json`
-- **Branch:** `cube_50-50-50_hole_30`
+- **Branch:** `cube_50_50_50`
 - **Status:** success
 - **CPU Load:** 0%
-- **Memory Usage:** 1550/15989MB
----
-
-### Audit: 2026-07-03 10:57:01 UTC
-- **Pipeline:** `mesh_pipeline_fdcc384.json`
-- **Branch:** `cube_50-50-50_hole_30`
-- **Status:** success
-- **CPU Load:** 2.3%
-- **Memory Usage:** 1496/15989MB
-### Audit: 2026-07-03 11:00:03 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `cube_50-50-50_hole_30`
+- **Memory Usage:** 1792/15989MB
 ---
 
 ### Audit: 2026-07-03 10:45:49 UTC
