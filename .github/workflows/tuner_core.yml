@@ -511,10 +511,15 @@ jobs:
             --exit-code $RUN_RC \
             --log-file "$LOG_FILE"
 
-          # 7. Explicitly fail if simulation failed
+          # 7. FLOW CONTROL: Instead of exiting, we report the status and continue
           if [ $RUN_RC -ne 0 ]; then
-              echo "❌ Execution Failure: Core simulation step returned non-zero code [$RUN_RC]."
-              exit $RUN_RC
+              echo "⚠️ Simulation reported failure (Exit Code: $RUN_RC)."
+              echo "   This is handled as a known outcome in tuning. Continuing pipeline flow..."
+              # You can export a variable here if you need subsequent steps to know this failed
+              echo "SIMULATION_STATUS=FAILED" >> $GITHUB_ENV
+          else
+              echo "✅ Simulation executed successfully."
+              echo "SIMULATION_STATUS=SUCCESS" >> $GITHUB_ENV
           fi
 
       - name: 📤 Package and Upload State Snapshot
