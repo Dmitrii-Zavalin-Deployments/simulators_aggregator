@@ -506,11 +506,15 @@ jobs:
           fi
           echo "📋 ========================================================================"
           
-          # 6. Invoke telemetry tracking engine
+          # 6. Invoke telemetry tracking engine (PROTECTED ERROR GATE)
+          echo "📊 Initiating telemetry recording system..."
+          set +e # Open error gates so telemetry exit 1 does not break the workflow step
           python3 src/pipeline/record_telemetry.py \
             --state-file "$WORKSPACE_DIR/state.json" \
             --exit-code $RUN_RC \
             --log-file "$LOG_FILE"
+          TELEMETRY_RC=$?
+          set -e # Restore default strict environment security
 
           # 7. FLOW CONTROL: Instead of exiting, we report the status and continue
           if [ $RUN_RC -ne 0 ]; then
