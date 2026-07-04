@@ -1,7 +1,7 @@
 {
   "pipeline_id": "mesh_pipeline_24d1ba9.json",
   "input_data_list": [
-    "test.step",
+    "cube_with_a_hole.step",
     "environment_initial_data.json"
   ]
 }
