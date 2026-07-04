@@ -1,5 +1,13 @@
 # 🛰️ Simulators Aggregator Performance Audit
 
+### Audit: 2026-07-04 15:02:25 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `nozzle`
+- **Status:** failure
+- **CPU Load:** 7%
+- **Memory Usage:** 1686/15989MB
+---
+
 ### Audit: 2026-07-04 15:00:18 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle`
