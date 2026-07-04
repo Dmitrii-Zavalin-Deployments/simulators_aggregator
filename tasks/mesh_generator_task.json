@@ -2,6 +2,6 @@
   "pipeline_id": "mesh_pipeline_24d1ba9.json",
   "input_data_list": [
     "cube.step",
-    "environmental_setup.json"
+    "environmental_data.json"
   ]
 }
