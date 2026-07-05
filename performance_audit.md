@@ -1,102 +1,118 @@
 # 🛰️ Simulators Aggregator Performance Audit
 
-### Audit: 2026-07-04 21:01:59 UTC
+### Audit: 2026-07-04 21:02:14 UTC
 - **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `cube_with_a_hole`
-- **Status:** success
-- **CPU Load:** 2.2%
-- **Memory Usage:** 1869/15989MB
----
-
-### Audit: 2026-07-04 21:00:16 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `cube_with_a_hole`
----
-
-### Audit: 2026-07-04 20:02:03 UTC
-- **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `cube_with_a_hole`
+- **Branch:** `nozzle`
 - **Status:** success
 - **CPU Load:** 2.3%
-- **Memory Usage:** 2116/15989MB
+- **Memory Usage:** 1930/15993MB
 ---
 
-### Audit: 2026-07-04 20:00:17 UTC
+### Audit: 2026-07-04 21:00:25 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `cube_with_a_hole`
+- **Branch:** `nozzle`
 ---
 
-### Audit: 2026-07-04 19:01:59 UTC
+### Audit: 2026-07-04 20:01:57 UTC
 - **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `cube_with_a_hole`
-- **Status:** success
-- **CPU Load:** 2.4%
-- **Memory Usage:** 1926/15989MB
----
-
-### Audit: 2026-07-04 19:00:16 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `cube_with_a_hole`
----
-
-### Audit: 2026-07-04 18:01:58 UTC
-- **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `cube_with_a_hole`
-- **Status:** success
-- **CPU Load:** 4.6%
-- **Memory Usage:** 1785/15989MB
----
-
-### Audit: 2026-07-04 18:00:16 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `cube_with_a_hole`
----
-
-### Audit: 2026-07-04 17:02:13 UTC
-- **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `cube_with_a_hole`
-- **Status:** success
-- **CPU Load:** 2.2%
-- **Memory Usage:** 2096/15993MB
----
-
-### Audit: 2026-07-04 17:00:16 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `cube_with_a_hole`
----
-
-### Audit: 2026-07-04 16:01:53 UTC
-- **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `cube_with_a_hole`
-- **Status:** success
-- **CPU Load:** 6%
-- **Memory Usage:** 2083/15989MB
----
-
-### Audit: 2026-07-04 16:00:14 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `cube_with_a_hole`
----
-
-### Audit: 2026-07-04 15:01:54 UTC
-- **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `cube_with_a_hole`
-- **Status:** success
-- **CPU Load:** 2.2%
-- **Memory Usage:** 2068/15993MB
----
-
-### Audit: 2026-07-04 15:00:12 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `cube_with_a_hole`
----
-
-### Audit: 2026-07-04 14:57:46 UTC
-- **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `cube_with_a_hole`
+- **Branch:** `nozzle`
 - **Status:** success
 - **CPU Load:** 0%
-- **Memory Usage:** 1601/15993MB
+- **Memory Usage:** 2119/15993MB
+---
+
+### Audit: 2026-07-04 20:00:25 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `nozzle`
+---
+
+### Audit: 2026-07-04 19:02:04 UTC
+- **Pipeline:** `mesh_pipeline_24d1ba9.json`
+- **Branch:** `nozzle`
+- **Status:** success
+- **CPU Load:** 2.3%
+- **Memory Usage:** 2179/15989MB
+---
+
+### Audit: 2026-07-04 19:00:24 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `nozzle`
+---
+
+### Audit: 2026-07-04 18:02:08 UTC
+- **Pipeline:** `mesh_pipeline_24d1ba9.json`
+- **Branch:** `nozzle`
+- **Status:** success
+- **CPU Load:** 9%
+- **Memory Usage:** 2063/15993MB
+---
+
+### Audit: 2026-07-04 18:00:25 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `nozzle`
+---
+
+### Audit: 2026-07-04 17:01:56 UTC
+- **Pipeline:** `mesh_pipeline_24d1ba9.json`
+- **Branch:** `nozzle`
+- **Status:** success
+- **CPU Load:** 3.8%
+- **Memory Usage:** 1891/15988MB
+---
+
+### Audit: 2026-07-04 17:00:25 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `nozzle`
+---
+
+### Audit: 2026-07-04 16:01:54 UTC
+- **Pipeline:** `mesh_pipeline_24d1ba9.json`
+- **Branch:** `nozzle`
+- **Status:** success
+- **CPU Load:** 5.1%
+- **Memory Usage:** 1913/15989MB
+---
+
+### Audit: 2026-07-04 16:00:20 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `nozzle`
+---
+
+### Audit: 2026-07-04 15:11:17 UTC
+- **Pipeline:** `mesh_pipeline_24d1ba9.json`
+- **Branch:** `nozzle`
+- **Status:** success
+- **CPU Load:** 4.8%
+- **Memory Usage:** 1685/15988MB
+---
+
+### Audit: 2026-07-04 15:09:06 UTC
+- **Pipeline:** `mesh_pipeline_24d1ba9.json`
+- **Branch:** `nozzle`
+- **Status:** success
+- **CPU Load:** 0%
+- **Memory Usage:** 1550/15993MB
+---
+
+### Audit: 2026-07-04 15:02:25 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `nozzle`
+- **Status:** failure
+- **CPU Load:** 7%
+- **Memory Usage:** 1686/15989MB
+---
+
+### Audit: 2026-07-04 15:00:18 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `nozzle`
+---
+
+### Audit: 2026-07-04 14:59:07 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `nozzle`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 1532/15989MB
 ---
 
 ### Audit: 2026-07-04 13:56:28 UTC
