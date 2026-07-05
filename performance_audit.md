@@ -1,102 +1,118 @@
 # 🛰️ Simulators Aggregator Performance Audit
 
-### Audit: 2026-07-05 05:02:07 UTC
+### Audit: 2026-07-04 21:02:14 UTC
 - **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `sphere`
+- **Branch:** `nozzle`
 - **Status:** success
 - **CPU Load:** 2.3%
-- **Memory Usage:** 1971/15988MB
+- **Memory Usage:** 1930/15993MB
 ---
 
-### Audit: 2026-07-05 05:00:21 UTC
+### Audit: 2026-07-04 21:00:25 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `sphere`
+- **Branch:** `nozzle`
 ---
 
-### Audit: 2026-07-04 22:02:39 UTC
+### Audit: 2026-07-04 20:01:57 UTC
 - **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `sphere`
+- **Branch:** `nozzle`
 - **Status:** success
 - **CPU Load:** 0%
-- **Memory Usage:** 1702/15989MB
+- **Memory Usage:** 2119/15993MB
 ---
 
-### Audit: 2026-07-04 22:00:29 UTC
+### Audit: 2026-07-04 20:00:25 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `sphere`
+- **Branch:** `nozzle`
 ---
 
-### Audit: 2026-07-04 21:02:19 UTC
+### Audit: 2026-07-04 19:02:04 UTC
 - **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `sphere`
-- **Status:** success
-- **CPU Load:** 0%
-- **Memory Usage:** 1890/15989MB
----
-
-### Audit: 2026-07-04 21:00:43 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `sphere`
----
-
-### Audit: 2026-07-04 20:02:24 UTC
-- **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `sphere`
-- **Status:** success
-- **CPU Load:** 0%
-- **Memory Usage:** 1795/15992MB
----
-
-### Audit: 2026-07-04 20:00:40 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `sphere`
----
-
-### Audit: 2026-07-04 19:02:29 UTC
-- **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `sphere`
-- **Status:** success
-- **CPU Load:** 2.6%
-- **Memory Usage:** 1853/15989MB
----
-
-### Audit: 2026-07-04 19:00:41 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `sphere`
----
-
-### Audit: 2026-07-04 18:02:21 UTC
-- **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `sphere`
-- **Status:** success
-- **CPU Load:** 8.5%
-- **Memory Usage:** 1780/15989MB
----
-
-### Audit: 2026-07-04 18:00:42 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `sphere`
----
-
-### Audit: 2026-07-04 17:02:17 UTC
-- **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `sphere`
-- **Status:** success
-- **CPU Load:** 3.4%
-- **Memory Usage:** 2000/15989MB
----
-
-### Audit: 2026-07-04 17:00:41 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `sphere`
----
-
-### Audit: 2026-07-04 16:15:07 UTC
-- **Pipeline:** `mesh_pipeline_24d1ba9.json`
-- **Branch:** `sphere`
+- **Branch:** `nozzle`
 - **Status:** success
 - **CPU Load:** 2.3%
-- **Memory Usage:** 1449/15989MB
+- **Memory Usage:** 2179/15989MB
+---
+
+### Audit: 2026-07-04 19:00:24 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `nozzle`
+---
+
+### Audit: 2026-07-04 18:02:08 UTC
+- **Pipeline:** `mesh_pipeline_24d1ba9.json`
+- **Branch:** `nozzle`
+- **Status:** success
+- **CPU Load:** 9%
+- **Memory Usage:** 2063/15993MB
+---
+
+### Audit: 2026-07-04 18:00:25 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `nozzle`
+---
+
+### Audit: 2026-07-04 17:01:56 UTC
+- **Pipeline:** `mesh_pipeline_24d1ba9.json`
+- **Branch:** `nozzle`
+- **Status:** success
+- **CPU Load:** 3.8%
+- **Memory Usage:** 1891/15988MB
+---
+
+### Audit: 2026-07-04 17:00:25 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `nozzle`
+---
+
+### Audit: 2026-07-04 16:01:54 UTC
+- **Pipeline:** `mesh_pipeline_24d1ba9.json`
+- **Branch:** `nozzle`
+- **Status:** success
+- **CPU Load:** 5.1%
+- **Memory Usage:** 1913/15989MB
+---
+
+### Audit: 2026-07-04 16:00:20 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `nozzle`
+---
+
+### Audit: 2026-07-04 15:11:17 UTC
+- **Pipeline:** `mesh_pipeline_24d1ba9.json`
+- **Branch:** `nozzle`
+- **Status:** success
+- **CPU Load:** 4.8%
+- **Memory Usage:** 1685/15988MB
+---
+
+### Audit: 2026-07-04 15:09:06 UTC
+- **Pipeline:** `mesh_pipeline_24d1ba9.json`
+- **Branch:** `nozzle`
+- **Status:** success
+- **CPU Load:** 0%
+- **Memory Usage:** 1550/15993MB
+---
+
+### Audit: 2026-07-04 15:02:25 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `nozzle`
+- **Status:** failure
+- **CPU Load:** 7%
+- **Memory Usage:** 1686/15989MB
+---
+
+### Audit: 2026-07-04 15:00:18 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `nozzle`
+---
+
+### Audit: 2026-07-04 14:59:07 UTC
+- **Pipeline:** `Assemble & Tuning (Disconnected)`
+- **Branch:** `nozzle`
+- **Status:** failure
+- **CPU Load:** 0%
+- **Memory Usage:** 1532/15989MB
 ---
 
 ### Audit: 2026-07-04 13:56:28 UTC
