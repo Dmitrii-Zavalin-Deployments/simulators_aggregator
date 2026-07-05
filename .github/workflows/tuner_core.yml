@@ -68,7 +68,7 @@ jobs:
           id: check
           run: |
             # 1. 🔧 GLOBAL ROBOT IDENTITY INITIALIZATION
-            git config --global user.name "Automation Engine [${{ github.ref_name }}]"
+            git config --global user.name "Human-Assisted Processing Engine [${{ github.ref_name }}]"
             git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
             git config --global notes.rewriteRef "refs/notes/*"
 
@@ -130,8 +130,8 @@ jobs:
       # 🔧 GLOBAL ROBOT IDENTITY + NOTES INITIALIZATION (Branch-Isolated)
       - name: 🤖 Initialize Robot Identity & Notes
         run: |
-          git config --global user.name "Automation Engine [${{ github.ref_name }}]"
-          git config --global user.email "automation-${{ github.ref_name }}@yourdomain.com"
+          git config --global user.name "Human-Assisted Processing Engine [${{ github.ref_name }}]"
+          git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
           git config --global notes.rewriteRef "refs/notes/*"
 
       - name: 🐍 Setup Python 3.11
@@ -296,8 +296,8 @@ jobs:
       # 🔧 GLOBAL ROBOT IDENTITY + NOTES INITIALIZATION (Branch-Isolated)
       - name: 🤖 Initialize Robot Identity & Notes
         run: |
-          git config --global user.name "Automation Engine [${{ github.ref_name }}]"
-          git config --global user.email "automation-${{ github.ref_name }}@yourdomain.com"
+          git config --global user.name "Human-Assisted Processing Engine [${{ github.ref_name }}]"
+          git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
           git config --global notes.rewriteRef "refs/notes/*"
 
       - name: 🐍 Setup Python 3.11
