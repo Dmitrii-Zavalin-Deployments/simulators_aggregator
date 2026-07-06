@@ -1,7 +1,7 @@
 {
   "pipeline_id": "pre_bernoulli_solver_pipeline_9293268.json",
   "input_data_list": [
-    "test.step",
+    "plate.step",
     "environment_initial_data.json"
   ]
 }
