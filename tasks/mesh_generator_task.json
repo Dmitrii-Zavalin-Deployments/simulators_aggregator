@@ -1,7 +1,7 @@
 {
   "pipeline_id": "mesh_pipeline_2a1ae5d.json",
   "input_data_list": [
-    "plate.step",
+    "test.step",
     "environment_initial_data.json"
   ]
 }
