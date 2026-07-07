@@ -66,7 +66,8 @@ def main():
         logger.info(f"Adding task for repository: {repo_name}")
         cmd = (
             f"echo '🚀 Running simulator engine execution block: {repo_name}...'; "
-            f"(cd {repo_dir} && python3 -m src.main --input_output_folder {inputs_outputs_dir})"
+            # CRITICAL FIX: Wrap execution in xvfb-run to provide a headless graphical context for FLTK
+            f"(cd {repo_dir} && xvfb-run --auto-servernum python3 -m src.main --input_output_folder {inputs_outputs_dir})"
         )
         commands.append(cmd)
 
