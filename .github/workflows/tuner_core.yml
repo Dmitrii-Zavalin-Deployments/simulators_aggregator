@@ -346,9 +346,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /usr/share/miniconda/envs/tuner-env
-          key: conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/mesh_gen_setup.sh') }}-${{ github.run_id }}
+          key: conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/mesh_gen_setup*.sh') }}-${{ github.run_id }}
           restore-keys: |
-            conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/mesh_gen_setup.sh') }}-
+            conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/mesh_gen_setup*.sh') }}-
+
+      # 🌐 CRITICAL FIX: HEADLESS GRAPHICS DRIVERS
+      - name: 🌐 Install Headless Rendering Dependencies
+        run: |
+          echo "Installing virtual framebuffer and OpenGL libraries for Gmsh FLTK rendering..."
+          sudo apt-get update
+          sudo apt-get install -y libgl1 xvfb libglu1-mesa
 
       # ⚙️ SELF-HEALING OPTIMISTIC CORE ENGINE (Initialization & Parameter Explosion)
       - name: ⚙️ Initialize Pipeline State (Optimistic Double-Iteration)
