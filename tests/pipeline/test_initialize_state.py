@@ -412,7 +412,12 @@ def test_main_exits_when_inputs_missing(
     mock_discover.return_value = {
         "pipeline_id": "test_id", 
         "input_data_list": ["missing.cad"]
-    mock_manifest.return_value = {"config": "cfg.json", "setup_script": None, "execution_chain": []}
+    }
+
+    mock_manifest.return_value = {
+        "config": "cfg.json",
+        "setup_script": None,
+        "execution_chain": []
     }
     
     # 2. Force the targeted structural exception
