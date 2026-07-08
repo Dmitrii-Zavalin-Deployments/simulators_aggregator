@@ -150,7 +150,7 @@ def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
         logger.info(f"DEBUG: Checking for asset at path: {target_path.resolve()}")
         
         if not target_path.exists():
-            logger.info(f"⚠️ Asset '{filename}' is missing locally. Initiating direct Dropbox download...")
+            logger.info(f"⚠ Asset '{filename}' is missing locally. Initiating direct Dropbox download...")
             
             # Lazily initialize Dropbox modules. Safely evaluates since setup scripts have completed.
             if ingestor is None:
