@@ -216,10 +216,6 @@ def test_main_entrypoint_execution(mock_filesystem, mock_tuner_state, monkeypatc
 # Utility & Coverage Completion
 # ==============================================================================
 
-# ==============================================================================
-# Utility & Coverage Completion
-# ==============================================================================
-
 def test_fetch_inputs_from_dropbox_preserves_existing_files(mock_filesystem):
     """Verifies that the function respects/preserves authentic assets that already exist."""
     input_list = ["test_a.cad", "test_b.step"]
@@ -279,12 +275,14 @@ def test_fetch_inputs_from_dropbox_raises_error_if_missing(mock_filesystem, monk
         with pytest.raises(FileNotFoundError, match="Failed to download asset"):
             initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
 
+
 # When a manifest search fails, we must trigger the specific error logging path, 
 # ensuring the user receives helpful feedback regarding the missing file.
 def test_load_pipeline_manifest_raises_error_when_missing(mock_filesystem):
     repo_path = mock_filesystem / "repo"
     with pytest.raises(FileNotFoundError, match="not found"):
         initialize_state.load_pipeline_manifest(repo_path, "missing_pid")
+
 
 # We assert that the success logger is invoked when a provisioning script finishes 
 # with a clean return code (0).
@@ -300,6 +298,7 @@ def test_execute_setup_script_success_path(mock_filesystem):
         mock_popen.return_value = mock_process
         
         initialize_state.execute_setup_script(repo_path, "test_success.sh")
+
 
 # Finally, we confirm that when the dependency cache is empty, the provisioning 
 # script is correctly executed, ensuring our environment setup logic is functional.
