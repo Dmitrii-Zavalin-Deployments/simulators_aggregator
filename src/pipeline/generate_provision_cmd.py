@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# src/pipeline/generate_provision_cmd.py
 import json
 import os
 import sys
@@ -77,7 +78,7 @@ def main():
     commands = [f"mkdir -p {repo_root}"]
     staged_configs = []
     
-    "--cached-dependency" if args.cached_dependency else ""
+    logger.info(f"ℹ️ Cache dependency bypass mode status: {args.cached_dependency}")
 
     # Loop through all folders and inject the identical config asset
     for task in tasks:
