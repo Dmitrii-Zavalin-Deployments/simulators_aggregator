@@ -44,6 +44,8 @@ def discover_task_file() -> dict:
         with open(task_file, 'r') as f:
             try:
                 data = json.load(f)
+                if isinstance(data, list):
+                    data = data[0]
                 if required_keys.issubset(data.keys()):
                     logger.info(f"✅ Explicit task payload validated at: {task_file}")
                     return data
@@ -76,6 +78,7 @@ def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> dict:
         
     with open(manifest_matches[0], 'r') as f:
         data = json.load(f)
+                if isinstance(data, list): data = data[0]
         
     logger.info(f"✅ Discovered Library Manifest at: {manifest_matches[0]}")
     return data

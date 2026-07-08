@@ -339,7 +339,7 @@ def test_main_exits_when_inputs_missing(
     """Verifies that a FileNotFoundError in input fetching triggers an explicit exit(1)."""
     # 1. Configure deterministic mock behaviors
     mock_exists.return_value = True
-    mock_args.return_value = MagicMock(repo_path="dummy/repo", cached_dependency=False)
+    mock_args.return_value = MagicMock(repo_path=str(mock_filesystem / "repo"), cached_dependency=False)
     mock_discover.return_value = {
         "pipeline_id": "test_id", 
         "input_data_list": ["missing.cad"]
