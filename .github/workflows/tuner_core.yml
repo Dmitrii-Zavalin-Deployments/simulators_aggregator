@@ -346,9 +346,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /usr/share/miniconda/envs/tuner-env
-          key: conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/mesh_gen_setup*.sh') }}-${{ github.run_id }}
+          # Hashing the directory ensures total environment synchronization
+          key: conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/**') }}-${{ github.run_id }}
           restore-keys: |
-            conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/mesh_gen_setup*.sh') }}-
+            conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/**') }}-
 
       # 🌐 CRITICAL FIX: HEADLESS GRAPHICS DRIVERS
       - name: 🌐 Install Headless Rendering Dependencies
