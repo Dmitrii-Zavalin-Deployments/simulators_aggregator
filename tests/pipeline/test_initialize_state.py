@@ -393,12 +393,22 @@ def test_main_exits_when_inputs_missing(
     mock_discover,      # Maps to discover_task_file
     mock_fetch,         # Maps to fetch_inputs_from_dropbox
     mock_exit,          # Maps to sys.exit
-    mock_manifest       # Maps to load_pipeline_manifest
+    mock_manifest,      # Maps to load_pipeline_manifest
+    mock_filesystem     # <--- ADD THIS FIXTURE
 ):
     """Verifies that a FileNotFoundError in input fetching triggers an explicit exit(1)."""
     # 1. Configure deterministic mock behaviors
     mock_exists.return_value = True
-    mock_args.return_value = MagicMock(repo_path="/mock/repo", cached_dependency=False)
+    
+    # FIX: Use the actual temporary directory from the fixture instead of a hardcoded string
+    repo_dir = mock_filesystem / "repo"
+    repo_dir.mkdir(exist_ok=True) # Ensure it exists physically for Path()
+    
+    mock_args.return_value = MagicMock(
+        repo_path=str(repo_dir), 
+        cached_dependency=False
+    )
+    
     mock_discover.return_value = {
         "pipeline_id": "test_id", 
         "input_data_list": ["missing.cad"]
