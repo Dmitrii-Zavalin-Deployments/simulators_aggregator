@@ -52,7 +52,7 @@ def discover_task_file() -> dict:
     raise ValueError("❌ CRITICAL: No JSON matching Tuner Task Schema found.")
 
 
-def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> list:
+def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> dict:
     """Finds and parses the target JSON manifest recursively within the Library."""
     search_pattern = f"{pipeline_id}*"
     manifest_matches = list(repo_path.rglob(search_pattern))
@@ -126,7 +126,7 @@ def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
         logger.info(f"DEBUG: Checking for asset at path: {target_path.resolve()}")
         
         if not target_path.exists():
-            logger.info(f"⚠️ Asset '{filename}' is missing locally. Initiating direct Dropbox download...")
+            logger.info(f"⚠ Asset '{filename}' is missing locally. Initiating direct Dropbox download...")
             
             # Lazily initialize Dropbox modules. Safely evaluates since setup scripts have completed.
             if ingestor is None:
@@ -176,32 +176,37 @@ def main():
         logger.error(str(e))
         sys.exit(1)
         
-    # 2. Discover Library Manifest
-    manifest_steps = load_pipeline_manifest(repo_path, task_data["pipeline_id"])
-    
-    target_config_path = None
-    
-    # 3. CRITICAL ENVIRONMENT HYDRATION: Execute Provisioning Scripts BEFORE I/O operations
-    for step in sorted(manifest_steps, key=lambda x: x.get("order", 0)):
-        logger.info(f"Processing Step {step.get('order')} for repository: {step.get('repository_url')}")
+    # 2. Discover Library Manifest (Resolves to Object Root Contract)
+    try:
+        manifest_data = load_pipeline_manifest(repo_path, task_data["pipeline_id"])
+    except Exception as e:
+        logger.error(str(e))
+        sys.exit(1)
         
-        # Execute provisioning setup scripts immediately if dependencies are not cached
-        if "setup_script" in step:
-            if not args.cached_dependency:
-                execute_setup_script(repo_path, step["setup_script"])
-            else:
-                logger.info(f"⏩ Skipping provisioning script (Cache Hit: True): {step['setup_script']}")
-            
-        # Track the configuration path location for step 5
-        if "config" in step:
-            target_config_path = step["config"]
+    # Extract Global Configuration Properties from Header
+    target_config_path = manifest_data.get("config")
+    global_setup_script = manifest_data.get("setup_script")
+    execution_chain = manifest_data.get("execution_chain", [])
+    
+    # 3. CRITICAL ENVIRONMENT HYDRATION: Run Global Setup Script
+    if global_setup_script:
+        if not args.cached_dependency:
+            execute_setup_script(repo_path, global_setup_script)
+        else:
+            logger.info(f"⏩ Skipping global provisioning script (Cache Hit: True): {global_setup_script}")
+    else:
+        logger.warning("⚠️ Warning: No unified 'setup_script' entry found in manifest root header.")
+
+    # Print planned tracking metrics for logging transparency
+    for step in sorted(execution_chain, key=lambda x: x.get("order", 0)):
+        logger.info(f"Scheduled Execution Sequence -> Step {step.get('order')} Target: {step.get('repository_url')}")
 
     # 4. Create Clean-Room Isolated Workspace Structures
     workspace_dir = Path("data/testing-input-output") / f"tuning_{branch_name}"
     workspace_dir.mkdir(parents=True, exist_ok=True)
     inputs_dir = workspace_dir / "inputs-outputs"
     
-    # 5. Verify Inputs are Present (Now fully insulated against missing dependency exceptions)
+    # 5. Verify Inputs are Present (Fully insulated against missing dependency exceptions)
     try:
         fetch_inputs_from_dropbox(task_data["input_data_list"], inputs_dir)
     except FileNotFoundError as e:
@@ -229,12 +234,12 @@ def main():
         logger.error("❌ CRITICAL: Manifest schema violation. No 'config' baseline file specified.")
         sys.exit(1)
     
-    # 7. Instantiate Sovereign State Container (Delayed to protect against internal compilation dependencies)
+    # 7. Instantiate Sovereign State Container (Propagates execution array down for command generation)
     try:
         state_container = TunerState(
             pipeline_id=task_data["pipeline_id"],
             input_data_list=task_data["input_data_list"],
-            task_details=manifest_steps, 
+            task_details=sorted(execution_chain, key=lambda x: x.get("order", 0)), 
             successful_runs_archive=f"successful_runs_{branch_name}",
             failed_runs_archive=f"failed_runs_{branch_name}"
         )
