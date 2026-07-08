@@ -28,28 +28,46 @@ def parse_arguments():
 
 
 def discover_task_file() -> dict:
-    """Scans the local 'tasks/' directory to locate and validate a lean task JSON."""
+    """
+    Scans the local 'tasks/' directory to locate and validate a single lean task JSON.
+    Enforces that exactly one task context exists.
+    """
     tasks_dir = Path("tasks")
     logger.info(f"Scanning {tasks_dir} for an ACE execution task payload...")
     
-    # Required keys according to the Tuner Task Schema (Intent only)
+    # Required keys according to the Tuner Task Schema
     required_keys = {"pipeline_id", "input_data_list"}
     
     task_files = list(tasks_dir.glob("*.json"))
     
+    # Guard 1: Zero files presence
     if not task_files:
         raise FileNotFoundError("❌ CRITICAL: No JSON files found in tasks/ directory.")
 
-    for task_file in task_files:
-        with open(task_file, 'r') as f:
-            try:
-                data = json.load(f)
-                if required_keys.issubset(data.keys()):
-                    logger.info(f"✅ Explicit task payload validated at: {task_file}")
-                    return data
-            except json.JSONDecodeError:
-                continue
-    raise ValueError("❌ CRITICAL: No JSON matching Tuner Task Schema found.")
+    # Guard 2: More than 1 file presence (Ambiguous state prevention)
+    if len(task_files) > 1:
+        found_names = [f.name for f in task_files]
+        raise ValueError(
+            f"❌ CRITICAL: Multiple task files found in tasks/ directory: {found_names}. "
+            f"Only exactly ONE task file is allowed at a time. Please delete additional files."
+        )
+    
+    task_file = task_files[0]
+    with open(task_file, 'r') as f:
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"❌ CRITICAL: Task file {task_file.name} contains invalid JSON: {e}")
+            
+    # Enforce strict object type assignment matching the schema root
+    if not isinstance(data, dict):
+        raise ValueError(f"❌ CRITICAL: Task file {task_file.name} root element must be a JSON object, not a list.")
+        
+    if not required_keys.issubset(data.keys()):
+        raise ValueError(f"❌ CRITICAL: JSON file '{task_file.name}' is missing required schema keys: {required_keys - data.keys()}")
+        
+    logger.info(f"✅ Explicit task payload validated at: {task_file}")
+    return data
 
 
 def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> dict:
@@ -75,7 +93,13 @@ def load_pipeline_manifest(repo_path: Path, pipeline_id: str) -> dict:
         raise FileNotFoundError(f"Manifest '{search_pattern}' not found in {repo_path}")
         
     with open(manifest_matches[0], 'r') as f:
-        data = json.load(f)
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"❌ CRITICAL: Manifest file {manifest_matches[0].name} contains invalid JSON: {e}")
+            
+    if not isinstance(data, dict):
+        raise ValueError(f"❌ CRITICAL: Manifest file {manifest_matches[0].name} root element must be a JSON object.")
         
     logger.info(f"✅ Discovered Library Manifest at: {manifest_matches[0]}")
     return data
