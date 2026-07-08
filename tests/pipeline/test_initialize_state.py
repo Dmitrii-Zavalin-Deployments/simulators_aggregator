@@ -433,3 +433,46 @@ def test_main_exits_when_inputs_missing(
     # 5. Assert defensive boundary conditions
     mock_exit.assert_called_once_with(1)
     mock_manifest.assert_called_once()
+
+@patch("src.pipeline.initialize_state.load_pipeline_manifest")
+@patch("src.pipeline.initialize_state.sys.exit")
+@patch("src.pipeline.initialize_state.discover_task_file")
+@patch("src.pipeline.initialize_state.parse_arguments")
+@patch("src.pipeline.initialize_state.Path.exists")
+def test_main_exits_when_manifest_loading_fails(
+    mock_exists,        # Maps to Path.exists
+    mock_args,          # Maps to parse_arguments
+    mock_discover,      # Maps to discover_task_file
+    mock_exit,          # Maps to sys.exit
+    mock_manifest,      # Maps to load_pipeline_manifest
+    mock_filesystem     # Pytest temporary directory fixture
+):
+    """Verifies that an unexpected exception during manifest loading triggers exit(1)."""
+    # 1. Mock base configuration rules to pass lines 186-194
+    mock_exists.return_value = True
+    repo_dir = mock_filesystem / "repo"
+    repo_dir.mkdir(exist_ok=True)
+    
+    mock_args.return_value = MagicMock(
+        repo_path=str(repo_dir), 
+        cached_dependency=False
+    )
+    
+    # 2. Return valid data from step 1 (lines 197-201) to hit the step 2 block cleanly
+    mock_discover.return_value = {
+        "pipeline_id": "faulty_pipeline", 
+        "input_data_list": ["asset.cad"]
+    }
+    
+    # 3. SMOKING GUN: Force the targeted exception on line 205
+    mock_manifest.side_effect = Exception("Simulated unexpected structural error")
+    
+    # 4. Intercept system termination to prevent test runner disruption
+    mock_exit.side_effect = SystemExit
+
+    # 5. Execute orchestration and verify lines 206-208 handle it safely
+    with pytest.raises(SystemExit):
+        main()
+
+    # 6. Assert defensive exit bounds
+    mock_exit.assert_called_once_with(1)
