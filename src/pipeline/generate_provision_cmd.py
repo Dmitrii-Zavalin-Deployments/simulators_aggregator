@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# src/pipeline/generate_provision_cmd.py
+
 import json
 import os
 import sys
@@ -16,7 +18,6 @@ logging.basicConfig(
 def main():
     parser = argparse.ArgumentParser(description="Generate repository provisioning commands")
     parser.add_argument("--state-file", required=True, help="Path to the state.json file")
-    parser.add_argument("--cached-dependency", action="store_true", help="Pass cache hit flag to initializers")
     args = parser.parse_args()
 
     logger.info(f"🚀 Initializing provisioning for state file: {args.state_file}")
@@ -76,8 +77,6 @@ def main():
     repo_root = "data/testing-input-output/repositories"
     commands = [f"mkdir -p {repo_root}"]
     staged_configs = []
-    
-    "--cached-dependency" if args.cached_dependency else ""
 
     # Loop through all folders and inject the identical config asset
     for task in tasks:
