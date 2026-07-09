@@ -1,0 +1,776 @@
+name: "🛰️ Simulators Pipeline Tuning Engine (Core Logic)"
+
+on:
+  workflow_call:    # This allows other files to trigger this entire pipeline
+  push:
+    branches:
+      - "**"
+  workflow_dispatch:
+
+jobs:
+  hourly_guard:
+    name: "🕒 Hourly Guard"
+    if: "!contains(github.event.head_commit.message, 'Merge branch') && !contains(github.event.head_commit.message, 'Merge pull request')"
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check last run hour
+        id: check
+        run: |
+          IS_SCHEDULED="${{ github.event_name == 'schedule' }}"
+
+          # If not scheduled (push or manual), always run
+          if [[ "$IS_SCHEDULED" != "true" ]]; then
+            echo "should_run=yes" >> $GITHUB_OUTPUT
+            echo "🚀 Non-scheduled event (push/manual) — always run."
+            exit 0
+          fi
+
+          # Scheduled event → apply hourly guard
+          CURRENT_HOUR=$(date -u +"%Y-%m-%d-%H")
+          AUDIT_FILE="performance_audit.md"
+
+          if [ ! -f "$AUDIT_FILE" ]; then
+            echo "should_run=yes" >> $GITHUB_OUTPUT
+            echo "📄 No audit file yet — first scheduled run allowed."
+            exit 0
+          fi
+
+          LAST_RUN=$(grep -m1 "### Audit:" "$AUDIT_FILE" | sed 's/### Audit: //; s/ UTC//')
+          LAST_RUN_HOUR=$(date -u -d "$LAST_RUN" +"%Y-%m-%d-%H")
+
+          echo "Last run hour: $LAST_RUN_HOUR"
+          echo "Current hour:  $CURRENT_HOUR"
+
+          if [ "$CURRENT_HOUR" == "$LAST_RUN_HOUR" ]; then
+            echo "should_run=no" >> $GITHUB_OUTPUT
+            echo "⏳ Already ran this hour — skipping scheduled run."
+          else
+            echo "should_run=yes" >> $GITHUB_OUTPUT
+            echo "🚀 First scheduled run this hour — proceeding."
+          fi
+
+  gatekeeper:
+      name: "🚦 Semaphore"
+      needs: hourly_guard
+      if: needs.hourly_guard.outputs.should_run == 'yes'
+      runs-on: ubuntu-latest
+      outputs:
+        status: ${{ steps.check.outputs.status }}
+      steps:
+        - name: 🗂️ Checkout Repository
+          uses: actions/checkout@v4
+
+        - name: 🔍 Check Dormancy Flag
+          id: check
+          run: |
+            # 1. 🔧 GLOBAL ROBOT IDENTITY INITIALIZATION
+            git config --global user.name "Human-Assisted Processing Engine [${{ github.ref_name }}]"
+            git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
+            git config --global notes.rewriteRef "refs/notes/*"
+
+            FLAG_PATH="dormant.flag"
+            IS_SCHEDULED="${{ github.event_name == 'schedule' }}"
+
+            # 2. LOGIC CHECK
+            # If scheduled and DORMANT -> Halt
+            if [[ "$IS_SCHEDULED" == "true" ]] && [ -f "$FLAG_PATH" ] && grep -q "STATUS: DORMANT" "$FLAG_PATH"; then
+              echo "status=dormant" >> $GITHUB_OUTPUT
+              echo "🛑 ENGINE DORMANT: Halting hourly pulse execution."
+
+            # If NOT scheduled (Manual/Push) OR Active -> Wake/Keep Active
+            else
+              echo "status=active" >> $GITHUB_OUTPUT
+              echo "🚀 ENGINE ACTIVE: Proceeding with execution pulse."
+
+              # 3. FORCE ACTIVE STATE (Declarative & Idempotent)
+              # This overwrites the file. If it was already ACTIVE, git status will be clean.
+              echo "STATUS: ACTIVE" > "$FLAG_PATH"
+              git add "$FLAG_PATH"
+              
+              # Only commit and push if the flag content actually changed
+              if [ -n "$(git status --porcelain)" ]; then
+                echo "🌅 WAKING ENGINE: State changed to ACTIVE. Syncing..."
+                git commit -m "🤖 robot: reset dormant flag to active [Engine]"
+                TARGET_COMMIT=$(git rev-parse HEAD)
+
+                # Fetch remote notes
+                git fetch origin refs/notes/commits:refs/notes/commits || true
+
+                # Add note locally
+                git notes add -f -m "robot: true" "$TARGET_COMMIT"
+
+                # Push commit and notes
+                git push origin HEAD
+                git push --force origin refs/notes/commits
+              else
+                echo "✅ Engine already active. No commit required."
+              fi
+            fi
+
+  pre_flight_tests:
+    name: "📋 Pre-Flight Tests"
+    needs: gatekeeper
+    if: needs.gatekeeper.outputs.status == 'active'
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      TEST_COMMAND: "pytest -s tests/ -vv --cov=src --cov-report=term-missing"
+    
+    steps:
+      - name: 🗂️ Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 🔧 GLOBAL ROBOT IDENTITY + NOTES INITIALIZATION (Branch-Isolated)
+      - name: 🤖 Initialize Robot Identity & Notes
+        run: |
+          git config --global user.name "Human-Assisted Processing Engine [${{ github.ref_name }}]"
+          git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
+          git config --global notes.rewriteRef "refs/notes/*"
+
+      - name: 🐍 Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 📦 Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🧹 Auto-Clean (Autoflake)
+        run: autoflake --in-place --recursive --remove-unused-variables --remove-all-unused-imports src tests
+
+      - name: 🧹 Static Analysis & Lint (Ruff)
+        run: ruff check src tests --fix
+
+      - name: 🚀 Commit & Push Hygiene Changes + Sync Notes
+        if: always()
+        run: |
+          # 1. Check if there are local changes to save
+          # We check this at the start so we know if we need to use stash/pop
+          HAS_CHANGES=$(git status --porcelain)
+
+          # 2. Stash ONLY if there are changes
+          if [ -n "$HAS_CHANGES" ]; then
+            git stash
+          fi
+          
+          # 3. Fetch and Rebase
+          git fetch origin
+          # We rebase regardless, so we stay up to date
+          git rebase origin/${GITHUB_REF_NAME} || {
+            echo "⚠️ Conflict during rebase. Aborting."
+            # If we stashed changes, we must pop them back before aborting
+            if [ -n "$HAS_CHANGES" ]; then git stash pop; fi
+            git rebase --abort
+            exit 1
+          }
+
+          # 4. Apply the hygiene changes back ONLY if we stashed them
+          if [ -n "$HAS_CHANGES" ]; then
+            git stash pop || {
+              echo "⚠️ Conflict during stash pop. Manual intervention required."
+              exit 1
+            }
+          fi
+
+          # 5. Perform the commit
+          # Check for changes, then stage and commit them
+          if [ -n "$(git status --porcelain)" ]; then
+            git add . 
+            # We use git commit -m ... || true to prevent the script from failing 
+            # if git somehow finds nothing to commit after the add
+            git commit -m "🤖 robot: auto-clean hygiene update [Engine]" || echo "No changes to commit"
+            
+            TARGET_COMMIT=$(git rev-parse HEAD)
+
+            # 6. Sync notes
+            git fetch origin refs/notes/commits:refs/notes/commits || true
+            git notes add -f -m "robot: true" "$TARGET_COMMIT"
+
+            # 7. Push
+            git push origin HEAD
+            git push --force origin refs/notes/commits
+          else
+            echo "No hygiene changes detected."
+          fi
+
+      - name: 💀 Dead Code Audit (Vulture)
+        id: vulture
+        run: vulture src --min-confidence 70
+
+      - name: 🧪 Quality Gate Check (Rule 2)
+        if: failure() && steps.vulture.outcome == 'failure'
+        run: |
+          echo "CRITICAL: Rule 2 (Zero-Debt Mandate) violation."
+          echo "Unused code detected in src/. Delete unreachable logic before continuing."
+          exit 1
+
+      - name: 🧪 Run Logic & Scientific Verification
+        run: |
+          echo "🚀 Initiating: $TEST_COMMAND"
+          $TEST_COMMAND
+      
+      - name: 🔍 Forensic Audit Testing
+        if: always()
+        run: |
+          if [[ "${{ job.status }}" == "success" ]]; then
+            echo "✅ All systems nominal. No anomalies detected."
+            cat <<EOF > debug/forensic_audit_testing.sh
+          #!/bin/bash
+          # Description: Automated forensic audit for ACE solver failures.
+          # Status: Dormant (All systems nominal)
+          exit 0
+          EOF
+            chmod +x debug/forensic_audit_testing.sh
+            echo "🧹 Diagnostic script reset to Dormant mode."
+          else
+            echo "⚠️ CI Failure Detected. Initiating Deep Forensic Audit..."
+            echo "============================================================"
+            echo "ls -R output:"
+            ls -R
+            echo "============================================================"
+            echo "debug/forensic_audit_testing.sh run results:"
+            if [ -f "debug/forensic_audit_testing.sh" ]; then
+              bash debug/forensic_audit_testing.sh
+            else
+              echo "❌ Critical: Diagnostic script 'debug/forensic_audit_testing.sh' not found."
+            fi
+            echo "============================================================"
+            echo "📉 RE-RUNNING FAILED TEST FOR FINAL SIGNAL"
+            $TEST_COMMAND || true
+            exit 1
+          fi
+      
+      - name: 🧹 Sync Forensic Reset + Sync Notes
+        if: success()
+        run: |
+          git add debug/forensic_audit_testing.sh
+          if [ -n "$(git status --porcelain debug/forensic_audit_testing.sh)" ]; then
+            git commit -m "🤖 robot: forensic reset [PASS]"
+            TARGET_COMMIT=$(git rev-parse HEAD)
+
+            # 1️⃣ Fetch remote notes FIRST
+            git fetch origin refs/notes/commits:refs/notes/commits || true
+
+            # 2️⃣ Add note locally
+            git notes add -f -m "robot: true" "$TARGET_COMMIT"
+
+            # 3️⃣ Push commit
+            git push origin HEAD
+
+            # 4️⃣ Force-push notes
+            git push --force origin refs/notes/commits
+          else
+            echo "Forensic script already dormant."
+          fi
+
+  production_run:
+    name: "🛠️ Assemble & Tuning"
+    needs: pre_flight_tests
+    # needs: gatekeeper
+    # if: needs.gatekeeper.outputs.status == 'active'
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      DROPBOX_APP_KEY: ${{ secrets.DROPBOX_APP_KEY }}
+      DROPBOX_APP_SECRET: ${{ secrets.DROPBOX_APP_SECRET }}
+      DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
+      DROPBOX_FOLDER: "simulators"
+      TUNER_STATE_ARCHIVE: "tuning_${{ github.ref_name }}.zip"
+      WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
+    
+    steps:
+      - name: 🗂️ Checkout Engine
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 🔧 GLOBAL ROBOT IDENTITY + NOTES INITIALIZATION (Branch-Isolated)
+      - name: 🤖 Initialize Robot Identity & Notes
+        run: |
+          git config --global user.name "Human-Assisted Processing Engine [${{ github.ref_name }}]"
+          git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
+          git config --global notes.rewriteRef "refs/notes/*"
+
+      - name: 🐍 Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 📦 Install Engine Pip Dependencies
+        run: python -m pip install --no-cache-dir -r requirements.txt
+      
+      # 📥 STATE IMPORT: Check if a prior state zip exists on Dropbox
+      - name: 📥 Check Pipeline State Existence
+        id: import_state
+        run: |
+          python3 src/io/state_manager.py \
+            --folder "${{ env.DROPBOX_FOLDER }}" \
+            --filename "${{ env.TUNER_STATE_ARCHIVE }}" >> $GITHUB_OUTPUT
+      
+      - name: 🔍 Log Pipeline State Status
+        run: echo "Current state status is [${{ steps.import_state.outputs.state_status }}]"
+
+      # 📥 WARM START: Download and unpack state archive if found
+      - name: 📥 Download Existing State Archive
+        if: steps.import_state.outputs.state_status == 'found'
+        run: |
+          python3 src/io/download_from_dropbox.py \
+            --folder "${{ env.DROPBOX_FOLDER }}" \
+            --filename "${{ env.TUNER_STATE_ARCHIVE }}"
+          
+          mkdir -p data/testing-input-output
+          unzip -o data/testing-input-output/${{ env.TUNER_STATE_ARCHIVE }} -d data/testing-input-output/
+
+      # 🐍 ENV CAPABILITY: Provisions Conda environment for executing simulator modules
+      - name: 🐍 Set up Conda Environment
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: "3.10"
+          channels: conda-forge
+          channel-priority: strict
+          activate-environment: tuner-env
+
+      # 📦 REPOSITORY-WIDE DYNAMIC CACHE: Shared across branches, keys uniquely per run ID to allow self-healing rewrites
+      - name: 📦 Repository-Wide Dynamic Conda Cache
+        id: cache-conda
+        uses: actions/cache@v4
+        with:
+          path: /usr/share/miniconda/envs/tuner-env
+          # Hashing the directory ensures total environment synchronization
+          key: conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/**') }}-${{ github.run_id }}
+          restore-keys: |
+            conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/**') }}-
+
+      # 🌐 CRITICAL FIX: HEADLESS GRAPHICS DRIVERS
+      - name: 🌐 Install Headless Rendering Dependencies
+        run: |
+          echo "Installing virtual framebuffer and OpenGL libraries for Gmsh FLTK rendering..."
+          sudo apt-get update
+          sudo apt-get install -y libgl1 xvfb libglu1-mesa
+
+      # ⚙️ SELF-HEALING OPTIMISTIC CORE ENGINE (Initialization & Parameter Explosion)
+      - name: ⚙️ Initialize Pipeline State (Optimistic Double-Iteration)
+        if: steps.import_state.outputs.state_status == 'not_found'
+        shell: bash -el {0}
+        run: |
+          echo "📥 Cold Start Initiated: Scaffolding baseline simulation assets..."
+          mkdir -p repositories
+          rm -rf repositories/fluid_dynamics_simulator
+          git clone https://github.com/Dmitrii-Zavalin-Deployments/fluid_dynamics_simulator.git repositories/fluid_dynamics_simulator
+          
+          if [ ! -d "repositories/fluid_dynamics_simulator/.git" ]; then
+              echo "❌ ERROR: Repository clone failed."
+              exit 1
+          fi
+          echo "✅ Repository staged successfully."
+
+          # --------------------------------------------------------------------
+          # ITERATION 1: OPTIMISTIC EXECUTION (With Cache Flag)
+          # --------------------------------------------------------------------
+          echo "🚀 [ITERATION 1] Attempting initialization with cache-optimized mode..."
+          
+          # Command: If cache exists, we use the flag to skip provisioning. 
+          # If the cache is broken, Python will error out here.
+          CMD="python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator"
+          
+          if [ "${{ steps.cache-conda.outputs.cache-hit }}" == "true" ]; then
+              CMD="$CMD --cached-dependency"
+          fi
+
+          set +e 
+          $CMD
+          ITERATION_1_STATUS=$?
+          set -e
+
+          # --------------------------------------------------------------------
+          # ITERATION 2: FALLBACK SELF-HEALING (Without Cache Flag)
+          # --------------------------------------------------------------------
+          if [ $ITERATION_1_STATUS -ne 0 ]; then
+              echo "⚠️ WARNING: Iteration 1 failed (Exit Code: $ITERATION_1_STATUS)."
+              echo "🔄 [ITERATION 2] Retrying without cache flag to force re-provisioning..."
+              
+              # By removing the --cached-dependency flag, the Python script 
+              # will now run the 'execute_setup_script' logic internally.
+              python3 src/pipeline/initialize_state.py --repo-path repositories/fluid_dynamics_simulator
+              echo "✅ Iteration 2 finished successfully."
+          else
+              echo "✅ Iteration 1 successful."
+          fi
+
+          # --------------------------------------------------------------------
+          # --- GARBAGE COLLECTOR (LOG-AND-PURGE) ---
+          # --------------------------------------------------------------------
+          echo -e "\n🧹 Checking for local Dropbox transaction logs..."
+          LOG_FILE=$(find data/testing-input-output/ -name "dropbox_download.log" | head -n 1)
+          
+          if [ -f "$LOG_FILE" ]; then
+              echo "📋 Found transaction logs. Extracting contents for CI ledger visibility:"
+              cat "$LOG_FILE"
+              echo -e "\n🗑️ Removing transaction logs to preserve workspace hygiene."
+              rm "$LOG_FILE"
+          else
+              echo "✅ No temporary dropbox_download.log artifacts found (skipping cleanup)."
+          fi
+
+      - name: 🧮 Explode Configuration Range Matrix (Cold Start)
+        if: steps.import_state.outputs.state_status == 'not_found'
+        shell: bash -el {0}
+        run: |
+          # 1. Find the first JSON file in the configs directory
+          CONFIG_FILE=$(find "${{ env.WORKSPACE_DIR }}/configs" -maxdepth 1 -name "*.json" | head -n 1)
+
+          # 2. Safety check: Exit if no file is found
+          if [ -z "$CONFIG_FILE" ]; then
+            echo "❌ Error: No JSON configuration files found in ${{ env.WORKSPACE_DIR }}/configs"
+            exit 1
+          fi
+
+          echo "🚀 Found configuration: $CONFIG_FILE. Proceeding..."
+
+          # 3. Execute the matrix exploder with the dynamic path
+          python3 src/pipeline/matrix_exploder.py \
+            --config-path "$CONFIG_FILE" \
+            --output-path "${{ env.WORKSPACE_DIR }}/config_combinations_array.json"
+
+      - name: ⚙️ Initialize Pipeline State (Warm Start)
+        if: steps.import_state.outputs.state_status == 'found' 
+        shell: bash -el {0}
+        env:
+          WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
+        run: |
+          echo "📥 Warm Start Detected: Initializing from $WORKSPACE_DIR..."
+          
+          if [ ! -f "$WORKSPACE_DIR/state.json" ]; then
+            echo "❌ ERROR: State file not found."
+            exit 1
+          fi
+          
+          # ✅ Added the missing comment symbol here:
+          # Generate and Execute provisioning (Cloning + Config Injection ONLY)
+          PROVISION_CMD=$(python3 src/pipeline/generate_provision_cmd.py --state-file "$WORKSPACE_DIR/state.json")
+          eval "$PROVISION_CMD"
+          
+          if [ $? -eq 0 ]; then
+            echo "✅ Repositories staged successfully."
+          else
+            echo "❌ ERROR: Repository staging failed."
+            exit 1
+          fi
+      
+      - name: 🚀 Execute Pipeline Sequence (Warm Start)
+        if: steps.import_state.outputs.state_status == 'found'
+        shell: bash -el {0}
+        env:
+          WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
+        run: |
+          echo "🚀 Initiating simulator pipeline execution sequence..."
+          
+          # 1. Enforce Contract: The config directory MUST exist
+          if [ ! -d "$WORKSPACE_DIR/configs" ]; then
+              echo "❌ CRITICAL ERROR: Expected directory $WORKSPACE_DIR/configs does not exist."
+              echo "   Pipeline state might be corrupted or improperly restored."
+              exit 1
+          fi
+          
+          # 2. Slice active configuration unit
+          if [ -f "$WORKSPACE_DIR/config_combinations_array.json" ]; then
+              jq '.[0]' "$WORKSPACE_DIR/config_combinations_array.json" > "$WORKSPACE_DIR/configs/config_temp.json"
+              echo "✅ Successfully staged staging asset: $WORKSPACE_DIR/configs/config_temp.json"
+          else
+              echo "❌ CRITICAL ERROR: config_combinations_array.json is missing from state archive."
+              exit 1
+          fi
+          # ==============================================================================
+
+          # 3. Generate execution command sequences using the engine script
+          EXEC_CMD=$(python3 src/pipeline/generate_execution_cmd.py --state-file "$WORKSPACE_DIR/state.json")
+          
+          # 4. Execute commands, bypassing 'set -e' to safeguard execution metrics
+          LOG_FILE="$RUNNER_TEMP/pipeline_execution.log"
+          
+          set +e # Open error gates to manually process exit telemetry
+          eval "$EXEC_CMD" > "$LOG_FILE" 2>&1
+          RUN_RC=$?
+          set -e # Restore default strict environment security
+          
+          # 5. Stream logs instantly back to the live GitHub Actions runner console
+          echo "📋 ========================================================================"
+          echo "📋                  --- LIVE PIPELINE EXECUTION LOGS ---"
+          echo "📋 ========================================================================"
+          if [ -f "$LOG_FILE" ]; then
+              cat "$LOG_FILE"
+          else
+              echo "❌ Error Error: Isolated pipeline runtime log file was never created."
+          fi
+          echo "📋 ========================================================================"
+          
+          # 6. Invoke telemetry tracking engine (PROTECTED ERROR GATE)
+          echo "📊 Initiating telemetry recording system..."
+          set +e # Open error gates so telemetry exit 1 does not break the workflow step
+          python3 src/pipeline/record_telemetry.py \
+            --state-file "$WORKSPACE_DIR/state.json" \
+            --exit-code $RUN_RC \
+            --log-file "$LOG_FILE"
+          TELEMETRY_RC=$?
+          set -e # Restore default strict environment security
+
+          # 7. FLOW CONTROL: Instead of exiting, we report the status and continue
+          if [ $RUN_RC -ne 0 ]; then
+              echo "⚠️ Simulation reported failure (Exit Code: $RUN_RC)."
+              echo "   This is handled as a known outcome in tuning. Continuing pipeline flow..."
+              # You can export a variable here if you need subsequent steps to know this failed
+              echo "SIMULATION_STATUS=FAILED" >> $GITHUB_ENV
+          else
+              echo "✅ Simulation executed successfully."
+              echo "SIMULATION_STATUS=SUCCESS" >> $GITHUB_ENV
+          fi
+
+      - name: 📤 Package and Upload State Snapshot
+        run: |
+          if [ -d "${{ env.WORKSPACE_DIR }}" ]; then
+            echo "📦 Packing active state folder..."
+            
+            # Defensive check and cleanup for the phantom 'config' directory
+            CONFIG_DIR="${{ env.WORKSPACE_DIR }}/config"
+            if [ -d "$CONFIG_DIR" ]; then
+              if rmdir "$CONFIG_DIR" 2>/dev/null; then
+                echo "✅ Phantom 'config' directory found and successfully removed."
+              else
+                echo "❌ CRITICAL: Directory '$CONFIG_DIR' is not empty and cannot be removed."
+                echo "   This indicates an unexpected dependency or data leak."
+                exit 1
+              fi
+            else
+              echo "ℹ️ No phantom 'config' directory detected. Proceeding."
+            fi
+            
+            cd data/testing-input-output/
+            zip -r "${{ env.TUNER_STATE_ARCHIVE }}" "tuning_${{ github.ref_name }}"
+            cd ../..
+            
+            echo "📤 Uploading updated transaction state to Dropbox..."
+            python3 src/io/upload_to_dropbox.py \
+              --folder "${{ env.DROPBOX_FOLDER }}" \
+              --filename "${{ env.TUNER_STATE_ARCHIVE }}"
+          fi
+        
+      - name: 🔍 Forensic Audit Production
+        if: always()
+        run: |
+          if [[ "${{ job.status }}" == "success" ]]; then
+            echo "✅ All systems nominal. No anomalies detected."
+            cat <<EOF > debug/forensic_audit_production.sh
+          #!/bin/bash
+          # Description: Automated forensic audit for ACE solver failures.
+          # Status: Dormant (All systems nominal)
+          exit 0
+          EOF
+            chmod +x debug/forensic_audit_production.sh
+            echo "🧹 Diagnostic script reset to Dormant mode."
+          else
+            echo "⚠️ CI Failure Detected. Initiating Deep Forensic Audit..."
+            echo "============================================================"
+            echo "ls -R output:"
+            ls -R
+            echo "============================================================"
+            echo "debug/forensic_audit_production.sh run results:"
+            if [ -f "debug/forensic_audit_production.sh" ]; then
+              bash debug/forensic_audit_production.sh
+            else
+              echo "❌ Critical: Diagnostic script 'debug/forensic_audit_production.sh' not found."
+            fi
+            echo "============================================================"
+            echo "📉 RE-RUNNING FAILED TEST FOR FINAL SIGNAL"
+            $TEST_COMMAND || true
+            exit 1
+          fi
+
+      - name: 📊 Audit Performance Ledger & Sync (Assemble & Tuning)
+        if: always()
+        env:
+          TASK_NAME: "Assemble & Tuning"
+        run: |
+          # Dynamically extract pipeline_id from the state workspace asset
+          STATE_FILE="data/testing-input-output/tuning_${{ github.ref_name }}/state.json"
+          
+          if [ -f "$STATE_FILE" ]; then
+              # Parse pipeline_id using jq, fallback to default name if empty
+              EXTRACTED_ID=$(jq -r '.pipeline_id' "$STATE_FILE" 2>/dev/null)
+              TASK_NAME="${EXTRACTED_ID:-"Assemble & Tuning (Fallback)"}"
+              echo "✅ Successfully parsed active execution context: $TASK_NAME"
+          else
+              echo "⚠️ Warning: State file not found at $STATE_FILE. Using fallback task name."
+              TASK_NAME="Assemble & Tuning (Disconnected)"
+          fi
+
+          echo "📊 Commencing performance audit ledger generation for task: $TASK_NAME..."
+
+          # 1️⃣ Collect environment performance metrics
+          RUN_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          STATUS="${{ job.status }}"
+          CURRENT_BRANCH=${GITHUB_REF##*/}
+          CPU_LOAD=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4 "%"}')
+          MEM_USAGE=$(free -m | awk '/Mem:/ { print $3 "/" $2 "MB" }')
+
+          # 2️⃣ Build the Markdown entry with the accurate Task metadata
+          NEW_ENTRY=$(cat <<EOF
+
+          ### Audit: $RUN_DATE
+          - **Pipeline:** \`$TASK_NAME\`
+          - **Branch:** \`$CURRENT_BRANCH\`
+          - **Status:** $STATUS
+          - **CPU Load:** $CPU_LOAD
+          - **Memory Usage:** $MEM_USAGE
+          ---
+          EOF
+          )
+
+          # 📦 ISOLATION PHASE 1: Protect current dirty workspace before PULL 1
+          echo "📦 Stashing all local modifications to isolate workspace for baseline sync..."
+          git stash push --include-untracked -m "pre-audit-baseline-isolation" || true
+
+          # 🔄 PULL 1: Clear out baseline modifications before injecting text to minimize file drift variance
+          echo "📥 Executing First Pull to capture baseline state..."
+          git pull origin ${{ github.ref_name }} --rebase -X ours || true
+
+          # 📤 RESTORE PHASE 1: Bring back workspace modifications to prepare for generation
+          echo "📤 Restoring workspace modifications post-baseline sync..."
+          git stash pop || echo "📋 Workspace pristine or no stash required."
+
+          # 3️⃣ Inject entry at the top of the file directly under the header
+          HEADER="# 🛰️ Simulators Aggregator Performance Audit"
+          if [ -f "performance_audit.md" ]; then
+              tail -n +2 performance_audit.md > old_body.tmp
+              echo "$HEADER" > performance_audit.md
+              echo "$NEW_ENTRY" >> performance_audit.md
+              cat old_body.tmp >> performance_audit.md
+              rm old_body.tmp
+          else
+              echo "$HEADER" > performance_audit.md
+              echo "$NEW_ENTRY" >> performance_audit.md
+          fi
+
+          # 📦 ISOLATION PHASE 2: Clear workspace for final sync against concurrent job drift
+          echo "📦 Stashing updated ledger and tracking assets for final serialization sync..."
+          git stash push --include-untracked -m "pre-commit-sync-isolation" || true
+
+          # 🔄 PULL 2: Grab updates made by parallel jobs that finished during the local file generation phase
+          echo "🔄 Executing Second Pull immediately prior to commit serialization..."
+          git pull origin ${{ github.ref_name }} --rebase -X ours
+
+          # 📤 RESTORE PHASE 2: Restore modifications cleanly over the updated upstream base
+          echo "📤 Restoring isolated workspace modifications..."
+          git stash pop || echo "📋 Workspace modifications restored safely."
+          
+          # Clean up any potential lingering conflict markers just in case
+          sed -i '/<<<<<<< Updated upstream/d' performance_audit.md
+          sed -i '/=======/d' performance_audit.md
+          sed -i '/>>>>>>> Stashed changes/d' performance_audit.md
+
+          # 5️⃣ ISOLATED COMMIT & PUSH
+          # Explicitly target only the public ledger for the final commit
+          git add performance_audit.md dormant.flag debug/forensic_audit_production.sh
+
+          if [ -n "$(git status --porcelain performance_audit.md)" ]; then
+            git commit -m "🤖 robot: audit ledger update [$STATUS]"
+            TARGET_COMMIT=$(git rev-parse HEAD)
+
+            # Sync and attach metadata notes
+            git fetch origin refs/notes/commits:refs/notes/commits || true
+            git notes add -f -m "robot: true" "$TARGET_COMMIT"
+            
+            # Final transmission out to the remote tracking branch
+            git push origin HEAD
+            git push --force origin refs/notes/commits || true
+          else
+            echo "📋 Notice: No ledger modifications detected. Skipping commit loop."
+          fi
+
+      - name: 🛡️ Pre-Dissolving Integrity Audit
+        if: always()
+        shell: bash -el {0}
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: |
+          echo "🔍 --- STARTING INTEGRITY AUDIT ---"
+
+          # 1. CONDA VALIDATION
+          echo -e "\n🧩 --- CONDA ENVIRONMENT ---"
+          if conda list pythonocc-core | grep -q "pythonocc-core"; then
+              echo "✅ pythonocc-core is installed."
+              conda list pythonocc-core | grep pythonocc-core
+          else
+              echo "❌ CRITICAL: pythonocc-core is MISSING."
+              exit 1
+          fi
+
+          # 2. PIP DEPENDENCY VALIDATION
+          echo -e "\n📦 --- PIP PACKAGE VALIDATION ---"
+          REQUIRED_PKGS=("numpy" "h5py" "requests" "jsonschema")
+
+          for pkg in "${REQUIRED_PKGS[@]}"; do
+              if pip show "$pkg" > /dev/null 2>&1; then
+                  echo "✅ $pkg is installed:"
+                  pip show "$pkg" | grep -E "Name:|Version:"
+              else
+                  echo "❌ CRITICAL: $pkg is MISSING."
+                  exit 1
+              fi
+          done
+
+          # 3. INTEGRITY CHECK
+          echo -e "\n🛡️ --- DEPENDENCY INTEGRITY CHECK ---"
+          if pip check; then
+              echo "✅ No dependency conflicts found."
+          else
+              echo "⚠️ WARNING: Potential dependency conflicts detected."
+          fi
+
+          # 4. SOVEREIGN STATE VERIFICATION
+          echo -e "\n📂 --- SOVEREIGN STATE VERIFICATION ---"
+          BRANCH="${GITHUB_REF_NAME:-main}"
+          STATE_DIR="data/testing-input-output/tuning_${BRANCH}"
+          PARENT_DIR="data/testing-input-output"
+
+          # --- GLOBAL SCOPE AUDIT ---
+          echo -e "\n--- FULL SCOPE DIRECTORY LISTING (data/testing-input-output) ---"
+          if [ -d "$PARENT_DIR" ]; then
+              ls -R "$PARENT_DIR"
+          else
+              echo "⚠️ Parent directory $PARENT_DIR does not exist."
+          fi
+
+          # # --- BRANCH-SPECIFIC AUDIT ---
+          # if [ -d "$STATE_DIR" ]; then
+          #     echo -e "\n📍 Verifying contents of active workspace: $STATE_DIR"
+              
+          #     # Automatically cat all JSON files found in the directory tree
+          #     echo -e "\n--- DUMPING CONTENT OF ALL JSON ASSETS ---"
+          #     find "$STATE_DIR" -type f -name "*.json" | while read -r json_file; do
+          #         echo -e "\n========================================="
+          #         echo "FILE: $json_file"
+          #         echo "========================================="
+          #         cat "$json_file"
+          #     done
+              
+          #     # Verify critical file existence
+          #     if [ ! -f "$STATE_DIR/state.json" ]; then
+          #         echo -e "\n❌ ERROR: state.json was NOT found in $STATE_DIR."
+          #         exit 1
+          #     fi
+          # else
+          #     echo "❌ ERROR: State directory $STATE_DIR does not exist."
+          #     exit 1
+          # fi
+
+          echo -e "\n✅ --- INTEGRITY AUDIT COMPLETE ---"
