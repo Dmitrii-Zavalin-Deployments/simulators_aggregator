@@ -1,5 +1,13 @@
 # 🛰️ Simulators Aggregator Performance Audit
 
+### Audit: 2026-07-09 13:32:55 UTC
+- **Pipeline:** `mesh_pipeline_f19ac43.json`
+- **Branch:** `nozzle`
+- **Status:** cancelled
+- **CPU Load:** 26.1%
+- **Memory Usage:** 6870/15989MB
+---
+
 ### Audit: 2026-07-09 13:32:46 UTC
 - **Pipeline:** `mesh_pipeline_f19ac43.json`
 - **Branch:** `nozzle`
