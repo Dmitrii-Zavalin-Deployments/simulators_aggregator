@@ -512,7 +512,8 @@ jobs:
           
           set +e # Open error gates to manually process exit telemetry
           START_TIME=$(date +%s)
-          timeout --foreground "${TIMEOUT_BUDGET}s" eval "$EXEC_CMD" > "$LOG_FILE" 2>&1
+          # MINIMAL FIX: Pass the command string directly into an isolated bash subshell via timeout
+          timeout --foreground "${TIMEOUT_BUDGET}s" bash -c "$EXEC_CMD" > "$LOG_FILE" 2>&1
           RUN_RC=$?
           END_TIME=$(date +%s)
           set -e # Restore default strict environment security
