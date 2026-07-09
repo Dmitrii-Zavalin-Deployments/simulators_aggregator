@@ -492,6 +492,18 @@ jobs:
           fi
           # ==============================================================================
 
+          # ⏱️ STRICT REGISTRY SCAN: Parse runtime constraint directly from global tuner repo config
+          if [ ! -f "config/config.json" ]; then
+              echo "❌ CRITICAL ERROR: Global tuner configuration asset 'config/config.json' is missing."
+              exit 1
+          fi
+          TIMEOUT_BUDGET=$(jq -r '.max_runtime_seconds' config/config.json)
+          if [[ "$TIMEOUT_BUDGET" == "null" || -z "$TIMEOUT_BUDGET" ]]; then
+              echo "❌ CRITICAL ERROR: Required 'max_runtime_seconds' is missing or null in config/config.json."
+              exit 1
+          fi
+          echo "SIM_ALLOWED_TIME=${TIMEOUT_BUDGET}" >> $GITHUB_ENV
+
           # 3. Generate execution command sequences using the engine script
           EXEC_CMD=$(python3 src/pipeline/generate_execution_cmd.py --state-file "$WORKSPACE_DIR/state.json")
           
@@ -499,9 +511,13 @@ jobs:
           LOG_FILE="$RUNNER_TEMP/pipeline_execution.log"
           
           set +e # Open error gates to manually process exit telemetry
-          eval "$EXEC_CMD" > "$LOG_FILE" 2>&1
+          START_TIME=$(date +%s)
+          timeout --foreground "${TIMEOUT_BUDGET}s" eval "$EXEC_CMD" > "$LOG_FILE" 2>&1
           RUN_RC=$?
+          END_TIME=$(date +%s)
           set -e # Restore default strict environment security
+          
+          echo "SIM_ELAPSED_TIME=$((END_TIME - START_TIME))" >> $GITHUB_ENV
           
           # 5. Stream logs instantly back to the live GitHub Actions runner console
           echo "📋 ========================================================================"
@@ -525,10 +541,12 @@ jobs:
           set -e # Restore default strict environment security
 
           # 7. FLOW CONTROL: Instead of exiting, we report the status and continue
-          if [ $RUN_RC -ne 0 ]; then
+          if [ $RUN_RC -eq 124 ]; then
+              echo "❌ TIMEOUT ENCOUNTERED: Module exceeded allowed window of ${TIMEOUT_BUDGET}s."
+              echo "SIMULATION_STATUS=TIMEOUT" >> $GITHUB_ENV
+          elif [ $RUN_RC -ne 0 ]; then
               echo "⚠️ Simulation reported failure (Exit Code: $RUN_RC)."
               echo "   This is handled as a known outcome in tuning. Continuing pipeline flow..."
-              # You can export a variable here if you need subsequent steps to know this failed
               echo "SIMULATION_STATUS=FAILED" >> $GITHUB_ENV
           else
               echo "✅ Simulation executed successfully."
@@ -613,6 +631,25 @@ jobs:
               TASK_NAME="Assemble & Tuning (Disconnected)"
           fi
 
+          # ⏱️ EXTRACT TIMING AND STATUS METRICS FROM ENVIRONMENT CONTEXT
+          SIM_STATE="${{ env.SIMULATION_STATUS }}"
+          SIM_ALLOWED="${{ env.SIM_ALLOWED_TIME }}"
+          SIM_ELAPSED="${{ env.SIM_ELAPSED_TIME }}"
+
+          # Handle fallback scenarios in case the run step crashed or was skipped entirely
+          SIM_ALLOWED="${SIM_ALLOWED:-0}"
+          SIM_ELAPSED="${SIM_ELAPSED:-0}"
+
+          if [ "$SIM_STATE" = "TIMEOUT" ]; then
+              SIM_STATE_LABEL="timeout"
+          elif [ "$SIM_STATE" = "SUCCESS" ]; then
+              SIM_STATE_LABEL="success"
+          elif [ "$SIM_STATE" = "FAILED" ]; then
+              SIM_STATE_LABEL="failed"
+          else
+              SIM_STATE_LABEL="skipped/error"
+          fi
+
           echo "📊 Commencing performance audit ledger generation for task: $TASK_NAME..."
 
           # 1️⃣ Collect environment performance metrics
@@ -622,13 +659,14 @@ jobs:
           CPU_LOAD=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4 "%"}')
           MEM_USAGE=$(free -m | awk '/Mem:/ { print $3 "/" $2 "MB" }')
 
-          # 2️⃣ Build the Markdown entry with the accurate Task metadata
+          # 2️⃣ Build the Markdown entry with the accurate Task and Runtime metadata
           NEW_ENTRY=$(cat <<EOF
 
           ### Audit: $RUN_DATE
           - **Pipeline:** \`$TASK_NAME\`
           - **Branch:** \`$CURRENT_BRANCH\`
           - **Status:** $STATUS
+          - **Modules Runtime:** Used ${SIM_ELAPSED} of ${SIM_ALLOWED} seconds (${SIM_STATE_LABEL})
           - **CPU Load:** $CPU_LOAD
           - **Memory Usage:** $MEM_USAGE
           ---
