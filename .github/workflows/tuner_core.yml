@@ -470,11 +470,15 @@ jobs:
       - name: 🚀 Execute Pipeline Sequence (Warm Start)
         id: execute_pipeline
         if: steps.import_state.outputs.state_status == 'found'
-        shell: bash {0}
+        shell: bash -el {0} # 🔄 Reverted to login shell to preserve Conda workspace
         env:
           WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
         run: |
           set -x
+          
+          # 🛑 IMMUNIZATION: Empty the logout file to destroy the broken clear_console hook
+          echo "" > ~/.bash_logout
+          
           echo "🚀 Initiating simulator pipeline execution sequence..."
           
           # Wrap the WHOLE setup in set +e to stop implicit failures
