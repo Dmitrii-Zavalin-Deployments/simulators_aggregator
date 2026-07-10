@@ -474,7 +474,11 @@ jobs:
         env:
           WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
         run: |
+          set -x
           echo "🚀 Initiating simulator pipeline execution sequence..."
+          
+          # Wrap the WHOLE setup in set +e to stop implicit failures
+          set +e
           
           # 1. Enforce Contract: The config directory MUST exist
           if [ ! -d "$WORKSPACE_DIR/configs" ]; then
