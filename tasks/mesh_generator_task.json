@@ -1,7 +1,7 @@
 {
-  "pipeline_id": "mesh_pipeline_42bf9cc.json",
+  "pipeline_id": "nozzle_pipeline7_d67d01e.json",
   "input_data_list": [
-    "test.step",
+    "nozzle.step",
     "environment_initial_data.json"
   ]
 }
