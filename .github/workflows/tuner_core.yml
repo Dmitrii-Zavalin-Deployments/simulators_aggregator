@@ -515,14 +515,42 @@ jobs:
           # 4. Execute commands, bypassing 'set -e' to safeguard execution metrics
           LOG_FILE="$RUNNER_TEMP/pipeline_execution.log"
           
+          # Initialize high-fidelity active validation metrics tracking logs
+          rm -f /tmp/cpu_track.log /tmp/memory_profile.log
+          
+          # Spawn high-frequency active background CPU load sampler
+          while true; do
+            top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}' >> /tmp/cpu_track.log 2>/dev/null || true
+            sleep 1
+          done &
+          SAMPLER_PID=$!
+          
           set +e # Open error gates to manually process exit telemetry
           START_TIME=$(date +%s)
-          # MINIMAL FIX: Pass the command string directly into an isolated bash subshell via timeout
-          timeout --foreground "${TIMEOUT_BUDGET}s" bash -c "$EXEC_CMD" > "$LOG_FILE" 2>&1
+          # MINIMAL FIX: Pass the command string directly into an isolated bash subshell via timeout wrapped in profiling time tool
+          /usr/bin/time -v -o /tmp/memory_profile.log timeout --foreground "${TIMEOUT_BUDGET}s" bash -c "$EXEC_CMD" > "$LOG_FILE" 2>&1
           RUN_RC=$?
           END_TIME=$(date +%s)
           set -e # Restore default strict environment security
           
+          # Terminate active background track sampler
+          kill $SAMPLER_PID
+          
+          # Extract absolute true peak compute values during pipeline active execution runtime
+          PEAK_CPU=$(sort -n /tmp/cpu_track.log | tail -n 1)
+          if [ -z "$PEAK_CPU" ]; then PEAK_CPU="0.0"; fi
+          
+          MAX_RSS_KB=$(grep "Maximum resident set size" /tmp/memory_profile.log | awk '{print $6}')
+          if [ -z "$MAX_RSS_KB" ]; then
+            MAX_RSS_MB=$(free -m | awk '/Mem:/ { print $3 }')
+          else
+            MAX_RSS_MB=$((MAX_RSS_KB / 1024))
+          fi
+          TOTAL_MEM_MB=$(free -m | awk '/Mem:/ { print $2 }')
+          
+          # Bind active extracted profiling metrics to pipeline environment block
+          echo "TUNING_ACTIVE_PEAK_CPU=${PEAK_CPU}%" >> $GITHUB_ENV
+          echo "TUNING_ACTIVE_PEAK_MEM=${MAX_RSS_MB}/${TOTAL_MEM_MB}MB" >> $GITHUB_ENV
           echo "SIM_ELAPSED_TIME=$((END_TIME - START_TIME))" >> $GITHUB_ENV
           
           # 5. Stream logs instantly back to the live GitHub Actions runner console
@@ -669,12 +697,13 @@ jobs:
           RUN_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
           STATUS="${{ job.status }}"
           CURRENT_BRANCH=${GITHUB_REF##*/}
-          CPU_LOAD=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4 "%"}')
-          MEM_USAGE=$(free -m | awk '/Mem:/ { print $3 "/" $2 "MB" }')
+          
+          # Inject true runtime execution peak metrics, falling back to system calls if pipeline was skipped/aborted
+          CPU_LOAD="${TUNING_ACTIVE_PEAK_CPU:-$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4 "%"}')}"
+          MEM_USAGE="${TUNING_ACTIVE_PEAK_MEM:-$(free -m | awk '/Mem:/ { print $3 "/" $2 "MB" }')}"
 
           # 2️⃣ Build the Markdown entry with the accurate Task and Runtime metadata
           NEW_ENTRY=$(cat <<EOF
-
           ### Audit: $RUN_DATE
           - **Pipeline:** \`$TASK_NAME\`
           - **Branch:** \`$CURRENT_BRANCH\`
@@ -700,15 +729,23 @@ jobs:
 
           # 3️⃣ Inject entry at the top of the file directly under the header
           HEADER="# 🛰️ Simulators Aggregator Performance Audit"
-          if [ -f "performance_audit.md" ]; then
-              tail -n +2 performance_audit.md > old_body.tmp
-              echo "$HEADER" > performance_audit.md
-              echo "$NEW_ENTRY" >> performance_audit.md
-              cat old_body.tmp >> performance_audit.md
+          TUTORIAL="### 📚 Resources & Documentation
+          - **Tutorial/Book:** ***currently in development***
+          ---"
+          
+          if [ -f "README.md" ]; then
+              # Extract everything after the first horizontal rule to preserve the body
+              sed '1,/---/d' README.md > old_body.tmp
+              echo "$HEADER" > README.md
+              echo "$TUTORIAL" >> README.md
+              echo "$NEW_ENTRY" >> README.md
+              cat old_body.tmp >> README.md
               rm old_body.tmp
           else
-              echo "$HEADER" > performance_audit.md
-              echo "$NEW_ENTRY" >> performance_audit.md
+              # Initialize new README
+              echo "$HEADER" > README.md
+              echo "$TUTORIAL" >> README.md
+              echo "$NEW_ENTRY" >> README.md
           fi
 
           # 📦 ISOLATION PHASE 2: Clear workspace for final sync against concurrent job drift
@@ -724,16 +761,16 @@ jobs:
           git stash pop || echo "📋 Workspace modifications restored safely."
           
           # Clean up any potential lingering conflict markers just in case
-          sed -i '/<<<<<<< Updated upstream/d' performance_audit.md
-          sed -i '/=======/d' performance_audit.md
-          sed -i '/>>>>>>> Stashed changes/d' performance_audit.md
+          sed -i '/<<<<<<< Updated upstream/d' README.md
+          sed -i '/=======/d' README.md
+          sed -i '/>>>>>>> Stashed changes/d' README.md
 
           # 5️⃣ ISOLATED COMMIT & PUSH
           # Explicitly target only the public ledger for the final commit
-          git add performance_audit.md dormant.flag debug/forensic_audit_production.sh
+          git add README.md dormant.flag debug/forensic_audit_production.sh
 
-          if [ -n "$(git status --porcelain performance_audit.md)" ]; then
-            git commit -m "🤖 robot: audit ledger update [$STATUS]"
+          if [ -n "$(git status --porcelain README.md)" ]; then
+            git commit -m "🤖 robot: audit ledger update [$STATUS] [skip ci]"
             TARGET_COMMIT=$(git rev-parse HEAD)
 
             # Sync and attach metadata notes
@@ -800,28 +837,5 @@ jobs:
           else
               echo "⚠️ Parent directory $PARENT_DIR does not exist."
           fi
-
-          # # --- BRANCH-SPECIFIC AUDIT ---
-          # if [ -d "$STATE_DIR" ]; then
-          #     echo -e "\n📍 Verifying contents of active workspace: $STATE_DIR"
-              
-          #     # Automatically cat all JSON files found in the directory tree
-          #     echo -e "\n--- DUMPING CONTENT OF ALL JSON ASSETS ---"
-          #     find "$STATE_DIR" -type f -name "*.json" | while read -r json_file; do
-          #         echo -e "\n========================================="
-          #         echo "FILE: $json_file"
-          #         echo "========================================="
-          #         cat "$json_file"
-          #     done
-              
-          #     # Verify critical file existence
-          #     if [ ! -f "$STATE_DIR/state.json" ]; then
-          #         echo -e "\n❌ ERROR: state.json was NOT found in $STATE_DIR."
-          #         exit 1
-          #     fi
-          # else
-          #     echo "❌ ERROR: State directory $STATE_DIR does not exist."
-          #     exit 1
-          # fi
 
           echo -e "\n✅ --- INTEGRITY AUDIT COMPLETE ---"
