@@ -1,8 +1,14 @@
 # 🛰️ Simulators Aggregator Performance Audit
-
-### Audit: 2026-07-10 21:00:45 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
+### 📚 Resources & Documentation
+- **Tutorial/Book:** ***currently in development***
+---
+### Audit: 2026-07-10 21:02:38 UTC
+- **Pipeline:** `nozzle_pipeline5_4e2e143.json`
 - **Branch:** `nozzle_5`
+- **Status:** success
+- **Modules Runtime:** Used 3 of 360 seconds (failed)
+- **CPU Load:** 47.6%
+- **Memory Usage:** 194/15989MB
 ---
 ### 📚 Resources & Documentation
 - **Tutorial/Book:** ***currently in development***
