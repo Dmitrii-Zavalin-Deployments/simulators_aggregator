@@ -470,7 +470,7 @@ jobs:
       - name: 🚀 Execute Pipeline Sequence (Warm Start)
         id: execute_pipeline
         if: steps.import_state.outputs.state_status == 'found'
-        shell: bash -el {0}
+        shell: bash {0}
         env:
           WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
         run: |
