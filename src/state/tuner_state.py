@@ -1,4 +1,3 @@
-# src/state/tuner_state.py
 import json
 from typing import List, Dict, Any
 
@@ -10,7 +9,7 @@ class TunerState:
     __slots__ = [
         # --- Unified Fields (Input Schema & Output Task Schema) ---
         'pipeline_id',              # Identifier for the target YAML/JSON in Library
-        'input_data_list',          # The list of names of the input files for this run
+        'steps',                    # Sequential pipeline step routing mapping
         
         # --- Provenance & Environment Traceability (The BOM) ---
         'task_details',             # Immutable manifest of repo/setup state (tracking everything)
@@ -23,7 +22,7 @@ class TunerState:
     def __init__(
         self, 
         pipeline_id: str, 
-        input_data_list: List[str],
+        steps: Dict[str, Dict[str, str]],
         task_details: List[Dict[str, Any]],
         successful_runs_archive: str,
         failed_runs_archive: str
@@ -31,8 +30,8 @@ class TunerState:
         # --- Zero-Default Policy Verification ---
         if pipeline_id is None:
             raise ValueError("Missing structural parameter: pipeline_id")
-        if input_data_list is None:
-            raise ValueError("Missing structural parameter: input_data_list")
+        if steps is None:
+            raise ValueError("Missing structural parameter: steps")
         if task_details is None:
             raise ValueError("Missing structural parameter: task_details")
         if successful_runs_archive is None:
@@ -40,9 +39,29 @@ class TunerState:
         if failed_runs_archive is None:
             raise ValueError("Missing structural parameter: failed_runs_archive")
 
+        # --- Deep Structural Validation for Steps Map ---
+        if not isinstance(steps, dict):
+            raise TypeError("Structural parameter 'steps' must be a dictionary mapping.")
+        
+        required_step_fields = {"input_file_name", "output_file_name", "input_output_folder"}
+        for step_key, step_meta in steps.items():
+            if not isinstance(step_meta, dict):
+                raise TypeError(f"Step metadata for key '{step_key}' must be a dictionary configuration.")
+            
+            missing_fields = required_step_fields - step_meta.keys()
+            if missing_fields:
+                raise ValueError(
+                    f"Step '{step_key}' violates validation schema. Missing required fields: {list(missing_fields)}"
+                )
+            
+            # Ensure none of the values are null or empty strings
+            for field in required_step_fields:
+                if not step_meta[field]:
+                    raise ValueError(f"Step '{step_key}' field '{field}' cannot be empty or null.")
+
         # Assign properties to state container instance
         self.pipeline_id = pipeline_id
-        self.input_data_list = input_data_list
+        self.steps = steps
         self.task_details = task_details
         self.successful_runs_archive = successful_runs_archive
         self.failed_runs_archive = failed_runs_archive
@@ -62,7 +81,7 @@ class TunerState:
         
         return cls(
             pipeline_id=data['pipeline_id'],
-            input_data_list=data['input_data_list'],
+            steps=data['steps'],
             task_details=data['task_details'],
             successful_runs_archive=data['successful_runs_archive'],
             failed_runs_archive=data['failed_runs_archive'],
@@ -90,7 +109,7 @@ class TunerState:
         return {
             "task": {
                 "pipeline_id": self.pipeline_id,
-                "input_data_list": self.input_data_list,
+                "steps": self.steps,
                 "task_details": self.task_details
             },
             "deliverables": {

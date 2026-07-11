@@ -1,11 +1,16 @@
-
 class dummy_in(dict):
     """Maps 1:1 to Tuner Execution Task Schema."""
-    def __init__(self, pipeline_id="default_pipeline", config_ids=None, input_data_list=None):
+    def __init__(self, pipeline_id="default_pipeline", config_ids=None, steps=None):
         super().__init__({
             "pipeline_id": pipeline_id,
             "config_ids": config_ids or ["default_config"],
-            "input_data_list": input_data_list or ["default_input.json"]
+            "steps": steps or {
+                "1": {
+                    "input_file_name": "default_input.json",
+                    "output_file_name": "default_output.json",
+                    "input_output_folder": "/tmp/pipeline_data"
+                }
+            }
         })
         self.validation_flag = False
         self.is_ready_to_run = True

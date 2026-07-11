@@ -7,14 +7,20 @@
       "type": "string",
       "description": "Identifier for the target YAML in Library."
     },
-    "input_data_list": {
-      "type": "array",
-      "description": "The list of names of the input files for this run.",
-      "items": { "type": "string" }
+    "steps": {
+      "type": "object",
+      "description": "Pipeline execution steps map.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "input_file_name": { "type": "string" },
+          "output_file_name": { "type": "string" },
+          "input_output_folder": { "type": "string" }
+        },
+        "required": ["input_file_name", "output_file_name", "input_output_folder"],
+        "additionalProperties": false
+      }
     }
   },
-  "required": [
-    "pipeline_id",
-    "input_data_list"
-  ]
+  "required": ["pipeline_id", "steps"]
 }

@@ -9,21 +9,25 @@ from src.state.tuner_state import TunerState
 # We define valid, minimal state data to be reused across tests.
 VALID_STATE_DATA = {
     "pipeline_id": "test_pipe",
-    "input_data_list": ["a.json"],
+    "steps": {
+        "1": {
+            "input_file_name": "a.json",
+            "output_file_name": "b.json",
+            "input_output_folder": "out_dir"
+        }
+    },
     "task_details": [{"step": 1}],
     "successful_runs_archive": "out",
     "failed_runs_archive": "err"
 }
 
 # ==============================================================================
-# 1. Constructor Validation (Covers lines 33, 35, 37, 39, 41)
+# 1. Constructor Validation (Covers strict Zero-Default Policy & Types)
 # ==============================================================================
 
-# The TunerState enforces a strict Zero-Default Policy.
-# If any required parameter is None, the constructor must raise a ValueError.
 def test_constructor_validation():
     # We iterate through each required parameter, ensuring None raises ValueError.
-    params = ["pipeline_id", "input_data_list", "task_details", "successful_runs_archive", "failed_runs_archive"]
+    params = ["pipeline_id", "steps", "task_details", "successful_runs_archive", "failed_runs_archive"]
     
     for param in params:
         test_args = VALID_STATE_DATA.copy()
@@ -33,8 +37,37 @@ def test_constructor_validation():
         with pytest.raises(ValueError, match=f"Missing structural parameter: {param}"):
             TunerState(**test_args)
 
+def test_constructor_steps_deep_validation():
+    test_args = VALID_STATE_DATA.copy()
+    
+    # 1. Check type rejection if steps is not a dictionary mapping
+    test_args["steps"] = ["not", "a", "dictionary"]
+    with pytest.raises(TypeError, match="must be a dictionary mapping"):
+        TunerState(**test_args)
+        
+    # 2. Check type rejection if a specific step item is not a dictionary configuration
+    test_args["steps"] = {"1": "invalid_string_config"}
+    with pytest.raises(TypeError, match="must be a dictionary configuration"):
+        TunerState(**test_args)
+
+    # 3. Check structural validation when required keys are missing inside a step configuration
+    test_args["steps"] = {"1": {"input_file_name": "a.json"}}  # missing output_file_name & input_output_folder
+    with pytest.raises(ValueError, match="violates validation schema. Missing required fields"):
+        TunerState(**test_args)
+
+    # 4. Check validation rejection if a field contains an empty string or null value
+    test_args["steps"] = {
+        "1": {
+            "input_file_name": "a.json",
+            "output_file_name": "",  # Empty string violation
+            "input_output_folder": "out_dir"
+        }
+    }
+    with pytest.raises(ValueError, match="cannot be empty or null"):
+        TunerState(**test_args)
+
 # ==============================================================================
-# 2. Dehydration & Hydration Validation (Covers lines 59-63)
+# 2. Dehydration & Hydration Validation
 # ==============================================================================
 
 # Reconstruction of the state from a dictionary requires the exact internal schema.
@@ -50,7 +83,7 @@ def test_from_dict_validation():
         TunerState.from_dict(corrupted_data)
 
 # ==============================================================================
-# 3. Disk Persistence Verification (Covers lines 79-81)
+# 3. Disk Persistence Verification
 # ==============================================================================
 
 # The state must be serializable and deserializable from disk.
@@ -66,10 +99,11 @@ def test_load_from_disk(tmp_path):
     
     # Assertion: Verify the properties are correctly assigned.
     assert state.pipeline_id == "test_pipe"
-    assert state.input_data_list == ["a.json"]
+    assert state.steps["1"]["input_file_name"] == "a.json"
+    assert state.steps["1"]["output_file_name"] == "b.json"
 
 # ==============================================================================
-# 4. Schema Compliance (Covers line 90)
+# 4. Schema Compliance
 # ==============================================================================
 
 # The `to_saap_deliverable` method must transform the internal flat state
@@ -85,4 +119,5 @@ def test_to_saap_deliverable():
     assert "task" in deliverable
     assert "deliverables" in deliverable
     assert deliverable["task"]["pipeline_id"] == "test_pipe"
+    assert deliverable["task"]["steps"]["1"]["input_output_folder"] == "out_dir"
     assert deliverable["deliverables"]["successful_runs_archive"] == "out"

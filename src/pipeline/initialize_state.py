@@ -1,4 +1,3 @@
-# src/pipeline/initialize_state.py
 import os
 import sys
 import json
@@ -19,6 +18,7 @@ logger = logging.getLogger("StateInitializer")
 
 
 def parse_arguments():
+    import argparse
     parser = argparse.ArgumentParser(description="ACE Loop Cold Start State Initializer")
     # Support both options seamlessly mapping to repo_path
     parser.add_argument("--repository-path", "--repo-path", required=True, dest="repo_path", help="Path to the repository")
@@ -35,8 +35,8 @@ def discover_task_file() -> dict:
     tasks_dir = Path("tasks")
     logger.info(f"Scanning {tasks_dir} for an ACE execution task payload...")
     
-    # Required keys according to the Tuner Task Schema
-    required_keys = {"pipeline_id", "input_data_list"}
+    # Required keys according to the updated Tuner Task Schema
+    required_keys = {"pipeline_id", "steps"}
     
     task_files = list(tasks_dir.glob("*.json"))
     
@@ -65,6 +65,9 @@ def discover_task_file() -> dict:
         
     if not required_keys.issubset(data.keys()):
         raise ValueError(f"❌ CRITICAL: JSON file '{task_file.name}' is missing required schema keys: {required_keys - data.keys()}")
+        
+    if not isinstance(data["steps"], dict):
+        raise ValueError(f"❌ CRITICAL: Task file {task_file.name} 'steps' property must be a dictionary map.")
         
     logger.info(f"✅ Explicit task payload validated at: {task_file}")
     return data
@@ -134,23 +137,31 @@ def execute_setup_script(repo_path: Path, script_path: str):
         print("::endgroup::")
 
 
-def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
+def fetch_inputs_from_dropbox(steps: dict):
     """
     Input synchronization layer.
-    Guaranteed to run post-provisioning. Safely pulls down assets using dynamic 
-    lazy imports that resolve cleanly now that dependencies are present.
+    Guaranteed to run post-provisioning. Parses the steps dictionary to gather
+    all unique input files and place/verify them inside their specified folders.
     """
-    logger.info("Verifying integrity and presence of required input data assets...")
-    target_dir.mkdir(parents=True, exist_ok=True)
+    logger.info("Verifying integrity and presence of required step-routed input data assets...")
+    
+    # Gather unique (folder_path, file_name) targets to avoid duplicate requests
+    unique_targets = {}
+    for step_id, step_meta in steps.items():
+        folder_str = step_meta.get("input_output_folder")
+        file_name = step_meta.get("input_file_name")
+        if folder_str and file_name:
+            unique_targets[(folder_str, file_name)] = (Path(folder_str), file_name)
     
     ingestor = None
     
-    for filename in input_data_list:
+    for target_dir, filename in unique_targets.values():
+        target_dir.mkdir(parents=True, exist_ok=True)
         target_path = target_dir / filename
         logger.info(f"DEBUG: Checking for asset at path: {target_path.resolve()}")
         
         if not target_path.exists():
-            logger.info(f"⚠️ Asset '{filename}' is missing locally. Initiating direct Dropbox download...")
+            logger.info(f"⚠️ Asset '{filename}' is missing locally within '{target_dir}'. Initiating direct Dropbox download...")
             
             # Lazily initialize Dropbox modules. Safely evaluates since setup scripts have completed.
             if ingestor is None:
@@ -169,7 +180,7 @@ def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
                     )
                 
                 tm = TokenManager(app_key, app_secret)
-                ingestor = CloudIngestor(tm, refresh_token, target_dir.parent / "dropbox_download.log")
+                ingestor = CloudIngestor(tm, refresh_token, Path("dropbox_download.log"))
             
             remote_path = f"/{dropbox_folder}/{filename}"
             try:
@@ -179,7 +190,7 @@ def fetch_inputs_from_dropbox(input_data_list: list, target_dir: Path):
                     f"❌ CRITICAL: Failed to download asset '{filename}' from Dropbox path '{remote_path}'. Error: {e}"
                 )
                 
-        logger.info(f"   ↳ [Verified] Authentic input asset present: {filename}")
+        logger.info(f"    ↳ [Verified] Authentic input asset present: {target_path.resolve()}")
 
 
 def main():
@@ -228,11 +239,10 @@ def main():
     # 4. Create Clean-Room Isolated Workspace Structures
     workspace_dir = Path("data/testing-input-output") / f"tuning_{branch_name}"
     workspace_dir.mkdir(parents=True, exist_ok=True)
-    inputs_dir = workspace_dir / "inputs-outputs"
     
     # 5. Verify Inputs are Present (Fully insulated against missing dependency exceptions)
     try:
-        fetch_inputs_from_dropbox(task_data["input_data_list"], inputs_dir)
+        fetch_inputs_from_dropbox(task_data["steps"])
     except FileNotFoundError as e:
         logger.error(str(e))
         sys.exit(1)
@@ -258,11 +268,11 @@ def main():
         logger.error("❌ CRITICAL: Manifest schema violation. No 'config' baseline file specified.")
         sys.exit(1)
     
-    # 7. Instantiate Sovereign State Container (Propagates execution array down for command generation)
+    # 7. Instantiate Sovereign State Container (Propagates step maps down for command generation)
     try:
         state_container = TunerState(
             pipeline_id=task_data["pipeline_id"],
-            input_data_list=task_data["input_data_list"],
+            steps=task_data["steps"],
             task_details=sorted(execution_chain, key=lambda x: x.get("order", 0)), 
             successful_runs_archive=f"successful_runs_{branch_name}",
             failed_runs_archive=f"failed_runs_{branch_name}"
