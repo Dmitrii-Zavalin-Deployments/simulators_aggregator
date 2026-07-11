@@ -1,4 +1,3 @@
-import os
 import json
 import runpy
 import sys
