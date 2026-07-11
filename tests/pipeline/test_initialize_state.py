@@ -43,8 +43,8 @@ def test_discover_task_file_raises_error_when_empty(mock_filesystem):
 def test_discover_task_file_raises_error_when_multiple_files(mock_filesystem):
     """Verifies that a ValueError is raised if more than 1 task file is present."""
     tasks_dir = mock_filesystem / "tasks"
-    (tasks_dir / "task1.json").write_text(json.dumps({"pipeline_id": "p1", "input_data_list": []}))
-    (tasks_dir / "task2.json").write_text(json.dumps({"pipeline_id": "p2", "input_data_list": []}))
+    (tasks_dir / "task1.json").write_text(json.dumps({"pipeline_id": "p1", "steps": {}}))
+    (tasks_dir / "task2.json").write_text(json.dumps({"pipeline_id": "p2", "steps": {}}))
     
     with pytest.raises(ValueError, match="Multiple task files found in tasks/ directory"):
         initialize_state.discover_task_file()
@@ -62,7 +62,7 @@ def test_discover_task_file_corrupt_json(mock_filesystem):
 def test_discover_task_file_raises_error_if_root_is_list(mock_filesystem):
     """Verifies strict schema contract rejection if root element is a JSON list."""
     tasks_dir = mock_filesystem / "tasks"
-    (tasks_dir / "list_root.json").write_text(json.dumps([{"pipeline_id": "p1", "input_data_list": []}]))
+    (tasks_dir / "list_root.json").write_text(json.dumps([{"pipeline_id": "p1", "steps": {}}]))
     
     with pytest.raises(ValueError, match="root element must be a JSON object, not a list"):
         initialize_state.discover_task_file()
@@ -74,6 +74,15 @@ def test_discover_task_file_invalid_schema_keys(mock_filesystem):
     (tasks_dir / "unmapped.json").write_text(json.dumps({"unsupported_key": True}))
     
     with pytest.raises(ValueError, match="is missing required schema keys"):
+        initialize_state.discover_task_file()
+
+
+def test_discover_task_file_raises_error_if_steps_not_dict(mock_filesystem):
+    """Verifies strict schema contract rejection if the 'steps' property is not a dictionary mapping."""
+    tasks_dir = mock_filesystem / "tasks"
+    (tasks_dir / "invalid_steps.json").write_text(json.dumps({"pipeline_id": "p1", "steps": ["not", "a", "dict"]}))
+    
+    with pytest.raises(ValueError, match="'steps' property must be a dictionary map"):
         initialize_state.discover_task_file()
 
 # ==============================================================================
@@ -175,7 +184,7 @@ def test_main_task_discovery_failure(mock_filesystem, monkeypatch):
 def test_main_cached_dependency_skips_provisioning(mock_filesystem, mock_tuner_state, monkeypatch):
     """Verifies provisioning scripts are bypassed when cached_dependency is flagged true."""
     task_file = mock_filesystem / "tasks" / "task.json"
-    task_file.write_text(json.dumps({"pipeline_id": "cached_pid", "input_data_list": []}))
+    task_file.write_text(json.dumps({"pipeline_id": "cached_pid", "steps": {}}))
     
     repo_path = mock_filesystem / "repo"
     manifest = repo_path / "cached_pid.json"
@@ -195,7 +204,7 @@ def test_main_executes_provisioning_when_not_cached(mock_filesystem, monkeypatch
     repo_path.mkdir(exist_ok=True)
     
     (mock_filesystem / "tasks").mkdir(exist_ok=True)
-    (mock_filesystem / "tasks" / "t.json").write_text(json.dumps({"pipeline_id": "p1", "input_data_list": []}))
+    (mock_filesystem / "tasks" / "t.json").write_text(json.dumps({"pipeline_id": "p1", "steps": {}}))
     (repo_path / "p1.json").write_text(json.dumps({"setup_script": "run.sh", "config": "c.json", "execution_chain": [{"order": 1, "repository_url": "mock"}]}))
     (repo_path / "c.json").write_text("{}")
     
@@ -216,7 +225,7 @@ def test_main_executes_provisioning_when_not_cached(mock_filesystem, monkeypatch
 def test_main_config_basename_fallback(mock_filesystem, mock_tuner_state, monkeypatch):
     """Verifies that drifted path layouts fallback gracefully onto filename rglob searches."""
     task_file = mock_filesystem / "tasks" / "task.json"
-    task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
+    task_file.write_text(json.dumps({"pipeline_id": "pid", "steps": {}}))
     
     repo_path = mock_filesystem / "repo"
     manifest = repo_path / "pid.json"
@@ -236,7 +245,7 @@ def test_main_config_basename_fallback(mock_filesystem, mock_tuner_state, monkey
 def test_main_config_file_missing_exit(mock_filesystem, monkeypatch):
     """Enforces direct termination if a configuration target cannot be localized."""
     task_file = mock_filesystem / "tasks" / "task.json"
-    task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
+    task_file.write_text(json.dumps({"pipeline_id": "pid", "steps": {}}))
     
     repo_path = mock_filesystem / "repo"
     manifest = repo_path / "pid.json"
@@ -252,7 +261,7 @@ def test_main_config_file_missing_exit(mock_filesystem, monkeypatch):
 def test_main_manifest_missing_config_exit(mock_filesystem, monkeypatch):
     """Enforces exit policies if manifest schemas omit mandatory configuration references."""
     task_file = mock_filesystem / "tasks" / "task.json"
-    task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
+    task_file.write_text(json.dumps({"pipeline_id": "pid", "steps": {}}))
     
     repo_path = mock_filesystem / "repo"
     manifest = repo_path / "pid.json"
@@ -274,7 +283,7 @@ def test_main_manifest_missing_config_exit(mock_filesystem, monkeypatch):
 def test_main_tuner_state_exception_exit(mock_filesystem, monkeypatch):
     """Ensures internal serialization errors wrap cleanly into explicit process codes."""
     task_file = mock_filesystem / "tasks" / "task.json"
-    task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
+    task_file.write_text(json.dumps({"pipeline_id": "pid", "steps": {}}))
     
     repo_path = mock_filesystem / "repo"
     manifest = repo_path / "pid.json"
@@ -299,7 +308,7 @@ def test_main_tuner_state_exception_exit(mock_filesystem, monkeypatch):
 def test_main_entrypoint_execution(mock_filesystem, mock_tuner_state, monkeypatch):
     """Validates entry point activation when executing via shell modules directly."""
     task_file = mock_filesystem / "tasks" / "task.json"
-    task_file.write_text(json.dumps({"pipeline_id": "pid", "input_data_list": []}))
+    task_file.write_text(json.dumps({"pipeline_id": "pid", "steps": {}}))
     
     repo_path = mock_filesystem / "repo"
     manifest = repo_path / "pid.json"
@@ -317,23 +326,69 @@ def test_main_entrypoint_execution(mock_filesystem, mock_tuner_state, monkeypatc
 # Utility & Coverage Completion
 # ==============================================================================
 
-def test_fetch_inputs_from_dropbox_preserves_existing_files(mock_filesystem):
-    """Verifies that the function respects/preserves authentic assets that already exist."""
-    input_list = ["test_a.cad", "test_b.step"]
+def test_fetch_inputs_from_dropbox_preserves_existing_files(mock_filesystem, monkeypatch):
+    """Verifies that the function respects/preserves authentic assets that already exist under Path B."""
+    monkeypatch.setenv("DROPBOX_APP_KEY", "mock_key")
+    monkeypatch.setenv("DROPBOX_APP_SECRET", "mock_secret")
+    monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "mock_refresh")
+    
     target_dir = mock_filesystem / "downloads"
     target_dir.mkdir(parents=True, exist_ok=True)
+    
+    steps = {
+        "1": {"input_file_name": "test_a.cad", "input_output_folder": str(target_dir), "output_file_name": "out_a.json"},
+        "2": {"input_file_name": "test_b.step", "input_output_folder": str(target_dir), "output_file_name": "out_b.json"}
+    }
 
     # 1. Pre-seed the environment with authentic data
-    for filename in input_list:
-        (target_dir / filename).write_text("Authentic CAD Data")
+    (target_dir / "test_a.cad").write_text("Authentic CAD Data")
+    (target_dir / "test_b.step").write_text("Authentic CAD Data")
 
-    # 2. Act
-    initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
+    # 2. Mock network infrastructure and force Path B fallback evaluation
+    with patch("src.io.dropbox_utils.TokenManager"), \
+         patch("src.io.download_from_dropbox.CloudIngestor") as mock_ingestor_cls:
+        
+        mock_ingestor = MagicMock()
+        if hasattr(mock_ingestor, 'download_folder'):
+            delattr(mock_ingestor, 'download_folder')
+            
+        mock_ingestor.list_folder.return_value = ["test_a.cad", "test_b.step"]
+        mock_ingestor_cls.return_value = mock_ingestor
 
-    # 3. Assert they were not touched/overwritten/deleted
-    for filename in input_list:
-        assert (target_dir / filename).exists(), f"{filename} was lost during verification"
-        assert (target_dir / filename).read_text() == "Authentic CAD Data"
+        # 3. Act
+        initialize_state.fetch_inputs_from_dropbox(steps)
+
+        # 4. Assert download_file was bypassed because assets match local availability targets
+        mock_ingestor.download_file.assert_not_called()
+
+    # 5. Verify local data wasn't modified
+    assert (target_dir / "test_a.cad").read_text() == "Authentic CAD Data"
+    assert (target_dir / "test_b.step").read_text() == "Authentic CAD Data"
+
+
+def test_fetch_inputs_from_dropbox_native_folder_download(mock_filesystem, monkeypatch):
+    """Verifies Path A execution flow where the ingestor natively executes high-level folder downloads."""
+    monkeypatch.setenv("DROPBOX_APP_KEY", "mock_key")
+    monkeypatch.setenv("DROPBOX_APP_SECRET", "mock_secret")
+    monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "mock_refresh")
+    monkeypatch.setenv("DROPBOX_FOLDER", "simulators")
+    
+    target_dir = mock_filesystem / "downloads"
+    steps = {
+        "1": {"input_file_name": "mesh.cad", "input_output_folder": str(target_dir), "output_file_name": "out.json"}
+    }
+
+    with patch("src.io.dropbox_utils.TokenManager"), \
+         patch("src.io.download_from_dropbox.CloudIngestor") as mock_ingestor_cls:
+        
+        mock_ingestor = MagicMock()
+        mock_ingestor.download_folder = MagicMock()
+        mock_ingestor_cls.return_value = mock_ingestor
+
+        initialize_state.fetch_inputs_from_dropbox(steps)
+
+        mock_ingestor.download_folder.assert_called_once_with("/simulators", target_dir)
+        mock_ingestor.download_file.assert_not_called()
 
 
 def test_fetch_inputs_from_dropbox_raises_credential_error_if_env_missing(mock_filesystem, monkeypatch):
@@ -343,12 +398,13 @@ def test_fetch_inputs_from_dropbox_raises_credential_error_if_env_missing(mock_f
     monkeypatch.delenv("DROPBOX_APP_SECRET", raising=False)
     monkeypatch.delenv("DROPBOX_REFRESH_TOKEN", raising=False)
     
-    input_list = ["missing_asset.step"]
     target_dir = mock_filesystem / "empty_dir"
-    target_dir.mkdir(parents=True, exist_ok=True)
+    steps = {
+        "1": {"input_file_name": "missing_asset.step", "input_output_folder": str(target_dir), "output_file_name": "out.json"}
+    }
 
     with pytest.raises(OSError, match="Missing required Dropbox credentials"):
-        initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
+        initialize_state.fetch_inputs_from_dropbox(steps)
 
 
 def test_fetch_inputs_from_dropbox_raises_error_if_missing(mock_filesystem, monkeypatch):
@@ -359,9 +415,10 @@ def test_fetch_inputs_from_dropbox_raises_error_if_missing(mock_filesystem, monk
     monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "mock_refresh")
     monkeypatch.setenv("DROPBOX_FOLDER", "simulators")
     
-    input_list = ["non_existent_file.cad"]
     target_dir = mock_filesystem / "empty_dir"
-    target_dir.mkdir(parents=True, exist_ok=True)
+    steps = {
+        "1": {"input_file_name": "non_existent_file.cad", "input_output_folder": str(target_dir), "output_file_name": "out.json"}
+    }
 
     # 2. Intercept and mock the network infrastructure components deterministically
     with patch("src.io.dropbox_utils.TokenManager"), \
@@ -369,13 +426,16 @@ def test_fetch_inputs_from_dropbox_raises_error_if_missing(mock_filesystem, monk
         
         # Configure the mock ingestor to throw a remote API error
         mock_ingestor = MagicMock()
+        if hasattr(mock_ingestor, 'download_folder'):
+            delattr(mock_ingestor, 'download_folder')
+            
+        mock_ingestor.list_folder.return_value = ["non_existent_file.cad"]
         mock_ingestor.download_file.side_effect = Exception("Remote file target not found on Dropbox")
         mock_ingestor_cls.return_value = mock_ingestor
 
         # 3. Assert that the function wraps the network failure into the expected FileNotFoundError
         with pytest.raises(FileNotFoundError, match="Failed to download asset"):
-            initialize_state.fetch_inputs_from_dropbox(input_list, target_dir)
-
+            initialize_state.fetch_inputs_from_dropbox(steps)
 
 # ==============================================================================
 # Input Missing Diagnostic Test
@@ -394,15 +454,14 @@ def test_main_exits_when_inputs_missing(
     mock_fetch,         # Maps to fetch_inputs_from_dropbox
     mock_exit,          # Maps to sys.exit
     mock_manifest,      # Maps to load_pipeline_manifest
-    mock_filesystem     # <--- ADD THIS FIXTURE
+    mock_filesystem     #
 ):
     """Verifies that a FileNotFoundError in input fetching triggers an explicit exit(1)."""
     # 1. Configure deterministic mock behaviors
     mock_exists.return_value = True
     
-    # FIX: Use the actual temporary directory from the fixture instead of a hardcoded string
     repo_dir = mock_filesystem / "repo"
-    repo_dir.mkdir(exist_ok=True) # Ensure it exists physically for Path()
+    repo_dir.mkdir(exist_ok=True)
     
     mock_args.return_value = MagicMock(
         repo_path=str(repo_dir), 
@@ -411,7 +470,9 @@ def test_main_exits_when_inputs_missing(
     
     mock_discover.return_value = {
         "pipeline_id": "test_id", 
-        "input_data_list": ["missing.cad"]
+        "steps": {
+            "1": {"input_file_name": "missing.cad", "input_output_folder": "some_dir", "output_file_name": "out.json"}
+        }
     }
 
     mock_manifest.return_value = {
@@ -433,6 +494,7 @@ def test_main_exits_when_inputs_missing(
     # 5. Assert defensive boundary conditions
     mock_exit.assert_called_once_with(1)
     mock_manifest.assert_called_once()
+
 
 @patch("src.pipeline.initialize_state.load_pipeline_manifest")
 @patch("src.pipeline.initialize_state.sys.exit")
@@ -461,10 +523,10 @@ def test_main_exits_when_manifest_loading_fails(
     # 2. Return valid data from step 1 (lines 197-201) to hit the step 2 block cleanly
     mock_discover.return_value = {
         "pipeline_id": "faulty_pipeline", 
-        "input_data_list": ["asset.cad"]
+        "steps": {}
     }
     
-    # 3. SMOKING GUN: Force the targeted exception on line 205
+    # 3. Force the targeted exception on line 205
     mock_manifest.side_effect = Exception("Simulated unexpected structural error")
     
     # 4. Intercept system termination to prevent test runner disruption

@@ -45,17 +45,30 @@ def main():
 
     logger.info(f"Processing state file: {args.state_file}")
     
-    base_dir = os.path.dirname(os.path.abspath(args.state_file))
-    inputs_outputs_dir = os.path.join(base_dir, "inputs-outputs")
-
     with open(args.state_file, "r") as f:
         data = json.load(f)
 
-    tasks = sorted(data.get("task_details", []), key=lambda x: x.get("order", 1))
+    steps = data.get("steps", {})
+    tasks = sorted(data.get("task_details", []), key=lambda x: x.get("order", 0))
     repo_root = "data/testing-input-output/repositories"
     
     commands = []
-    for task in tasks:
+    
+    # Loop through the steps object to format individual sequential run scripts
+    for step_id, step_meta in sorted(steps.items(), key=lambda x: int(x[0])):
+        step_idx = int(step_id)
+        
+        # Correlate the step with its corresponding task profile metadata by order
+        task = next((t for t in tasks if t.get("order") == step_idx), None)
+        
+        # Fallback to index matching if order fields drift or are zero-indexed
+        if not task and len(tasks) >= step_idx:
+            task = tasks[step_idx - 1]
+            
+        if not task:
+            logger.warning(f"Active step profile '{step_id}' detected, but no matching repository task profile was configured.")
+            continue
+            
         repo_url = task["repository_url"]
         if repo_url.startswith("git@github.com:"):
             repo_url = repo_url.replace("git@github.com:", "https://github.com/")
@@ -63,16 +76,22 @@ def main():
         repo_name = repo_url.split("/")[-1].replace(".git", "")
         repo_dir = f"{repo_root}/{repo_name}"
         
-        logger.info(f"Adding task for repository: {repo_name}")
+        inputs_outputs_dir = step_meta.get("input_output_folder", "")
+        in_file = step_meta.get("input_file_name", "")
+        out_file = step_meta.get("output_file_name", "")
+        
+        logger.info(f"Adding step {step_id} execution block for repository: {repo_name}")
+        
+        # Standard string generation targeting explicit environment execution overrides
         cmd = (
-            f"echo '🚀 Running simulator engine execution block: {repo_name}...'; "
-            # CRITICAL FIX: Wrap execution in xvfb-run to provide a headless graphical context for FLTK
-            f"(cd {repo_dir} && xvfb-run --auto-servernum python3 -m src.main --input_output_folder {inputs_outputs_dir})"
+            f"echo '🚀 Running simulator engine execution block: {repo_name} (Step {step_id})...'; "
+            f"(cd {repo_dir} && xvfb-run --auto-servernum python3 -m src.main "
+            f"--input_output_folder {inputs_outputs_dir} --input_file {in_file} --output_file {out_file})"
         )
         commands.append(cmd)
 
     if not commands:
-        logger.warning("Active state detected, but no task profiles were configured.")
+        logger.warning("Active state detected, but no valid step or task profiles were configured.")
         print("echo '📋 Notice: Active state detected, but no task profiles were configured in state.json.'")
         sys.exit(0)
 

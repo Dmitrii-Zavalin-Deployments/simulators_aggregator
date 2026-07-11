@@ -17,7 +17,6 @@ logger = logging.getLogger("StateInitializer")
 
 
 def parse_arguments():
-    import argparse
     parser = argparse.ArgumentParser(description="ACE Loop Cold Start State Initializer")
     # Support both options seamlessly mapping to repo_path
     parser.add_argument("--repository-path", "--repo-path", required=True, dest="repo_path", help="Path to the repository")
@@ -139,57 +138,90 @@ def execute_setup_script(repo_path: Path, script_path: str):
 def fetch_inputs_from_dropbox(steps: dict):
     """
     Input synchronization layer.
-    Guaranteed to run post-provisioning. Parses the steps dictionary to gather
-    all unique input files and place/verify them inside their specified folders.
+    Guaranteed to run post-provisioning. Gathers all unique destination target folders 
+    and downloads the ENTIRE contents of the configured remote Dropbox folder into them.
     """
-    logger.info("Verifying integrity and presence of required step-routed input data assets...")
+    logger.info("Verifying integrity and presence of required step-routed remote data assets...")
     
-    # Gather unique (folder_path, file_name) targets to avoid duplicate requests
-    unique_targets = {}
-    for step_id, step_meta in steps.items():
-        folder_str = step_meta.get("input_output_folder")
-        file_name = step_meta.get("input_file_name")
-        if folder_str and file_name:
-            unique_targets[(folder_str, file_name)] = (Path(folder_str), file_name)
+    # Gather unique destination folders to download assets into
+    unique_folders = {Path(step_meta["input_output_folder"]) for step_meta in steps.values() if step_meta.get("input_output_folder")}
     
-    ingestor = None
+    if not unique_folders:
+        logger.info("No input/output folders specified in steps. Skipping Dropbox synchronization.")
+        return
+
+    # Lazily initialize Dropbox modules. Safely evaluates since setup scripts have completed.
+    from src.io.dropbox_utils import TokenManager
+    from src.io.download_from_dropbox import CloudIngestor
     
-    for target_dir, filename in unique_targets.values():
-        target_dir.mkdir(parents=True, exist_ok=True)
-        target_path = target_dir / filename
-        logger.info(f"DEBUG: Checking for asset at path: {target_path.resolve()}")
-        
-        if not target_path.exists():
-            logger.info(f"⚠️ Asset '{filename}' is missing locally within '{target_dir}'. Initiating direct Dropbox download...")
-            
-            # Lazily initialize Dropbox modules. Safely evaluates since setup scripts have completed.
-            if ingestor is None:
-                from src.io.dropbox_utils import TokenManager
-                from src.io.download_from_dropbox import CloudIngestor
-                
-                app_key = os.environ.get("DROPBOX_APP_KEY")
-                app_secret = os.environ.get("DROPBOX_APP_SECRET")
-                refresh_token = os.environ.get("DROPBOX_REFRESH_TOKEN")
-                dropbox_folder = os.environ.get("DROPBOX_FOLDER", "simulators").strip("/")
-                
-                if not all([app_key, app_secret, refresh_token]):
-                    raise EnvironmentError(
-                        "❌ CRITICAL: Missing required Dropbox credentials (DROPBOX_APP_KEY, "
-                        "DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN) in environment."
-                    )
-                
-                tm = TokenManager(app_key, app_secret)
-                ingestor = CloudIngestor(tm, refresh_token, Path("dropbox_download.log"))
-            
-            remote_path = f"/{dropbox_folder}/{filename}"
+    app_key = os.environ.get("DROPBOX_APP_KEY")
+    app_secret = os.environ.get("DROPBOX_APP_SECRET")
+    refresh_token = os.environ.get("DROPBOX_REFRESH_TOKEN")
+    dropbox_folder = os.environ.get("DROPBOX_FOLDER", "simulators").strip("/")
+    
+    if not all([app_key, app_secret, refresh_token]):
+        raise EnvironmentError(
+            "❌ CRITICAL: Missing required Dropbox credentials (DROPBOX_APP_KEY, "
+            "DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN) in environment."
+        )
+    
+    tm = TokenManager(app_key, app_secret)
+    ingestor = CloudIngestor(tm, refresh_token, Path("dropbox_download.log"))
+    remote_folder_path = f"/{dropbox_folder}"
+    
+    # Implementation Path A: High-level native folder download method check
+    if hasattr(ingestor, 'download_folder'):
+        for target_dir in unique_folders:
+            target_dir.mkdir(parents=True, exist_ok=True)
+            logger.info(f"Syncing entire Dropbox folder '{remote_folder_path}' to '{target_dir}' via native download_folder...")
             try:
-                ingestor.download_file(remote_path, target_path)
+                ingestor.download_folder(remote_folder_path, target_dir)
             except Exception as e:
-                raise FileNotFoundError(
-                    f"❌ CRITICAL: Failed to download asset '{filename}' from Dropbox path '{remote_path}'. Error: {e}"
-                )
-                
-        logger.info(f"    ↳ [Verified] Authentic input asset present: {target_path.resolve()}")
+                raise FileNotFoundError(f"❌ CRITICAL: Failed to download folder from Dropbox path '{remote_folder_path}'. Error: {e}")
+        return
+
+    # Implementation Path B: Retrieve file manifest from the remote Dropbox folder dynamically
+    logger.info(f"Retrieving remote file manifest from Dropbox directory: {remote_folder_path}")
+    filenames = []
+    try:
+        if hasattr(ingestor, 'list_folder'):
+            filenames = ingestor.list_folder(remote_folder_path)
+        elif hasattr(ingestor, 'dbx'):
+            res = ingestor.dbx.files_list_folder(remote_folder_path)
+            filenames = [entry.name for entry in res.entries if hasattr(entry, 'name')]
+        elif hasattr(ingestor, 'client'):
+            res = ingestor.client.files_list_folder(remote_folder_path)
+            filenames = [entry.name for entry in res.entries if hasattr(entry, 'name')]
+        else:
+            # Fallback: Scrape files explicitly declared across all steps if remote reflection is completely blocked
+            logger.warning("Could not automatically list remote Dropbox directory contents. Falling back to downloading all step-declared files.")
+            filenames = list({step_meta["input_file_name"] for step_meta in steps.values() if step_meta.get("input_file_name")})
+    except Exception as e:
+        logger.error(f"Failed to list remote Dropbox folder contents ({e}). Falling back to collective step-declared file targets.")
+        filenames = list({step_meta["input_file_name"] for step_meta in steps.values() if step_meta.get("input_file_name")})
+
+    if not filenames:
+        logger.warning(f"No files discovered or specified for remote folder '{remote_folder_path}'.")
+        return
+
+    # Synchronize all discovered remote assets down into the respective destination folders
+    for target_dir in unique_folders:
+        target_dir.mkdir(parents=True, exist_ok=True)
+        for filename in filenames:
+            target_path = target_dir / filename
+            remote_path = f"{remote_folder_path}/{filename}"
+            
+            if not target_path.exists():
+                logger.info(f"⚠️ Asset '{filename}' is missing locally within '{target_dir}'. Downloading...")
+                try:
+                    ingestor.download_file(remote_path, target_path)
+                    logger.info(f"    ↳ [Downloaded] {filename}")
+                except Exception as e:
+                    raise FileNotFoundError(
+                        f"❌ CRITICAL: Failed to download asset '{filename}' from Dropbox path '{remote_path}'. Error: {e}"
+                    )
+            else:
+                logger.info(f"    ↳ [Verified] Authentic input asset present: {target_path.resolve()}")
 
 
 def main():
