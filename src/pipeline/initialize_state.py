@@ -131,8 +131,9 @@ def fetch_inputs_from_dropbox(target_dir: Path):
     tm = TokenManager(app_key, app_secret)
     ingestor = CloudIngestor(tm, refresh_token, Path("dropbox_download.log"))
     
-    # Use the clean environment variable value without forcing branch subfolder logic onto the remote path
-    remote_folder_path = f"/{dropbox_folder}" if dropbox_folder else ""
+    # FIX: Extract strictly the root folder name (e.g., 'simulators') to avoid querying non-existent branch subfolders on Dropbox
+    dropbox_base = dropbox_folder.split("/")[0]
+    remote_folder_path = f"/{dropbox_base}" if dropbox_base else ""
     
     logger.info(f"Syncing Dropbox folder '{remote_folder_path}' to '{target_dir}' via native sync engine...")
     try:
@@ -188,9 +189,8 @@ def main():
     for step in sorted(execution_chain, key=lambda x: x.get("order", 0)):
         logger.info(f"Scheduled Execution Sequence -> Step {step.get('order')} Target: {step.get('repository_url')}")
 
-    # 4. FIX: Prepend base directory path right before the manifest input_output_folder and branch target context
-    base_workspace = Path("data/testing-input-output") / input_output_folder
-    workspace_dir = base_workspace / f"tuning_{branch_name}"
+    # 4. Create Workspace Structure Dynamically from Manifest and Branch Context
+    workspace_dir = Path(input_output_folder) / f"tuning_{branch_name}"
     workspace_dir.mkdir(parents=True, exist_ok=True)
     
     # 5. Hydrate Inputs Directly into the Branch-Isolated Folder
