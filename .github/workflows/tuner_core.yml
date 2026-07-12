@@ -364,26 +364,85 @@ jobs:
         if: steps.import_state.outputs.state_status == 'not_found'
         shell: bash -el {0}
         run: |
-          echo "🚀 Executing cold start branch workspace instantiation..."
-          python3 src/pipeline/initialize_workspace.py --repo-path repositories/payload_library
+          # 🛑 IMMUNIZATION: Neutralize console clear hook scripts
+          echo "" > ~/.bash_logout
+
+          echo "📊 Setting up profiling tracking tools for workspace initialization..."
+          rm -f /tmp/cpu_track.log /tmp/memory_profile.log
           
-          # Workspace hygiene handling
-          rm -f data/testing-input-output/dropbox_download.log
-          echo "✅ Workspace structural configuration mapped safely."
+          # Spawn high-frequency active background CPU load sampler
+          while true; do
+            top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}' >> /tmp/cpu_track.log 2>/dev/null || true
+            sleep 1
+          done &
+          SAMPLER_PID=$!
 
-          echo "🧮 Commencing Matrix Range Exploder Sequence..."
-          # 1. Find the staged JSON file inside the dynamically constructed directory
-          CONFIG_FILE=$(find "${{ env.WORKSPACE_DIR }}/configs" -maxdepth 1 -name "*.json" | head -n 1)
+          # Open gate to catch manual exit codes safely
+          set +e
+          START_TIME=$(date +%s)
 
-          if [ -z "$CONFIG_FILE" ]; then
-            echo "❌ CRITICAL ERROR: Staged configuration asset was not found."
-            exit 1
+          # Wrap all initialization actions in a timed, profiled execution block
+          /usr/bin/time -v -o /tmp/memory_profile.log bash -c '
+            echo "🚀 Executing cold start branch workspace instantiation..."
+            python3 src/pipeline/initialize_workspace.py --repo-path repositories/payload_library
+            
+            # Workspace hygiene handling
+            rm -f data/testing-input-output/dropbox_download.log
+            echo "✅ Workspace structural configuration mapped safely."
+
+            echo "🧮 Commencing Matrix Range Exploder Sequence..."
+            # 1. Find the staged JSON file inside the dynamically constructed directory
+            CONFIG_FILE=$(find "${{ env.WORKSPACE_DIR }}/configs" -maxdepth 1 -name "*.json" | head -n 1)
+
+            if [ -z "$CONFIG_FILE" ]; then
+              echo "❌ CRITICAL ERROR: Staged configuration asset was not found."
+              exit 1
+            fi
+
+            # 2. Explode configuration matrix to complete cold start initialization phase
+            python3 src/pipeline/matrix_exploder.py \
+              --config-path "$CONFIG_FILE" \
+              --output-path "${{ env.WORKSPACE_DIR }}/config_combinations_array.json"
+          '
+          
+          RUN_RC=$?
+          END_TIME=$(date +%s)
+          set -e # Restore default strict environmental security
+
+          # 🛑 Terminate background tracking sampler immediately
+          kill $SAMPLER_PID
+          
+          # 📊 Standard Profile Metrics Output Aggregation
+          PEAK_CPU=$(sort -n /tmp/cpu_track.log | tail -n 1)
+          if [ -z "$PEAK_CPU" ]; then PEAK_CPU="0.0"; fi
+          
+          MAX_RSS_KB=$(grep "Maximum resident set size" /tmp/memory_profile.log | awk '{print $6}')
+          if [ -z "$MAX_RSS_KB" ]; then
+            MAX_RSS_MB=$(free -m | awk '/Mem:/ { print $3 }')
+          else
+            MAX_RSS_MB=$((MAX_RSS_KB / 1024))
           fi
+          TOTAL_MEM_MB=$(free -m | awk '/Mem:/ { print $2 }')
 
-          # 2. Explode configuration matrix to complete cold start initialization phase
-          python3 src/pipeline/matrix_exploder.py \
-            --config-path "$CONFIG_FILE" \
-            --output-path "${{ env.WORKSPACE_DIR }}/config_combinations_array.json"
+          # Bind active extracted profiling metrics to pipeline environment block (Pre-fixed with INIT_)
+          echo "INIT_ACTIVE_PEAK_CPU=${PEAK_CPU}%" >> $GITHUB_ENV
+          echo "INIT_ACTIVE_PEAK_MEM=${MAX_RSS_MB}/${TOTAL_MEM_MB}MB" >> $GITHUB_ENV
+          echo "INIT_ELAPSED_TIME=$((END_TIME - START_TIME))" >> $GITHUB_ENV
+          
+          # Stream execution profiles out to the live console summary view
+          echo "📋 ========================================================================"
+          echo "📋             --- INITIALIZATION PROFILING SUMMARY METRICS ---"
+          echo "📋 ========================================================================"
+          echo "⏱️ Total Cold Start Duration: $((END_TIME - START_TIME)) seconds"
+          echo "🔥 Peak Compute Allocation Load: ${PEAK_CPU}%"
+          echo "💾 Peak Resident Memory Footprint: ${MAX_RSS_MB}/${TOTAL_MEM_MB}MB"
+          echo "📋 ========================================================================"
+
+          # Enforce proper pipeline step termination if the initialization routine dropped out
+          if [ $RUN_RC -ne 0 ]; then
+              echo "❌ CRITICAL ERROR: Workspace mapping or matrix explosion phase encountered a failure."
+              exit $RUN_RC
+          fi
           
           echo "✅ Configuration matrix successfully arrayed."
 
@@ -506,36 +565,36 @@ jobs:
               --filename "${{ env.TUNER_STATE_ARCHIVE }}"
           fi
         
-      # - name: 🔍 Forensic Audit Production
-      #   if: always()
-      #   run: |
-      #     if [[ "${{ job.status }}" == "success" ]]; then
-      #       echo "✅ All systems nominal. No anomalies detected."
-      #       cat <<EOF > debug/forensic_audit_production.sh
-      #     #!/bin/bash
-      #     # Description: Automated forensic audit for ACE solver failures.
-      #     # Status: Dormant (All systems nominal)
-      #     exit 0
-      #     EOF
-      #       chmod +x debug/forensic_audit_production.sh
-      #       echo "🧹 Diagnostic script reset to Dormant mode."
-      #     else
-      #       echo "⚠️ CI Failure Detected. Initiating Deep Forensic Audit..."
-      #       echo "============================================================"
-      #       echo "ls -R output:"
-      #       ls -R
-      #       echo "============================================================"
-      #       echo "debug/forensic_audit_production.sh run results:"
-      #       if [ -f "debug/forensic_audit_production.sh" ]; then
-      #         bash debug/forensic_audit_production.sh
-      #       else
-      #         echo "❌ Critical: Diagnostic script 'debug/forensic_audit_production.sh' not found."
-      #       fi
-      #       echo "============================================================"
-      #       echo "📉 RE-RUNNING FAILED TEST FOR FINAL SIGNAL"
-      #       $TEST_COMMAND || true
-      #       exit 1
-      #     fi
+      - name: 🔍 Forensic Audit Production
+        if: always()
+        run: |
+          if [[ "${{ job.status }}" == "success" ]]; then
+            echo "✅ All systems nominal. No anomalies detected."
+            cat <<EOF > debug/forensic_audit_production.sh
+          #!/bin/bash
+          # Description: Automated forensic audit for ACE solver failures.
+          # Status: Dormant (All systems nominal)
+          exit 0
+          EOF
+            chmod +x debug/forensic_audit_production.sh
+            echo "🧹 Diagnostic script reset to Dormant mode."
+          else
+            echo "⚠️ CI Failure Detected. Initiating Deep Forensic Audit..."
+            echo "============================================================"
+            echo "ls -R output:"
+            ls -R
+            echo "============================================================"
+            echo "debug/forensic_audit_production.sh run results:"
+            if [ -f "debug/forensic_audit_production.sh" ]; then
+              bash debug/forensic_audit_production.sh
+            else
+              echo "❌ Critical: Diagnostic script 'debug/forensic_audit_production.sh' not found."
+            fi
+            echo "============================================================"
+            echo "📉 RE-RUNNING FAILED TEST FOR FINAL SIGNAL"
+            $TEST_COMMAND || true
+            exit 1
+          fi
 
       # - name: 📊 Audit Performance Ledger & Sync (Assemble & Tuning)
       #   if: always()
