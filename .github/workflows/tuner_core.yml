@@ -348,69 +348,44 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgl1 xvfb libglu1-mesa
 
-      # ⚙️ DETERMINISTIC CORE ENGINE (Initialization & Single-Pass Staging)
-      - name: ⚙️ Initialize Pipeline State (Cold Start)
+      # ==============================================================================
+      # 🛠️ GLOBAL ENVIRONMENT PROVISIONING STEP (Always Runs)
+      # ==============================================================================
+      - name: 🛠️ Provision Environment Modules
+        shell: bash -el {0}
+        run: |
+          echo "🔄 Running dynamic dependency engine scan..."
+          python3 src/pipeline/provision_environment.py
+
+      # ==============================================================================
+      # ⚙️ DETERMINISTIC CORE ENGINE & MATRIX GENERATION (Cold Start Only)
+      # ==============================================================================
+      - name: ⚙️ Initialize Workspace & Explode Range Matrix (Cold Start)
         if: steps.import_state.outputs.state_status == 'not_found'
         shell: bash -el {0}
         run: |
-          echo "📥 Reading dynamic pipeline targets from task.json..."
-          REPO_URL=$(jq -r '.library_repository_url' task.json)
-          VERSION_TAG=$(jq -r '.version_tag' task.json)
+          echo "🚀 Executing cold start branch workspace instantiation..."
+          python3 src/pipeline/initialize_workspace.py --repo-path repositories/payload_library
           
-          if [ -z "$REPO_URL" ] || [ -z "$VERSION_TAG" ]; then
-              echo "❌ CRITICAL: Failed to parse library specifications from task.json."
-              exit 1
-          fi
-
-          echo "🗂️ Cloning Payload Library ($VERSION_TAG) from $REPO_URL..."
-          mkdir -p repositories
-          rm -rf repositories/payload_library
-          git clone --depth 1 --branch "$VERSION_TAG" "$REPO_URL" repositories/payload_library
-          
-          if [ ! -d "repositories/payload_library/.git" ]; then
-              echo "❌ CRITICAL: Payload repository clone failed."
-              exit 1
-          fi
-          echo "✅ Payload repository staged successfully."
-
-          # --------------------------------------------------------------------
-          # DETERMINISTIC EXECUTION (Single-Pass Execution Strategy)
-          # --------------------------------------------------------------------
-          echo "🚀 Executing runtime configuration and state initialization..."
-          python3 src/pipeline/initialize_state.py --repo-path repositories/payload_library
-          
-          if [ $? -ne 0 ]; then
-              echo "❌ CRITICAL: State initialization pipeline encountered a runtime failure."
-              exit 1
-          fi
-          echo "✅ Pipeline state successfully initialized."
-
-          # --------------------------------------------------------------------
-          # --- WORKSPACE HYGIENE ---
-          # --------------------------------------------------------------------
-          echo -e "\n🧹 Purging local temporary log payloads..."
+          # Workspace hygiene handling
           rm -f data/testing-input-output/dropbox_download.log
-          echo "✅ Workspace hygiene maintained."
+          echo "✅ Workspace structural configuration mapped safely."
 
-      - name: 🧮 Explode Configuration Range Matrix (Cold Start)
-        if: steps.import_state.outputs.state_status == 'not_found'
-        shell: bash -el {0}
-        run: |
-          # 1. Find the first JSON file in the configs directory
+          echo "🧮 Commencing Matrix Range Exploder Sequence..."
+          # 1. Find the staged JSON file inside the dynamically constructed directory
           CONFIG_FILE=$(find "${{ env.WORKSPACE_DIR }}/configs" -maxdepth 1 -name "*.json" | head -n 1)
 
-          # 2. Safety check: Exit if no file is found
           if [ -z "$CONFIG_FILE" ]; then
-            echo "❌ Error: No JSON configuration files found in ${{ env.WORKSPACE_DIR }}/configs"
+            echo "❌ CRITICAL ERROR: Staged configuration asset was not found."
             exit 1
           fi
 
-          echo "🚀 Found configuration: $CONFIG_FILE. Proceeding..."
-
-          # 3. Execute the matrix exploder with the dynamic path
+          # 2. Explode configuration matrix to complete cold start initialization phase
           python3 src/pipeline/matrix_exploder.py \
             --config-path "$CONFIG_FILE" \
             --output-path "${{ env.WORKSPACE_DIR }}/config_combinations_array.json"
+          
+          echo "✅ Configuration matrix successfully arrayed."
 
       - name: 🚀 Execute Unified Pipeline Chain (Warm Start)
         id: execute_pipeline
