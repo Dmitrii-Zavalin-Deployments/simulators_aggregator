@@ -5,22 +5,16 @@
   "properties": {
     "pipeline_id": {
       "type": "string",
-      "description": "Identifier for the target YAML in Library."
+      "description": "Identifier for the target YAML pipeline definition inside the Library."
     },
-    "steps": {
-      "type": "object",
-      "description": "Pipeline execution steps map.",
-      "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "input_file_name": { "type": "string" },
-          "output_file_name": { "type": "string" },
-          "input_output_folder": { "type": "string" }
-        },
-        "required": ["input_file_name", "output_file_name", "input_output_folder"],
-        "additionalProperties": false
-      }
+    "library_repository_url": {
+      "type": "string",
+      "description": "The full Git URL for the Library repository containing the pipeline definitions."
+    },
+    "version_tag": {
+      "type": "string",
+      "description": "Specific Git branch, tag, or commit hash to ensure reproducible execution."
     }
   },
-  "required": ["pipeline_id", "steps"]
+  "required": ["pipeline_id", "library_repository_url", "version_tag"]
 }
