@@ -501,6 +501,15 @@ jobs:
           echo "TUNING_ACTIVE_PEAK_MEM=${MAX_RSS_MB}/${TOTAL_MEM_MB}MB" >> $GITHUB_ENV
           echo "SIM_ELAPSED_TIME=$((END_TIME - START_TIME))" >> $GITHUB_ENV
           
+          # Stream execution profiles out to the live console summary view
+          echo "📋 ========================================================================"
+          echo "📋             --- PIPELINE EXECUTION PROFILING SUMMARY METRICS ---"
+          echo "📋 ========================================================================"
+          echo "⏱️ Total Loop Duration: $((END_TIME - START_TIME)) seconds"
+          echo "🔥 Peak Compute Allocation Load: ${PEAK_CPU}%"
+          echo "💾 Peak Resident Memory Footprint: ${MAX_RSS_MB}/${TOTAL_MEM_MB}MB"
+          echo "📋 ========================================================================"
+
           # 6. Stream Live Console Logs Back to GitHub Execution Window Interface
           echo "📋 ========================================================================"
           echo "📋             --- UNIFIED SEQUENTIAL PROCESSING CHAIN RUN LOGS ---"
@@ -596,135 +605,135 @@ jobs:
             exit 1
           fi
 
-      # - name: 📊 Audit Performance Ledger & Sync (Assemble & Tuning)
-      #   if: always()
-      #   env:
-      #     TASK_NAME: "Assemble & Tuning"
-      #   run: |
-      #     # Dynamically extract pipeline_id from the state workspace asset
-      #     STATE_FILE="data/testing-input-output/tuning_${{ github.ref_name }}/state.json"
+      - name: 📊 Audit Performance Ledger & Sync (Assemble & Tuning)
+        if: always()
+        env:
+          TASK_NAME: "Assemble & Tuning"
+        run: |
+          # Dynamically extract pipeline_id from the state workspace asset
+          STATE_FILE="data/testing-input-output/tuning_${{ github.ref_name }}/state.json"
           
-      #     if [ -f "$STATE_FILE" ]; then
-      #         # Parse pipeline_id using jq, fallback to default name if empty
-      #         EXTRACTED_ID=$(jq -r '.pipeline_id' "$STATE_FILE" 2>/dev/null)
-      #         TASK_NAME="${EXTRACTED_ID:-"Assemble & Tuning (Fallback)"}"
-      #         echo "✅ Successfully parsed active execution context: $TASK_NAME"
-      #     else
-      #         echo "⚠️ Warning: State file not found at $STATE_FILE. Using fallback task name."
-      #         TASK_NAME="Assemble & Tuning (Disconnected)"
-      #     fi
+          if [ -f "$STATE_FILE" ]; then
+              # Parse pipeline_id using jq, fallback to default name if empty
+              EXTRACTED_ID=$(jq -r '.pipeline_id' "$STATE_FILE" 2>/dev/null)
+              TASK_NAME="${EXTRACTED_ID:-"Assemble & Tuning (Fallback)"}"
+              echo "✅ Successfully parsed active execution context: $TASK_NAME"
+          else
+              echo "⚠️ Warning: State file not found at $STATE_FILE. Using fallback task name."
+              TASK_NAME="Assemble & Tuning (Disconnected)"
+          fi
 
-      #     # ⏱️ EXTRACT TIMING AND STATUS METRICS FROM ENVIRONMENT CONTEXT
-      #     SIM_STATE="${{ env.SIMULATION_STATUS }}"
-      #     SIM_ALLOWED="${{ env.SIM_ALLOWED_TIME }}"
-      #     SIM_ELAPSED="${{ env.SIM_ELAPSED_TIME }}"
+          # ⏱️ EXTRACT TIMING AND STATUS METRICS FROM ENVIRONMENT CONTEXT
+          SIM_STATE="${{ env.SIMULATION_STATUS }}"
+          SIM_ALLOWED="${{ env.SIM_ALLOWED_TIME }}"
+          SIM_ELAPSED="${{ env.SIM_ELAPSED_TIME }}"
 
-      #     # Handle fallback scenarios in case the run step crashed or was skipped entirely
-      #     SIM_ALLOWED="${SIM_ALLOWED:-0}"
-      #     SIM_ELAPSED="${SIM_ELAPSED:-0}"
+          # Handle fallback scenarios in case the run step crashed or was skipped entirely
+          SIM_ALLOWED="${SIM_ALLOWED:-0}"
+          SIM_ELAPSED="${SIM_ELAPSED:-0}"
 
-      #     if [ "$SIM_STATE" = "TIMEOUT" ]; then
-      #         SIM_STATE_LABEL="timeout"
-      #     elif [ "$SIM_STATE" = "SUCCESS" ]; then
-      #         SIM_STATE_LABEL="success"
-      #     elif [ "$SIM_STATE" = "FAILED" ]; then
-      #         SIM_STATE_LABEL="failed"
-      #     else
-      #         SIM_STATE_LABEL="skipped/error"
-      #     fi
+          if [ "$SIM_STATE" = "TIMEOUT" ]; then
+              SIM_STATE_LABEL="timeout"
+          elif [ "$SIM_STATE" = "SUCCESS" ]; then
+              SIM_STATE_LABEL="success"
+          elif [ "$SIM_STATE" = "FAILED" ]; then
+              SIM_STATE_LABEL="failed"
+          else
+              SIM_STATE_LABEL="skipped/error"
+          fi
 
-      #     echo "📊 Commencing performance audit ledger generation for task: $TASK_NAME..."
+          echo "📊 Commencing performance audit ledger generation for task: $TASK_NAME..."
 
-      #     # 1️⃣ Collect environment performance metrics
-      #     RUN_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
-      #     STATUS="${{ job.status }}"
-      #     CURRENT_BRANCH=${GITHUB_REF##*/}
+          # 1️⃣ Collect environment performance metrics
+          RUN_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          STATUS="${{ job.status }}"
+          CURRENT_BRANCH=${GITHUB_REF##*/}
           
-      #     # Inject true runtime execution peak metrics, falling back to system calls if pipeline was skipped/aborted
-      #     CPU_LOAD="${TUNING_ACTIVE_PEAK_CPU:-$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4 "%"}')}"
-      #     MEM_USAGE="${TUNING_ACTIVE_PEAK_MEM:-$(free -m | awk '/Mem:/ { print $3 "/" $2 "MB" }')}"
+          # Inject true runtime execution peak metrics, falling back to system calls if pipeline was skipped/aborted
+          CPU_LOAD="${TUNING_ACTIVE_PEAK_CPU:-$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4 "%"}')}"
+          MEM_USAGE="${TUNING_ACTIVE_PEAK_MEM:-$(free -m | awk '/Mem:/ { print $3 "/" $2 "MB" }')}"
 
-      #     # 2️⃣ Build the Markdown entry with the accurate Task and Runtime metadata
-      #     NEW_ENTRY=$(cat <<EOF
-      #     ### Audit: $RUN_DATE
-      #     - **Pipeline:** \`$TASK_NAME\`
-      #     - **Branch:** \`$CURRENT_BRANCH\`
-      #     - **Status:** $STATUS
-      #     - **Modules Runtime:** Used ${SIM_ELAPSED} of ${SIM_ALLOWED} seconds (${SIM_STATE_LABEL})
-      #     - **CPU Load:** $CPU_LOAD
-      #     - **Memory Usage:** $MEM_USAGE
-      #     ---
-      #     EOF
-      #     )
+          # 2️⃣ Build the Markdown entry with the accurate Task and Runtime metadata
+          NEW_ENTRY=$(cat <<EOF
+          ### Audit: $RUN_DATE
+          - **Pipeline:** \`$TASK_NAME\`
+          - **Branch:** \`$CURRENT_BRANCH\`
+          - **Status:** $STATUS
+          - **Modules Runtime:** Used ${SIM_ELAPSED} of ${SIM_ALLOWED} seconds (${SIM_STATE_LABEL})
+          - **CPU Load:** $CPU_LOAD
+          - **Memory Usage:** $MEM_USAGE
+          ---
+          EOF
+          )
 
-      #     # 📦 ISOLATION PHASE 1: Protect current dirty workspace before PULL 1
-      #     echo "📦 Stashing all local modifications to isolate workspace for baseline sync..."
-      #     git stash push --include-untracked -m "pre-audit-baseline-isolation" || true
+          # 📦 ISOLATION PHASE 1: Protect current dirty workspace before PULL 1
+          echo "📦 Stashing all local modifications to isolate workspace for baseline sync..."
+          git stash push --include-untracked -m "pre-audit-baseline-isolation" || true
 
-      #     # 🔄 PULL 1: Clear out baseline modifications before injecting text to minimize file drift variance
-      #     echo "📥 Executing First Pull to capture baseline state..."
-      #     git pull origin ${{ github.ref_name }} --rebase -X ours || true
+          # 🔄 PULL 1: Clear out baseline modifications before injecting text to minimize file drift variance
+          echo "📥 Executing First Pull to capture baseline state..."
+          git pull origin ${{ github.ref_name }} --rebase -X ours || true
 
-      #     # 📤 RESTORE PHASE 1: Bring back workspace modifications to prepare for generation
-      #     echo "📤 Restoring workspace modifications post-baseline sync..."
-      #     git stash pop || echo "📋 Workspace pristine or no stash required."
+          # 📤 RESTORE PHASE 1: Bring back workspace modifications to prepare for generation
+          echo "📤 Restoring workspace modifications post-baseline sync..."
+          git stash pop || echo "📋 Workspace pristine or no stash required."
 
-      #     # 3️⃣ Inject entry at the top of the file directly under the header
-      #     HEADER="# 🛰️ Simulators Aggregator Performance Audit"
-      #     TUTORIAL="### 📚 Resources & Documentation
-      #     - **Tutorial/Book:** ***currently in development***
-      #     ---"
+          # 3️⃣ Inject entry at the top of the file directly under the header
+          HEADER="# 🛰️ Simulators Aggregator Performance Audit"
+          TUTORIAL="### 📚 Resources & Documentation
+          - **Tutorial/Book:** ***currently in development***
+          ---"
           
-      #     if [ -f "README.md" ]; then
-      #         # Extract everything after the first horizontal rule to preserve the body
-      #         sed '1,/---/d' README.md > old_body.tmp
-      #         echo "$HEADER" > README.md
-      #         echo "$TUTORIAL" >> README.md
-      #         echo "$NEW_ENTRY" >> README.md
-      #         cat old_body.tmp >> README.md
-      #         rm old_body.tmp
-      #     else
-      #         # Initialize new README
-      #         echo "$HEADER" > README.md
-      #         echo "$TUTORIAL" >> README.md
-      #         echo "$NEW_ENTRY" >> README.md
-      #     fi
+          if [ -f "README.md" ]; then
+              # Extract everything after the first horizontal rule to preserve the body
+              sed '1,/---/d' README.md > old_body.tmp
+              echo "$HEADER" > README.md
+              echo "$TUTORIAL" >> README.md
+              echo "$NEW_ENTRY" >> README.md
+              cat old_body.tmp >> README.md
+              rm old_body.tmp
+          else
+              # Initialize new README
+              echo "$HEADER" > README.md
+              echo "$TUTORIAL" >> README.md
+              echo "$NEW_ENTRY" >> README.md
+          fi
 
-      #     # 📦 ISOLATION PHASE 2: Clear workspace for final sync against concurrent job drift
-      #     echo "📦 Stashing updated ledger and tracking assets for final serialization sync..."
-      #     git stash push --include-untracked -m "pre-commit-sync-isolation" || true
+          # 📦 ISOLATION PHASE 2: Clear workspace for final sync against concurrent job drift
+          echo "📦 Stashing updated ledger and tracking assets for final serialization sync..."
+          git stash push --include-untracked -m "pre-commit-sync-isolation" || true
 
-      #     # 🔄 PULL 2: Grab updates made by parallel jobs that finished during the local file generation phase
-      #     echo "🔄 Executing Second Pull immediately prior to commit serialization..."
-      #     git pull origin ${{ github.ref_name }} --rebase -X ours
+          # 🔄 PULL 2: Grab updates made by parallel jobs that finished during the local file generation phase
+          echo "🔄 Executing Second Pull immediately prior to commit serialization..."
+          git pull origin ${{ github.ref_name }} --rebase -X ours
 
-      #     # 📤 RESTORE PHASE 2: Restore modifications cleanly over the updated upstream base
-      #     echo "📤 Restoring isolated workspace modifications..."
-      #     git stash pop || echo "📋 Workspace modifications restored safely."
+          # 📤 RESTORE PHASE 2: Restore modifications cleanly over the updated upstream base
+          echo "📤 Restoring isolated workspace modifications..."
+          git stash pop || echo "📋 Workspace modifications restored safely."
           
-      #     # Clean up any potential lingering conflict markers just in case
-      #     sed -i '/<<<<<<< Updated upstream/d' README.md
-      #     sed -i '/=======/d' README.md
-      #     sed -i '/>>>>>>> Stashed changes/d' README.md
+          # Clean up any potential lingering conflict markers just in case
+          sed -i '/<<<<<<< Updated upstream/d' README.md
+          sed -i '/=======/d' README.md
+          sed -i '/>>>>>>> Stashed changes/d' README.md
 
-      #     # 5️⃣ ISOLATED COMMIT & PUSH
-      #     # Explicitly target only the public ledger for the final commit
-      #     git add README.md dormant.flag debug/forensic_audit_production.sh
+          # 5️⃣ ISOLATED COMMIT & PUSH
+          # Explicitly target only the public ledger for the final commit
+          git add README.md dormant.flag debug/forensic_audit_production.sh
 
-      #     if [ -n "$(git status --porcelain README.md)" ]; then
-      #       git commit -m "🤖 robot: audit ledger update [$STATUS] [skip ci]"
-      #       TARGET_COMMIT=$(git rev-parse HEAD)
+          if [ -n "$(git status --porcelain README.md)" ]; then
+            git commit -m "🤖 robot: audit ledger update [$STATUS] [skip ci]"
+            TARGET_COMMIT=$(git rev-parse HEAD)
 
-      #       # Sync and attach metadata notes
-      #       git fetch origin refs/notes/commits:refs/notes/commits || true
-      #       git notes add -f -m "robot: true" "$TARGET_COMMIT"
+            # Sync and attach metadata notes
+            git fetch origin refs/notes/commits:refs/notes/commits || true
+            git notes add -f -m "robot: true" "$TARGET_COMMIT"
             
-      #       # Final transmission out to the remote tracking branch
-      #       git push origin HEAD
-      #       git push --force origin refs/notes/commits || true
-      #     else
-      #       echo "📋 Notice: No ledger modifications detected. Skipping commit loop."
-      #     fi
+            # Final transmission out to the remote tracking branch
+            git push origin HEAD
+            git push --force origin refs/notes/commits || true
+          else
+            echo "📋 Notice: No ledger modifications detected. Skipping commit loop."
+          fi
 
       - name: 🛡️ Pre-Dissolving Integrity Audit
         if: steps.execute_pipeline.outputs.status != 'TIMEOUT'
