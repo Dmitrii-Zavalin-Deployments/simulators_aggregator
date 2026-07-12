@@ -107,16 +107,12 @@ def execute_setup_script(repo_path: Path, script_path: str):
         print("::endgroup::")
 
 
-def fetch_inputs_from_dropbox(input_output_folder: str):
-    """Input synchronization layer. Gathers assets into the unified pipeline workspace directory."""
+def fetch_inputs_from_dropbox(target_dir: Path):
+    """Input synchronization layer. Gathers assets directly into the dynamic target directory."""
     logger.info("Verifying integrity and presence of required pipeline remote data assets...")
     
-    if not input_output_folder:
-        logger.warning("⚠️ Warning: No explicit 'input_output_folder' entry discovered inside manifest header. Skipping Dropbox synchronization.")
-        return
-
     # Ensure local tracking directory existence prior to ingestion execution
-    target_dir = Path(input_output_folder)
+    target_dir = Path(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
 
     from src.io.dropbox_utils import TokenManager
@@ -136,7 +132,6 @@ def fetch_inputs_from_dropbox(input_output_folder: str):
     ingestor = CloudIngestor(tm, refresh_token, Path("dropbox_download.log"))
     
     # Format absolute remote directory path according to Dropbox API namespace constraints
-    # (Dropbox root is an empty string "", while subfolders require a leading slash)
     remote_folder_path = f"/{dropbox_folder}" if dropbox_folder else ""
     
     logger.info(f"Syncing Dropbox folder '{remote_folder_path}' to '{target_dir}' via native sync engine...")
@@ -180,6 +175,10 @@ def main():
     input_output_folder = manifest_data.get("input_output_folder")
     execution_chain = manifest_data.get("execution_chain", [])
     
+    if not input_output_folder:
+        logger.error("❌ CRITICAL: Manifest configuration validation failed. Missing 'input_output_folder' key.")
+        sys.exit(1)
+
     # 3. DETERMINISTIC RE-PROVISIONING: Global setup execution runs every time
     if global_setup_script:
         execute_setup_script(repo_path, global_setup_script)
@@ -189,13 +188,13 @@ def main():
     for step in sorted(execution_chain, key=lambda x: x.get("order", 0)):
         logger.info(f"Scheduled Execution Sequence -> Step {step.get('order')} Target: {step.get('repository_url')}")
 
-    # 4. Create Workspace Structure
-    workspace_dir = Path("data/testing-input-output") / f"tuning_{branch_name}"
+    # 4. Create Workspace Structure Dynamically from Manifest and Branch Context
+    workspace_dir = Path(input_output_folder) / f"tuning_{branch_name}"
     workspace_dir.mkdir(parents=True, exist_ok=True)
     
-    # 5. Hydrate Inputs from Centralized Target Path
+    # 5. Hydrate Inputs Directly into the Branch-Isolated Folder
     try:
-        fetch_inputs_from_dropbox(input_output_folder)
+        fetch_inputs_from_dropbox(workspace_dir)
     except Exception as e:
         logger.error(str(e))
         sys.exit(1)
