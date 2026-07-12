@@ -107,14 +107,17 @@ def execute_setup_script(repo_path: Path, script_path: str):
         print("::endgroup::")
 
 
-def fetch_inputs_from_dropbox(steps: dict):
-    """Input synchronization layer. Gathers assets into workspace folders."""
-    logger.info("Verifying integrity and presence of required step-routed remote data assets...")
-    unique_folders = {Path(step_meta["input_output_folder"]) for step_meta in steps.values() if step_meta.get("input_output_folder")}
+def fetch_inputs_from_dropbox(input_output_folder: str):
+    """Input synchronization layer. Gathers assets into the unified pipeline workspace directory."""
+    logger.info("Verifying integrity and presence of required pipeline remote data assets...")
     
-    if not unique_folders:
-        logger.info("No input/output folders specified in steps. Skipping Dropbox synchronization.")
+    if not input_output_folder:
+        logger.warning("⚠️ Warning: No explicit 'input_output_folder' entry discovered inside manifest header. Skipping Dropbox synchronization.")
         return
+
+    # Ensure local tracking directory existence prior to ingestion execution
+    target_dir = Path(input_output_folder)
+    target_dir.mkdir(parents=True, exist_ok=True)
 
     from src.io.dropbox_utils import TokenManager
     from src.io.download_from_dropbox import CloudIngestor
@@ -136,17 +139,16 @@ def fetch_inputs_from_dropbox(steps: dict):
     # (Dropbox root is an empty string "", while subfolders require a leading slash)
     remote_folder_path = f"/{dropbox_folder}" if dropbox_folder else ""
     
-    # Execute deterministic batch ingestion
-    for target_dir in unique_folders:
-        logger.info(f"Syncing Dropbox folder '{remote_folder_path}' to '{target_dir}' via native sync engine...")
-        try:
-            # Passing allowed_ext=[] tells the native engine to fetch all discovered assets
-            ingestor.sync(remote_folder_path, target_dir, allowed_ext=[])
-        except Exception as e:
-            raise FileNotFoundError(
-                f"❌ CRITICAL: Ingestion engine failed to synchronize remote Dropbox path "
-                f"'{remote_folder_path}' into local directory '{target_dir}'. Error: {e}"
-            )
+    logger.info(f"Syncing Dropbox folder '{remote_folder_path}' to '{target_dir}' via native sync engine...")
+    try:
+        # Passing allowed_ext=[] tells the native engine to fetch all discovered assets
+        ingestor.sync(remote_folder_path, target_dir, allowed_ext=[])
+    except Exception as e:
+        raise FileNotFoundError(
+            f"❌ CRITICAL: Ingestion engine failed to synchronize remote Dropbox path "
+            f"'{remote_folder_path}' into local directory '{target_dir}'. Error: {e}"
+        )
+
 
 def main():
     args = parse_arguments()
@@ -175,6 +177,7 @@ def main():
         
     target_config_path = manifest_data.get("config")
     global_setup_script = manifest_data.get("setup_script")
+    input_output_folder = manifest_data.get("input_output_folder")
     execution_chain = manifest_data.get("execution_chain", [])
     
     # 3. DETERMINISTIC RE-PROVISIONING: Global setup execution runs every time
@@ -190,11 +193,9 @@ def main():
     workspace_dir = Path("data/testing-input-output") / f"tuning_{branch_name}"
     workspace_dir.mkdir(parents=True, exist_ok=True)
     
-    # 5. Hydrate Inputs
+    # 5. Hydrate Inputs from Centralized Target Path
     try:
-        # Check if "steps" exists in root task payload, fallback to structured steps map gracefully
-        steps_payload = task_data.get("steps", {})
-        fetch_inputs_from_dropbox(steps_payload)
+        fetch_inputs_from_dropbox(input_output_folder)
     except Exception as e:
         logger.error(str(e))
         sys.exit(1)
@@ -236,6 +237,7 @@ def main():
     except Exception as e:
         logger.error(f"❌ Structural state packaging execution failure: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":  # pragma: no cover
     main()
