@@ -319,26 +319,26 @@ jobs:
       - name: 🔍 Log Pipeline State Status
         run: echo "Current state status is [${{ steps.import_state.outputs.state_status }}]"
 
-      # # 📥 WARM START: Download and unpack state archive if found
-      # - name: 📥 Download Existing State Archive
-      #   if: steps.import_state.outputs.state_status == 'found'
-      #   run: |
-      #     python3 src/io/download_from_dropbox.py \
-      #       --folder "${{ env.DROPBOX_FOLDER }}" \
-      #       --filename "${{ env.TUNER_STATE_ARCHIVE }}"
+      # 📥 WARM START: Download and unpack state archive if found
+      - name: 📥 Download Existing State Archive
+        if: steps.import_state.outputs.state_status == 'found'
+        run: |
+          python3 src/io/download_from_dropbox.py \
+            --folder "${{ env.DROPBOX_FOLDER }}" \
+            --filename "${{ env.TUNER_STATE_ARCHIVE }}"
           
-      #     mkdir -p data/testing-input-output
-      #     unzip -o data/testing-input-output/${{ env.TUNER_STATE_ARCHIVE }} -d data/testing-input-output/
+          mkdir -p data/testing-input-output
+          unzip -o data/testing-input-output/${{ env.TUNER_STATE_ARCHIVE }} -d data/testing-input-output/
 
-      # # 🐍 ENV CAPABILITY: Provisions Conda environment for executing simulator modules
-      # - name: 🐍 Set up Conda Environment
-      #   uses: conda-incubator/setup-miniconda@v3
-      #   with:
-      #     auto-update-conda: true
-      #     python-version: "3.10"
-      #     channels: conda-forge
-      #     channel-priority: strict
-      #     activate-environment: tuner-env
+      # 🐍 ENV CAPABILITY: Provisions Conda environment for executing simulator modules
+      - name: 🐍 Set up Conda Environment
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: "3.10"
+          channels: conda-forge
+          channel-priority: strict
+          activate-environment: tuner-env
 
       # # 📦 REPOSITORY-WIDE DYNAMIC CACHE: Shared across branches, keys uniquely per run ID to allow self-healing rewrites
       # - name: 📦 Repository-Wide Dynamic Conda Cache
