@@ -412,157 +412,95 @@ jobs:
             --config-path "$CONFIG_FILE" \
             --output-path "${{ env.WORKSPACE_DIR }}/config_combinations_array.json"
 
-      # - name: ⚙️ Initialize Pipeline State (Warm Start)
-      #   if: steps.import_state.outputs.state_status == 'found' 
-      #   shell: bash -el {0}
-      #   env:
-      #     WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
-      #   run: |
-      #     echo "📥 Warm Start Detected: Initializing from $WORKSPACE_DIR..."
+      - name: 🚀 Execute Unified Pipeline Chain (Warm Start)
+        id: execute_pipeline
+        if: steps.import_state.outputs.state_status == 'found'
+        shell: bash -el {0}
+        env:
+          WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
+          LOG_FILE: "${{ runner.temp }}/pipeline_execution.log"
+        run: |
+          # 🛑 IMMUNIZATION: Neutralize console clear hook scripts
+          echo "" > ~/.bash_logout
           
-      #     if [ ! -f "$WORKSPACE_DIR/state.json" ]; then
-      #       echo "❌ ERROR: State file not found."
-      #       exit 1
-      #     fi
+          echo "🚀 Initiating unified simulator orchestration framework loop..."
           
-      #     # ✅ Added the missing comment symbol here:
-      #     # Generate and Execute provisioning (Cloning + Config Injection ONLY)
-      #     PROVISION_CMD=$(python3 src/pipeline/generate_provision_cmd.py --state-file "$WORKSPACE_DIR/state.json")
-      #     eval "$PROVISION_CMD"
-          
-      #     if [ $? -eq 0 ]; then
-      #       echo "✅ Repositories staged successfully."
-      #     else
-      #       echo "❌ ERROR: Repository staging failed."
-      #       exit 1
-      #     fi
-      
-      # - name: 🚀 Execute Pipeline Sequence (Warm Start)
-      #   id: execute_pipeline
-      #   if: steps.import_state.outputs.state_status == 'found'
-      #   shell: bash -el {0} # 🔄 Reverted to login shell to preserve Conda workspace
-      #   env:
-      #     WORKSPACE_DIR: "data/testing-input-output/tuning_${{ github.ref_name }}"
-      #   run: |
-          
-      #     # 🛑 IMMUNIZATION: Empty the logout file to destroy the broken clear_console hook
-      #     echo "" > ~/.bash_logout
-          
-      #     echo "🚀 Initiating simulator pipeline execution sequence..."
-          
-      #     # 1. Enforce Contract: The config directory MUST exist
-      #     if [ ! -d "$WORKSPACE_DIR/configs" ]; then
-      #         echo "❌ CRITICAL ERROR: Expected directory $WORKSPACE_DIR/configs does not exist."
-      #         echo "   Pipeline state might be corrupted or improperly restored."
-      #         exit 1
-      #     fi
-          
-      #     # 2. Slice active configuration unit
-      #     if [ -f "$WORKSPACE_DIR/config_combinations_array.json" ]; then
-      #         jq '.[0]' "$WORKSPACE_DIR/config_combinations_array.json" > "$WORKSPACE_DIR/configs/config_temp.json"
-      #         echo "✅ Successfully staged staging asset: $WORKSPACE_DIR/configs/config_temp.json"
-      #     else
-      #         echo "❌ CRITICAL ERROR: config_combinations_array.json is missing from state archive."
-      #         exit 1
-      #     fi
-      #     # ==============================================================================
+          # 1. Parse operational runtime constraint definitions from static parameters
+          if [ ! -f "config/config.json" ]; then
+              echo "❌ CRITICAL ERROR: Global tuner config file asset missing."
+              exit 1
+          fi
+          TIMEOUT_BUDGET=$(jq -r '.max_runtime_seconds' config/config.json)
+          echo "SIM_ALLOWED_TIME=${TIMEOUT_BUDGET}" >> $GITHUB_ENV
 
-      #     # ⏱️ STRICT REGISTRY SCAN: Parse runtime constraint directly from global tuner repo config
-      #     if [ ! -f "config/config.json" ]; then
-      #         echo "❌ CRITICAL ERROR: Global tuner configuration asset 'config/config.json' is missing."
-      #         exit 1
-      #     fi
-      #     TIMEOUT_BUDGET=$(jq -r '.max_runtime_seconds' config/config.json)
-      #     if [[ "$TIMEOUT_BUDGET" == "null" || -z "$TIMEOUT_BUDGET" ]]; then
-      #         echo "❌ CRITICAL ERROR: Required 'max_runtime_seconds' is missing or null in config/config.json."
-      #         exit 1
-      #     fi
-      #     echo "SIM_ALLOWED_TIME=${TIMEOUT_BUDGET}" >> $GITHUB_ENV
+          # 2. Setup profiling tracking tools
+          rm -f /tmp/cpu_track.log /tmp/memory_profile.log
+          while true; do
+            top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}' >> /tmp/cpu_track.log 2>/dev/null || true
+            sleep 1
+          done &
+          SAMPLER_PID=$!
+          
+          # 3. Execute Unified Pipeline Chain under wrapped constraints
+          set +e
+          START_TIME=$(date +%s)
+          
+          /usr/bin/time -v -o /tmp/memory_profile.log timeout --foreground "${TIMEOUT_BUDGET}s" \
+            python3 src/pipeline/unified_orchestrator.py \
+              --state-file "$WORKSPACE_DIR/state.json" \
+              --log-file "$LOG_FILE"
+          
+          RUN_RC=$?
+          END_TIME=$(date +%s)
+          set -e
+          
+          # 4. Tear down background analytical hooks
+          kill $SAMPLER_PID
+          
+          # 5. Standard Profile Metrics Output Aggregation
+          PEAK_CPU=$(sort -n /tmp/cpu_track.log | tail -n 1 || echo "0.0")
+          MAX_RSS_KB=$(grep "Maximum resident set size" /tmp/memory_profile.log | awk '{print $6}' || echo "0")
+          MAX_RSS_MB=$((MAX_RSS_KB / 1024))
+          TOTAL_MEM_MB=$(free -m | awk '/Mem:/ { print $2 }')
+          
+          echo "TUNING_ACTIVE_PEAK_CPU=${PEAK_CPU}%" >> $GITHUB_ENV
+          echo "TUNING_ACTIVE_PEAK_MEM=${MAX_RSS_MB}/${TOTAL_MEM_MB}MB" >> $GITHUB_ENV
+          echo "SIM_ELAPSED_TIME=$((END_TIME - START_TIME))" >> $GITHUB_ENV
+          
+          # 6. Stream Live Console Logs Back to GitHub Execution Window Interface
+          echo "📋 ========================================================================"
+          echo "📋             --- UNIFIED SEQUENTIAL PROCESSING CHAIN RUN LOGS ---"
+          echo "📋 ========================================================================"
+          if [ -f "$LOG_FILE" ]; then cat "$LOG_FILE"; else echo "❌ Error: Log file was not created."; fi
+          echo "📋 ========================================================================"
+          
+          # 7. Hand over result directly to Telemetry System Record
+          echo "📊 Staging runtime execution telemetry..."
+          set +e
+          python3 src/pipeline/record_telemetry.py \
+            --state-file "$WORKSPACE_DIR/state.json" \
+            --exit-code $RUN_RC \
+            --log-file "$LOG_FILE"
+          TELEMETRY_RC=$?
+          set -e
 
-      #     # 3. Generate execution command sequences using the engine script
-      #     EXEC_CMD=$(python3 src/pipeline/generate_execution_cmd.py --state-file "$WORKSPACE_DIR/state.json")
-          
-      #     # 4. Execute commands, bypassing 'set -e' to safeguard execution metrics
-      #     LOG_FILE="$RUNNER_TEMP/pipeline_execution.log"
-          
-      #     # Initialize high-fidelity active validation metrics tracking logs
-      #     rm -f /tmp/cpu_track.log /tmp/memory_profile.log
-          
-      #     # Spawn high-frequency active background CPU load sampler
-      #     while true; do
-      #       top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}' >> /tmp/cpu_track.log 2>/dev/null || true
-      #       sleep 1
-      #     done &
-      #     SAMPLER_PID=$!
-          
-      #     set +e # Open error gates to manually process exit telemetry
-      #     START_TIME=$(date +%s)
-      #     # MINIMAL FIX: Pass the command string directly into an isolated bash subshell via timeout wrapped in profiling time tool
-      #     /usr/bin/time -v -o /tmp/memory_profile.log timeout --foreground "${TIMEOUT_BUDGET}s" bash -c "$EXEC_CMD" > "$LOG_FILE" 2>&1
-      #     RUN_RC=$?
-      #     END_TIME=$(date +%s)
-      #     set -e # Restore default strict environment security
-          
-      #     # Terminate active background track sampler
-      #     kill $SAMPLER_PID
-          
-      #     # Extract absolute true peak compute values during pipeline active execution runtime
-      #     PEAK_CPU=$(sort -n /tmp/cpu_track.log | tail -n 1)
-      #     if [ -z "$PEAK_CPU" ]; then PEAK_CPU="0.0"; fi
-          
-      #     MAX_RSS_KB=$(grep "Maximum resident set size" /tmp/memory_profile.log | awk '{print $6}')
-      #     if [ -z "$MAX_RSS_KB" ]; then
-      #       MAX_RSS_MB=$(free -m | awk '/Mem:/ { print $3 }')
-      #     else
-      #       MAX_RSS_MB=$((MAX_RSS_KB / 1024))
-      #     fi
-      #     TOTAL_MEM_MB=$(free -m | awk '/Mem:/ { print $2 }')
-          
-      #     # Bind active extracted profiling metrics to pipeline environment block
-      #     echo "TUNING_ACTIVE_PEAK_CPU=${PEAK_CPU}%" >> $GITHUB_ENV
-      #     echo "TUNING_ACTIVE_PEAK_MEM=${MAX_RSS_MB}/${TOTAL_MEM_MB}MB" >> $GITHUB_ENV
-      #     echo "SIM_ELAPSED_TIME=$((END_TIME - START_TIME))" >> $GITHUB_ENV
-          
-      #     # 5. Stream logs instantly back to the live GitHub Actions runner console
-      #     echo "📋 ========================================================================"
-      #     echo "📋                  --- LIVE PIPELINE EXECUTION LOGS ---"
-      #     echo "📋 ========================================================================"
-      #     if [ -f "$LOG_FILE" ]; then
-      #         cat "$LOG_FILE"
-      #     else
-      #         echo "❌ Error Error: Isolated pipeline runtime log file was never created."
-      #     fi
-      #     echo "📋 ========================================================================"
-          
-      #     # 6. Invoke telemetry tracking engine (PROTECTED ERROR GATE)
-      #     echo "📊 Initiating telemetry recording system..."
-      #     set +e # Open error gates so telemetry exit 1 does not break the workflow step
-      #     python3 src/pipeline/record_telemetry.py \
-      #       --state-file "$WORKSPACE_DIR/state.json" \
-      #       --exit-code $RUN_RC \
-      #       --log-file "$LOG_FILE"
-      #     TELEMETRY_RC=$?
-      #     set -e # Restore default strict environment security
+          # 8. Flow Control Reporting Outputs
+          if [ $RUN_RC -eq 124 ]; then
+              echo "❌ TIMEOUT ENCOUNTERED: Pipeline step chain timed out."
+              echo "SIMULATION_STATUS=TIMEOUT" >> $GITHUB_ENV
+              STATUS="TIMEOUT"
+          elif [ $RUN_RC -ne 0 ]; then
+              echo "⚠️ Simulation path sequence execution reported failure."
+              echo "SIMULATION_STATUS=FAILED" >> $GITHUB_ENV
+              STATUS="FAILED"
+          else
+              echo "✅ All loop simulation instances completed successfully."
+              echo "SIMULATION_STATUS=SUCCESS" >> $GITHUB_ENV
+              STATUS="SUCCESS"
+          fi
 
-      #     # 7. FLOW CONTROL: Instead of exiting, we report the status and continue
-      #     if [ $RUN_RC -eq 124 ]; then
-      #         echo "❌ TIMEOUT ENCOUNTERED: Module exceeded allowed window of ${TIMEOUT_BUDGET}s."
-      #         echo "SIMULATION_STATUS=TIMEOUT" >> $GITHUB_ENV
-      #         STATUS="TIMEOUT"
-      #     elif [ $RUN_RC -ne 0 ]; then
-      #         echo "⚠️ Simulation reported failure (Exit Code: $RUN_RC)."
-      #         echo "   This is handled as a known outcome in tuning. Continuing pipeline flow..."
-      #         echo "SIMULATION_STATUS=FAILED" >> $GITHUB_ENV
-      #         STATUS="FAILED"
-      #     else
-      #         echo "✅ Simulation executed successfully."
-      #         echo "SIMULATION_STATUS=SUCCESS" >> $GITHUB_ENV
-      #         STATUS="SUCCESS"
-      #     fi
-
-      #     # Expose status field directly to the runner engine context layer
-      #     echo "status=$STATUS" >> $GITHUB_OUTPUT
-      #     exit 0
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          exit 0
 
       - name: 📤 Package and Upload State Snapshot
         run: |
