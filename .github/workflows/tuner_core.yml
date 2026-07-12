@@ -341,23 +341,12 @@ jobs:
           channel-priority: strict
           activate-environment: tuner-env
 
-      # # 📦 REPOSITORY-WIDE DYNAMIC CACHE: Shared across branches, keys uniquely per run ID to allow self-healing rewrites
-      # - name: 📦 Repository-Wide Dynamic Conda Cache
-      #   id: cache-conda
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: /usr/share/miniconda/envs/tuner-env
-      #     # Hashing the directory ensures total environment synchronization
-      #     key: conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/**') }}-${{ github.run_id }}
-      #     restore-keys: |
-      #       conda-env-${{ hashFiles('requirements.txt', 'setup_scripts/**') }}-
-
-      # # 🌐 CRITICAL FIX: HEADLESS GRAPHICS DRIVERS
-      # - name: 🌐 Install Headless Rendering Dependencies
-      #   run: |
-      #     echo "Installing virtual framebuffer and OpenGL libraries for Gmsh FLTK rendering..."
-      #     sudo apt-get update
-      #     sudo apt-get install -y libgl1 xvfb libglu1-mesa
+      # HEADLESS GRAPHICS DRIVERS
+      - name: 🌐 Install Headless Rendering Dependencies
+        run: |
+          echo "Installing virtual framebuffer and OpenGL libraries for Gmsh FLTK rendering..."
+          sudo apt-get update
+          sudo apt-get install -y libgl1 xvfb libglu1-mesa
 
       # # ⚙️ SELF-HEALING OPTIMISTIC CORE ENGINE (Initialization & Parameter Explosion)
       # - name: ⚙️ Initialize Pipeline State (Cold Start: Optimistic Double-Iteration)
