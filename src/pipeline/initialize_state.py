@@ -107,12 +107,10 @@ def execute_setup_script(repo_path: Path, script_path: str):
         print("::endgroup::")
 
 
-def fetch_inputs_from_dropbox(target_dir: Path):
-    """Input synchronization layer. Gathers assets directly into the dynamic target directory."""
-    logger.info("Verifying integrity and presence of required pipeline remote data assets...")
+def fetch_inputs_from_dropbox(target_dir: Path, branch_name: str):
+    """Syncs the remote Dropbox folder (simulators/tuning_branch) to the local workspace."""
+    logger.info(f"Verifying integrity of remote pipeline assets for branch: {branch_name}...")
     
-    # Ensure local tracking directory existence prior to ingestion execution
-    target_dir = Path(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
 
     from src.io.dropbox_utils import TokenManager
@@ -122,26 +120,23 @@ def fetch_inputs_from_dropbox(target_dir: Path):
     app_key = os.environ.get("DROPBOX_APP_KEY")
     app_secret = os.environ.get("DROPBOX_APP_SECRET")
     refresh_token = os.environ.get("DROPBOX_REFRESH_TOKEN")
-    dropbox_folder = os.environ.get("DROPBOX_FOLDER", "simulators").strip("/")
+    dropbox_base = os.environ.get("DROPBOX_FOLDER", "simulators").strip("/")
     
     if not all([app_key, app_secret, refresh_token]):
         raise EnvironmentError("❌ CRITICAL: Missing required Dropbox credentials in environment variables.")
     
-    # Initialize infrastructure dependencies
     tm = TokenManager(app_key, app_secret)
     ingestor = CloudIngestor(tm, refresh_token, Path("dropbox_download.log"))
     
-    # Format absolute remote directory path according to Dropbox API namespace constraints
-    remote_folder_path = f"/{dropbox_folder}" if dropbox_folder else ""
+    # FIX: Explicitly target the subfolder structure on Dropbox
+    remote_folder_path = f"/{dropbox_base}/tuning_{branch_name}"
     
     logger.info(f"Syncing Dropbox folder '{remote_folder_path}' to '{target_dir}' via native sync engine...")
     try:
-        # Passing allowed_ext=[] tells the native engine to fetch all discovered assets
         ingestor.sync(remote_folder_path, target_dir, allowed_ext=[])
     except Exception as e:
         raise FileNotFoundError(
-            f"❌ CRITICAL: Ingestion engine failed to synchronize remote Dropbox path "
-            f"'{remote_folder_path}' into local directory '{target_dir}'. Error: {e}"
+            f"❌ CRITICAL: Ingestion failed for remote path '{remote_folder_path}'. Error: {e}"
         )
 
 
@@ -192,9 +187,9 @@ def main():
     workspace_dir = Path(input_output_folder) / f"tuning_{branch_name}"
     workspace_dir.mkdir(parents=True, exist_ok=True)
     
-    # 5. Hydrate Inputs Directly into the Branch-Isolated Folder
+    # 5. Hydrate Inputs (Passing branch_name to target the correct remote folder)
     try:
-        fetch_inputs_from_dropbox(workspace_dir)
+        fetch_inputs_from_dropbox(workspace_dir, branch_name)
     except Exception as e:
         logger.error(str(e))
         sys.exit(1)
