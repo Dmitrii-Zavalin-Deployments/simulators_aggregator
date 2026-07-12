@@ -330,12 +330,13 @@ jobs:
           mkdir -p data/testing-input-output
           unzip -o data/testing-input-output/${{ env.TUNER_STATE_ARCHIVE }} -d data/testing-input-output/
 
-      # 🐍 ENV CAPABILITY: Provisions Conda environment for executing simulator modules
+      # Provisions Conda environment for executing simulator modules
       - name: 🐍 Set up Conda Environment
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: "3.10"
+          conda-solver: libmamba
           channels: conda-forge
           channel-priority: strict
           activate-environment: tuner-env
