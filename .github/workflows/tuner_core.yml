@@ -392,25 +392,25 @@ jobs:
           rm -f data/testing-input-output/dropbox_download.log
           echo "✅ Workspace hygiene maintained."
 
-      # - name: 🧮 Explode Configuration Range Matrix (Cold Start)
-      #   if: steps.import_state.outputs.state_status == 'not_found'
-      #   shell: bash -el {0}
-      #   run: |
-      #     # 1. Find the first JSON file in the configs directory
-      #     CONFIG_FILE=$(find "${{ env.WORKSPACE_DIR }}/configs" -maxdepth 1 -name "*.json" | head -n 1)
+      - name: 🧮 Explode Configuration Range Matrix (Cold Start)
+        if: steps.import_state.outputs.state_status == 'not_found'
+        shell: bash -el {0}
+        run: |
+          # 1. Find the first JSON file in the configs directory
+          CONFIG_FILE=$(find "${{ env.WORKSPACE_DIR }}/configs" -maxdepth 1 -name "*.json" | head -n 1)
 
-      #     # 2. Safety check: Exit if no file is found
-      #     if [ -z "$CONFIG_FILE" ]; then
-      #       echo "❌ Error: No JSON configuration files found in ${{ env.WORKSPACE_DIR }}/configs"
-      #       exit 1
-      #     fi
+          # 2. Safety check: Exit if no file is found
+          if [ -z "$CONFIG_FILE" ]; then
+            echo "❌ Error: No JSON configuration files found in ${{ env.WORKSPACE_DIR }}/configs"
+            exit 1
+          fi
 
-      #     echo "🚀 Found configuration: $CONFIG_FILE. Proceeding..."
+          echo "🚀 Found configuration: $CONFIG_FILE. Proceeding..."
 
-      #     # 3. Execute the matrix exploder with the dynamic path
-      #     python3 src/pipeline/matrix_exploder.py \
-      #       --config-path "$CONFIG_FILE" \
-      #       --output-path "${{ env.WORKSPACE_DIR }}/config_combinations_array.json"
+          # 3. Execute the matrix exploder with the dynamic path
+          python3 src/pipeline/matrix_exploder.py \
+            --config-path "$CONFIG_FILE" \
+            --output-path "${{ env.WORKSPACE_DIR }}/config_combinations_array.json"
 
       # - name: ⚙️ Initialize Pipeline State (Warm Start)
       #   if: steps.import_state.outputs.state_status == 'found' 
@@ -564,34 +564,34 @@ jobs:
       #     echo "status=$STATUS" >> $GITHUB_OUTPUT
       #     exit 0
 
-      # - name: 📤 Package and Upload State Snapshot
-      #   run: |
-      #     if [ -d "${{ env.WORKSPACE_DIR }}" ]; then
-      #       echo "📦 Packing active state folder..."
+      - name: 📤 Package and Upload State Snapshot
+        run: |
+          if [ -d "${{ env.WORKSPACE_DIR }}" ]; then
+            echo "📦 Packing active state folder..."
             
-      #       # Defensive check and cleanup for the phantom 'config' directory
-      #       CONFIG_DIR="${{ env.WORKSPACE_DIR }}/config"
-      #       if [ -d "$CONFIG_DIR" ]; then
-      #         if rmdir "$CONFIG_DIR" 2>/dev/null; then
-      #           echo "✅ Phantom 'config' directory found and successfully removed."
-      #         else
-      #           echo "❌ CRITICAL: Directory '$CONFIG_DIR' is not empty and cannot be removed."
-      #           echo "   This indicates an unexpected dependency or data leak."
-      #           exit 1
-      #         fi
-      #       else
-      #         echo "ℹ️ No phantom 'config' directory detected. Proceeding."
-      #       fi
+            # Defensive check and cleanup for the phantom 'config' directory
+            CONFIG_DIR="${{ env.WORKSPACE_DIR }}/config"
+            if [ -d "$CONFIG_DIR" ]; then
+              if rmdir "$CONFIG_DIR" 2>/dev/null; then
+                echo "✅ Phantom 'config' directory found and successfully removed."
+              else
+                echo "❌ CRITICAL: Directory '$CONFIG_DIR' is not empty and cannot be removed."
+                echo "   This indicates an unexpected dependency or data leak."
+                exit 1
+              fi
+            else
+              echo "ℹ️ No phantom 'config' directory detected. Proceeding."
+            fi
             
-      #       cd data/testing-input-output/
-      #       zip -r "${{ env.TUNER_STATE_ARCHIVE }}" "tuning_${{ github.ref_name }}"
-      #       cd ../..
+            cd data/testing-input-output/
+            zip -r "${{ env.TUNER_STATE_ARCHIVE }}" "tuning_${{ github.ref_name }}"
+            cd ../..
             
-      #       echo "📤 Uploading updated transaction state to Dropbox..."
-      #       python3 src/io/upload_to_dropbox.py \
-      #         --folder "${{ env.DROPBOX_FOLDER }}" \
-      #         --filename "${{ env.TUNER_STATE_ARCHIVE }}"
-      #     fi
+            echo "📤 Uploading updated transaction state to Dropbox..."
+            python3 src/io/upload_to_dropbox.py \
+              --folder "${{ env.DROPBOX_FOLDER }}" \
+              --filename "${{ env.TUNER_STATE_ARCHIVE }}"
+          fi
         
       # - name: 🔍 Forensic Audit Production
       #   if: always()
