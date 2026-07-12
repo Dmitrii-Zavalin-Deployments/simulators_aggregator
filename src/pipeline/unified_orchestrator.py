@@ -7,6 +7,7 @@ import sys
 import argparse
 import logging
 import subprocess
+import shutil
 from pathlib import Path
 
 def setup_logging():
@@ -19,36 +20,52 @@ def setup_logging():
 
 def main():
     logger = setup_logging()
+    logger.info("🎬 Orchestrator process invoked. Parsing execution environment parameters...")
     
     parser = argparse.ArgumentParser(description="Unified ACE Loop Workspace Provisioner and Chain Executor")
     parser.add_argument("--state-file", required=True, help="Path to the state.json file")
     parser.add_argument("--log-file", required=True, help="Path where simulator execution logs will be written")
     args = parser.parse_args()
 
+    logger.info(f"📋 Received Arguments -> --state-file: {args.state_file} | --log-file: {args.log-file}")
+
     # 1. Dormant State Pre-flight Check
     dormant_flag_path = "dormant.flag"
+    logger.info(f"🔍 Checking for presence of system dormancy flag: {dormant_flag_path}")
     if os.path.exists(dormant_flag_path):
         with open(dormant_flag_path, "r") as f:
             content = f.read().strip()
+        logger.info(f"📄 Dormancy flag content read: '{content}'")
         if "STATUS: DORMANT" in content:
-            logger.info("🏁 Pipeline status is DORMANT. Matrix options exhausted.")
+            logger.info("🏁 Pipeline status is DORMANT. Matrix options exhausted. Terminating loop cleanly.")
             sys.exit(0)
+    else:
+        logger.info("✅ No active dormancy flag detected. Proceeding to structural validations.")
 
     # 2. State & Matrix Validation
     state_path = Path(args.state_file)
+    logger.info(f"🔍 Validating physical existence of state mapping path: {state_path.resolve()}")
     if not state_path.exists():
-        logger.error(f"❌ CRITICAL: Execution state file missing at {state_path}")
+        logger.error(f"❌ CRITICAL: Execution state file missing at {state_path.resolve()}")
         sys.exit(1)
 
     base_dir = state_path.parent
     combinations_path = base_dir / "config_combinations_array.json"
+    logger.info(f"🔍 Validating physical existence of configuration matrix path: {combinations_path.resolve()}")
     
     if not combinations_path.exists():
-        logger.error(f"❌ CRITICAL: Matrix definition file missing at {combinations_path}")
+        logger.error(f"❌ CRITICAL: Matrix definition file missing at {combinations_path.resolve()}")
         sys.exit(1)
 
+    logger.info("📖 Reading configuration array variations matrix...")
     with open(combinations_path, "r") as f:
-        combinations = json.load(f)
+        try:
+            combinations = json.load(f)
+        except Exception as e:
+            logger.error(f"❌ CRITICAL: Failed to parse JSON matrix from {combinations_path}. Error: {e}")
+            sys.exit(1)
+
+    logger.info(f"📊 Configuration matrix structural analysis: Loaded type={type(combinations)}, Length={len(combinations) if isinstance(combinations, list) else 'N/A'}")
 
     if not combinations or not isinstance(combinations, list) or len(combinations) == 0:
         logger.warning("🏁 All configuration variations have been completely exhausted.")
@@ -58,76 +75,115 @@ def main():
 
     # 3. Pop Active Runtime Configuration Combination Slice
     current_runtime_config = combinations.pop(0)
-    logger.info(f"📦 Popped next variation matrix target configuration. Remaining: {len(combinations)}")
+    logger.info(f"📦 Popped next variation matrix target configuration. Remaining items in pool: {len(combinations)}")
+    logger.info(f"⚙️ Active variation slice signature: {json.dumps(current_runtime_config)[:120]}...")
 
     # Stage config_temp.json where telemetry engine explicitly expects it
     configs_dir = base_dir / "configs"
+    logger.info(f"📁 Ensuring staging infrastructure directory exists: {configs_dir.resolve()}")
     configs_dir.mkdir(parents=True, exist_ok=True)
     config_temp_path = configs_dir / "config_temp.json"
 
+    logger.info(f"✍️ Staging dynamic runtime execution configuration asset profile to: {config_temp_path.resolve()}")
     with open(config_temp_path, "w") as f:
         json.dump(current_runtime_config, f, indent=4)
 
-    # Write the remaining matrix array entries back to disk
+    logger.info("✍️ Writing updated residual matrix array variant pool back to storage disk...")
     with open(combinations_path, "w") as f:
         json.dump(combinations, f, indent=4)
 
     # 4. Load Pipeline Step Map Specifications
+    logger.info(f"📖 Loading pipeline architectural map rules from sovereign state file: {state_path.resolve()}")
     with open(state_path, "r") as f:
-        state_data = json.load(f)
+        try:
+            state_data = json.load(f)
+        except Exception as e:
+            logger.error(f"❌ CRITICAL: Failed to parse state JSON structure. Error: {e}")
+            sys.exit(1)
 
+    # 🔴 CORE FORENSIC INSPECTION POINT
+    logger.info("🔍 --- SOVEREIGN STATE MAP DIAGNOSTIC PRINT ---")
+    logger.info(f"📄 Full State Keys Discovered: {list(state_data.keys())}")
+    
     steps = state_data.get("steps", {})
-    tasks = sorted(state_data.get("task_details", []), key=lambda x: x.get("order", 0))
+    tasks = state_data.get("task_details", [])
+    
+    logger.info(f"📋 'steps' field inspection: type={type(steps)}, structure/content={steps}")
+    logger.info(f"📋 'task_details' field inspection: type={type(tasks)}, count={len(tasks) if isinstance(tasks, list) else 'N/A'}")
+    
+    try:
+        tasks = sorted(tasks, key=lambda x: x.get("order", 0))
+    except Exception as e:
+        logger.error(f"⚠️ Failed to sort task data array items by order parameter. Error: {e}")
+
     repo_root = Path("data/testing-input-output/repositories")
+    logger.info(f"📁 Allocating system workspace storage root framework at: {repo_root.resolve()}")
     repo_root.mkdir(parents=True, exist_ok=True)
 
     # Ensure log file workspace is cleared out before starting execution stream
     log_file_path = Path(args.log_file)
+    logger.info(f"📝 Configuring destination processing trace log target location: {log_file_path.resolve()}")
     log_file_path.parent.mkdir(parents=True, exist_ok=True)
     if log_file_path.exists():
+        logger.info("🧹 Pre-existing run trace file detected. Cleaving log asset target space...")
         os.remove(log_file_path)
 
     # 5. Iterative Provision-and-Execute Loop Flow
+    if not isinstance(steps, dict) or not steps:
+        logger.error("❌ DIAGNOSTIC ALERT: The 'steps' dictionary is EMPTY or structurally malformed. Loop cannot execute!")
+    else:
+        logger.info(f"🚀 Found {len(steps)} pipeline steps scheduled for execution processing loop sequence.")
+
     for step_id, step_meta in sorted(steps.items(), key=lambda x: int(x[0])):
+        logger.info(f"🔄 Loop Sequence Triggered -> Current Target Step ID Key: '{step_id}' (Meta: {step_meta})")
         step_idx = int(step_id)
+        
+        logger.info(f"🔍 Searching task maps for step reference order index matching: {step_idx}")
         task = next((t for t in tasks if t.get("order") == step_idx), None)
         if not task and len(tasks) >= step_idx:
             task = tasks[step_idx - 1]
+            logger.info(f"⚠️ Direct lookup missed. Falling back to relative index slice: {step_idx - 1}")
             
         if not task:
-            logger.warning(f"⚠️ Step {step_id} has no matching task metadata layout configured.")
+            logger.warning(f"⚠️ Step {step_id} has no matching structural task metadata layout configuration record. Skipping step.")
             continue
 
+        logger.info(f"✅ Step metadata link verified successfully: {task}")
         repo_url = task["repository_url"].replace("git@github.com:", "https://github.com/")
         version_tag = task["version_tag"]
         repo_name = repo_url.split("/")[-1].replace(".git", "")
         repo_dir = repo_root / repo_name
 
-        logger.info(f"⚙️ Processing Execution Chain Step [{step_id}] -> Repository: {repo_name}")
+        logger.info(f"⚙️ Processing Execution Chain Step [{step_id}] -> Repository: {repo_name} | Target Directory: {repo_dir.resolve()}")
 
         # A. Provision Stage (Clone + Checkout + Inject Config)
         if repo_dir.exists():
+            logger.info(f"🧹 Stale execution repository tracking path found at '{repo_dir}'. Evicting file paths...")
             subprocess.run(["rm", "-rf", str(repo_dir)], check=True)
         
-        logger.info(f"  📥 Cloning {repo_url} at tag {version_tag}...")
+        logger.info(f"  📥 Cloning {repo_url} at tag version context {version_tag}...")
         subprocess.run(["git", "clone", repo_url, str(repo_dir)], check=True)
+        logger.info(f"  🔀 Checking out code version context at deployment marker branch: {version_tag}")
         subprocess.run(["git", "checkout", version_tag], cwd=str(repo_dir), check=True)
 
         # Inject popped configuration variant profile directly into module layout root
         module_config_dir = repo_dir / "config"
+        logger.info(f"  📁 Generating environment config tracking layout targets inside target repo: {module_config_dir.resolve()}")
         module_config_dir.mkdir(parents=True, exist_ok=True)
         shutil_config_target = module_config_dir / "config.json"
         
+        logger.info(f"  ✍️ Injecting active dynamic matrix runtime validation profile straight into module workspace: {shutil_config_target}")
         with open(shutil_config_target, "w") as f:
             json.dump(current_runtime_config, f, indent=4)
 
         # B. Execute Simulation Stage
-        # Dynamically locate the precise subfolder inside our branch workspace holding the assets
         dropbox_sync_dir = base_dir / "input-output"
         in_file = step_meta.get("input_file_name", "")
         out_file = step_meta.get("output_file_name", "")
 
-        logger.info(f"  🚀 Executing Simulation Engine for step {step_id}...")
+        logger.info(f"  🚀 Building execution environment commands for step {step_id}...")
+        logger.info(f"  📂 Expected internal Dropbox context workspace folder path: {dropbox_sync_dir.resolve()}")
+        logger.info(f"  📥 In-file asset parameter target: '{in_file}' | Out-file target: '{out_file}'")
         
         # Build command sequence
         run_cmd = [
@@ -138,6 +194,8 @@ def main():
             "--output_file", out_file
         ]
 
+        logger.info(f"  🎬 Dispatched command string sequence: {' '.join(run_cmd)}")
+        
         # Execute and append output capture telemetry streams cleanly to unified log target
         with open(log_file_path, "a") as log_out:
             log_out.write(f"\n--- STEP {step_id} LOGS ({repo_name}) ---\n")
@@ -151,6 +209,8 @@ def main():
                 text=True
             )
 
+        logger.info(f"  📉 Execution phase for step finished tracking. Process exit status return code code: {result.returncode}")
+
         if result.returncode != 0:
             logger.error(f"❌ CRITICAL: Step {step_id} reported execution failure (Exit Code: {result.returncode}).")
             sys.exit(result.returncode)
@@ -160,5 +220,5 @@ def main():
     logger.info("🎉 All sequence execution steps executed nominally across the pipeline graph chain.")
     sys.exit(0)
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     main()
