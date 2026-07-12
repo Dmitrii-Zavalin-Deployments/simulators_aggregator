@@ -754,58 +754,58 @@ jobs:
       #       echo "📋 Notice: No ledger modifications detected. Skipping commit loop."
       #     fi
 
-      # - name: 🛡️ Pre-Dissolving Integrity Audit
-      #   if: steps.execute_pipeline.outputs.status != 'TIMEOUT'
-      #   shell: bash -el {0}
-      #   env:
-      #     GITHUB_REF_NAME: ${{ github.ref_name }}
-      #   run: |
-      #     echo "🔍 --- STARTING INTEGRITY AUDIT ---"
+      - name: 🛡️ Pre-Dissolving Integrity Audit
+        if: steps.execute_pipeline.outputs.status != 'TIMEOUT'
+        shell: bash -el {0}
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: |
+          echo "🔍 --- STARTING INTEGRITY AUDIT ---"
 
-      #     # 1. CONDA VALIDATION
-      #     echo -e "\n🧩 --- CONDA ENVIRONMENT ---"
-      #     if conda list pythonocc-core | grep -q "pythonocc-core"; then
-      #         echo "✅ pythonocc-core is installed."
-      #         conda list pythonocc-core | grep pythonocc-core
-      #     else
-      #         echo "❌ CRITICAL: pythonocc-core is MISSING."
-      #         exit 1
-      #     fi
+          # 1. CONDA VALIDATION
+          echo -e "\n🧩 --- CONDA ENVIRONMENT ---"
+          if conda list pythonocc-core | grep -q "pythonocc-core"; then
+              echo "✅ pythonocc-core is installed."
+              conda list pythonocc-core | grep pythonocc-core
+          else
+              echo "❌ CRITICAL: pythonocc-core is MISSING."
+              exit 1
+          fi
 
-      #     # 2. PIP DEPENDENCY VALIDATION
-      #     echo -e "\n📦 --- PIP PACKAGE VALIDATION ---"
-      #     REQUIRED_PKGS=("numpy" "h5py" "requests" "jsonschema")
+          # 2. PIP DEPENDENCY VALIDATION
+          echo -e "\n📦 --- PIP PACKAGE VALIDATION ---"
+          REQUIRED_PKGS=("numpy" "h5py" "requests" "jsonschema")
 
-      #     for pkg in "${REQUIRED_PKGS[@]}"; do
-      #         if pip show "$pkg" > /dev/null 2>&1; then
-      #             echo "✅ $pkg is installed:"
-      #             pip show "$pkg" | grep -E "Name:|Version:"
-      #         else
-      #             echo "❌ CRITICAL: $pkg is MISSING."
-      #             exit 1
-      #         fi
-      #     done
+          for pkg in "${REQUIRED_PKGS[@]}"; do
+              if pip show "$pkg" > /dev/null 2>&1; then
+                  echo "✅ $pkg is installed:"
+                  pip show "$pkg" | grep -E "Name:|Version:"
+              else
+                  echo "❌ CRITICAL: $pkg is MISSING."
+                  exit 1
+              fi
+          done
 
-      #     # 3. INTEGRITY CHECK
-      #     echo -e "\n🛡️ --- DEPENDENCY INTEGRITY CHECK ---"
-      #     if pip check; then
-      #         echo "✅ No dependency conflicts found."
-      #     else
-      #         echo "⚠️ WARNING: Potential dependency conflicts detected."
-      #     fi
+          # 3. INTEGRITY CHECK
+          echo -e "\n🛡️ --- DEPENDENCY INTEGRITY CHECK ---"
+          if pip check; then
+              echo "✅ No dependency conflicts found."
+          else
+              echo "⚠️ WARNING: Potential dependency conflicts detected."
+          fi
 
-      #     # 4. SOVEREIGN STATE VERIFICATION
-      #     echo -e "\n📂 --- SOVEREIGN STATE VERIFICATION ---"
-      #     BRANCH="${GITHUB_REF_NAME:-main}"
-      #     STATE_DIR="data/testing-input-output/tuning_${BRANCH}"
-      #     PARENT_DIR="data/testing-input-output"
+          # 4. SOVEREIGN STATE VERIFICATION
+          echo -e "\n📂 --- SOVEREIGN STATE VERIFICATION ---"
+          BRANCH="${GITHUB_REF_NAME:-main}"
+          STATE_DIR="data/testing-input-output/tuning_${BRANCH}"
+          PARENT_DIR="data/testing-input-output"
 
-      #     # --- GLOBAL SCOPE AUDIT ---
-      #     echo -e "\n--- FULL SCOPE DIRECTORY LISTING (data/testing-input-output) ---"
-      #     if [ -d "$PARENT_DIR" ]; then
-      #         ls -R "$PARENT_DIR"
-      #     else
-      #         echo "⚠️ Parent directory $PARENT_DIR does not exist."
-      #     fi
+          # --- GLOBAL SCOPE AUDIT ---
+          echo -e "\n--- FULL SCOPE DIRECTORY LISTING (data/testing-input-output) ---"
+          if [ -d "$PARENT_DIR" ]; then
+              ls -R "$PARENT_DIR"
+          else
+              echo "⚠️ Parent directory $PARENT_DIR does not exist."
+          fi
 
-      #     echo -e "\n✅ --- INTEGRITY AUDIT COMPLETE ---"
+          echo -e "\n✅ --- INTEGRITY AUDIT COMPLETE ---"
