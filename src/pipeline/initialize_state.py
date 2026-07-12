@@ -173,11 +173,11 @@ def main():
         
     target_config_path = manifest_data.get("config")
     global_setup_script = manifest_data.get("setup_script")
-    input_output_folder = manifest_data.get("input_output_folder")
+    modules_input_output_folder = manifest_data.get("modules_input_output_folder")
     execution_chain = manifest_data.get("execution_chain", [])
     
-    if not input_output_folder:
-        logger.error("❌ CRITICAL: Manifest configuration validation failed. Missing 'input_output_folder' key.")
+    if not modules_input_output_folder:
+        logger.error("❌ CRITICAL: Manifest configuration validation failed. Missing 'modules_input_output_folder' key.")
         sys.exit(1)
 
     # 3. DETERMINISTIC RE-PROVISIONING: Global setup execution runs every time
@@ -189,13 +189,15 @@ def main():
     for step in sorted(execution_chain, key=lambda x: x.get("order", 0)):
         logger.info(f"Scheduled Execution Sequence -> Step {step.get('order')} Target: {step.get('repository_url')}")
 
-    # 4. Create Workspace Structure Dynamically from Manifest and Branch Context
-    workspace_dir = Path(input_output_folder) / f"tuning_{branch_name}"
+    # 4. FIX: Core workspace structure stays anchored strictly under data/testing-input-output/tuning_<branch>
+    workspace_dir = Path("data/testing-input-output") / f"tuning_{branch_name}"
     workspace_dir.mkdir(parents=True, exist_ok=True)
     
-    # 5. Hydrate Inputs Directly into the Branch-Isolated Folder
+    # 5. FIX: Nest the folder declared in manifest (e.g. 'input-output') inside the workspace, then download to it
     try:
-        fetch_inputs_from_dropbox(workspace_dir)
+        dropbox_target_folder_name = Path(modules_input_output_folder).name
+        dropbox_download_dir = workspace_dir / dropbox_target_folder_name
+        fetch_inputs_from_dropbox(dropbox_download_dir)
     except Exception as e:
         logger.error(str(e))
         sys.exit(1)
