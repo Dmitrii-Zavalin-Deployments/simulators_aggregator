@@ -529,11 +529,12 @@ jobs:
 
           # 8. Flow Control Reporting Outputs
           if [ $RUN_RC -eq 124 ]; then
-              echo "❌ TIMEOUT ENCOUNTERED: Pipeline step chain timed out."
+              echo "❌ TIMEOUT ENCOUNTERED: Module exceeded allowed window of ${TIMEOUT_BUDGET}s."
               echo "SIMULATION_STATUS=TIMEOUT" >> $GITHUB_ENV
               STATUS="TIMEOUT"
           elif [ $RUN_RC -ne 0 ]; then
-              echo "⚠️ Simulation path sequence execution reported failure."
+              echo "⚠️ Simulation reported failure (Exit Code: $RUN_RC)."
+              echo "   This is handled as a known outcome in tuning. Continuing pipeline flow..."
               echo "SIMULATION_STATUS=FAILED" >> $GITHUB_ENV
               STATUS="FAILED"
           else
@@ -542,6 +543,7 @@ jobs:
               STATUS="SUCCESS"
           fi
 
+          # Expose status field directly to the runner engine context layer
           echo "status=$STATUS" >> $GITHUB_OUTPUT
           exit 0
 
