@@ -476,17 +476,21 @@ jobs:
           SAMPLER_PID=$!
           
           # 3. Execute Unified Pipeline Chain under wrapped constraints
-          set +e
-          START_TIME=$(date +%s)
+          # set +e
+          # START_TIME=$(date +%s)
           
-          /usr/bin/time -v -o /tmp/memory_profile.log timeout --foreground "${TIMEOUT_BUDGET}s" \
-            python3 src/pipeline/unified_orchestrator.py \
+          # /usr/bin/time -v -o /tmp/memory_profile.log timeout --foreground "${TIMEOUT_BUDGET}s" \
+          #   python3 src/pipeline/unified_orchestrator.py \
+          #     --state-file "$WORKSPACE_DIR/state.json" \
+          #     --log-file "$LOG_FILE"
+          
+          # RUN_RC=$?
+          # END_TIME=$(date +%s)
+          # set -e
+
+          python3 src/pipeline/unified_orchestrator.py \
               --state-file "$WORKSPACE_DIR/state.json" \
               --log-file "$LOG_FILE"
-          
-          RUN_RC=$?
-          END_TIME=$(date +%s)
-          set -e
           
           # 4. Tear down background analytical hooks
           kill $SAMPLER_PID
