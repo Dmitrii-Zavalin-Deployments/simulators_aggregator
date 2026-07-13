@@ -27,7 +27,8 @@ def main():
     parser.add_argument("--log-file", required=True, help="Path where simulator execution logs will be written")
     args = parser.parse_args()
 
-    logger.info(f"📋 Received Arguments -> --state-file: {args.state_file} | --log-file: {args.log-file}")
+    # Fixed: Changed args.log-file to args.log_file to avoid attribute subtraction error
+    logger.info(f"📋 Received Arguments -> --state-file: {args.state_file} | --log-file: {args.log_file}")
 
     # 1. Dormant State Pre-flight Check
     dormant_flag_path = "dormant.flag"
@@ -101,7 +102,6 @@ def main():
             logger.error(f"❌ CRITICAL: Failed to parse state JSON structure. Error: {e}")
             sys.exit(1)
 
-    # 🔴 CORE FORENSIC INSPECTION POINT
     logger.info("🔍 --- SOVEREIGN STATE MAP DIAGNOSTIC PRINT ---")
     logger.info(f"📄 Full State Keys Discovered: {list(state_data.keys())}")
     
