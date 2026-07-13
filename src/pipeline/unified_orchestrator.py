@@ -131,6 +131,7 @@ def main():
     # 5. Iterative Provision-and-Execute Loop Flow
     if not isinstance(steps, dict) or not steps:
         logger.error("❌ DIAGNOSTIC ALERT: The 'steps' dictionary is EMPTY or structurally malformed. Loop cannot execute!")
+        sys.exit(1)
     else:
         logger.info(f"🚀 Found {len(steps)} pipeline steps scheduled for execution processing loop sequence.")
 
