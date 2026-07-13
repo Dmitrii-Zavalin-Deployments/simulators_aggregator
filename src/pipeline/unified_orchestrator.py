@@ -27,7 +27,6 @@ def main():
     parser.add_argument("--log-file", required=True, help="Path where simulator execution logs will be written")
     args = parser.parse_args()
 
-    # Fixed: Changed args.log-file to args.log_file to avoid attribute subtraction error
     logger.info(f"📋 Received Arguments -> --state-file: {args.state_file} | --log-file: {args.log_file}")
 
     # 1. Dormant State Pre-flight Check
@@ -93,7 +92,7 @@ def main():
     with open(combinations_path, "w") as f:
         json.dump(combinations, f, indent=4)
 
-    # 4. Load Pipeline Step Map Specifications
+    # 4. Load Pipeline Specifications
     logger.info(f"📖 Loading pipeline architectural map rules from sovereign state file: {state_path.resolve()}")
     with open(state_path, "r") as f:
         try:
@@ -105,16 +104,43 @@ def main():
     logger.info("🔍 --- SOVEREIGN STATE MAP DIAGNOSTIC PRINT ---")
     logger.info(f"📄 Full State Keys Discovered: {list(state_data.keys())}")
     
-    steps = state_data.get("steps", {})
-    tasks = state_data.get("task_details", [])
-    
-    logger.info(f"📋 'steps' field inspection: type={type(steps)}, structure/content={steps}")
+    if "task_details" not in state_data:
+        logger.error("❌ CRITICAL: Key 'task_details' is completely absent from state.json.")
+        sys.exit(1)
+        
+    tasks = state_data["task_details"]
     logger.info(f"📋 'task_details' field inspection: type={type(tasks)}, count={len(tasks) if isinstance(tasks, list) else 'N/A'}")
     
+    if not isinstance(tasks, list) or not tasks:
+        logger.error("❌ DIAGNOSTIC ALERT: The 'task_details' list is EMPTY or structurally malformed. Loop cannot execute!")
+        sys.exit(1)
+        
+    # --- NO-DEFAULT POLICY VALIDATION LAYER ---
+    logger.info("🛡️ Performing strict structural validation check over task properties...")
+    for idx, task in enumerate(tasks):
+        if not isinstance(task, dict):
+            logger.error(f"❌ CRITICAL: Task configuration item at list index [{idx}] is not a valid JSON object structure.")
+            sys.exit(1)
+        if "order" not in task or task["order"] is None:
+            logger.error(f"❌ CRITICAL: Element property 'order' is missing or unassigned at list index [{idx}].")
+            sys.exit(1)
+        if "repository_url" not in task or not str(task["repository_url"]).strip():
+            logger.error(f"❌ CRITICAL: Required property 'repository_url' is missing or blank at list index [{idx}].")
+            sys.exit(1)
+        if "version_tag" not in task or not str(task["version_tag"]).strip():
+            logger.error(f"❌ CRITICAL: Required property 'version_tag' is missing or blank at list index [{idx}].")
+            sys.exit(1)
+        if "input_file_name" not in task or not str(task["input_file_name"]).strip():
+            logger.error(f"❌ CRITICAL: Required property 'input_file_name' is missing or blank at list index [{idx}].")
+            sys.exit(1)
+        if "output_file_name" not in task or not str(task["output_file_name"]).strip():
+            logger.error(f"❌ CRITICAL: Required property 'output_file_name' is missing or blank at list index [{idx}].")
+            sys.exit(1)
+    
     try:
-        tasks = sorted(tasks, key=lambda x: x.get("order", 0))
+        tasks = sorted(tasks, key=lambda x: int(x["order"]))
     except Exception as e:
-        logger.error(f"⚠️ Failed to sort task data array items by order parameter. Error: {e}")
+        logger.error(f"⚠️ Failed to sort task data array items by order parameter value. Error: {e}")
         sys.exit(1)
 
     repo_root = Path("data/testing-input-output/repositories")
@@ -129,34 +155,21 @@ def main():
         logger.info("🧹 Pre-existing run trace file detected. Cleaving log asset target space...")
         os.remove(log_file_path)
 
-    # 5. Iterative Provision-and-Execute Loop Flow
-    if not isinstance(steps, dict) or not steps:
-        logger.error("❌ DIAGNOSTIC ALERT: The 'steps' dictionary is EMPTY or structurally malformed. Loop cannot execute!")
-        sys.exit(1)
-    else:
-        logger.info(f"🚀 Found {len(steps)} pipeline steps scheduled for execution processing loop sequence.")
+    # 5. Iterative Provision-and-Execute Loop Flow (Direct Pipeline Loop)
+    logger.info(f"🚀 Found {len(tasks)} pipeline execution sequences scheduled inside task profiles.")
 
-    for step_id, step_meta in sorted(steps.items(), key=lambda x: int(x[0])):
-        logger.info(f"🔄 Loop Sequence Triggered -> Current Target Step ID Key: '{step_id}' (Meta: {step_meta})")
-        step_idx = int(step_id)
-        
-        logger.info(f"🔍 Searching task maps for step reference order index matching: {step_idx}")
-        task = next((t for t in tasks if t.get("order") == step_idx), None)
-        if not task and len(tasks) >= step_idx:
-            task = tasks[step_idx - 1]
-            logger.info(f"⚠️ Direct lookup missed. Falling back to relative index slice: {step_idx - 1}")
-            
-        if not task:
-            logger.warning(f"⚠️ Step {step_id} has no matching structural task metadata layout configuration record. Skipping step.")
-            continue
-
-        logger.info(f"✅ Step metadata link verified successfully: {task}")
+    for task in tasks:
+        # Assured strict direct dictionary lookups with no fallbacks
+        step_id = str(task["order"])
         repo_url = task["repository_url"].replace("git@github.com:", "https://github.com/")
         version_tag = task["version_tag"]
+        in_file = task["input_file_name"]
+        out_file = task["output_file_name"]
+
         repo_name = repo_url.split("/")[-1].replace(".git", "")
         repo_dir = repo_root / repo_name
 
-        logger.info(f"⚙️ Processing Execution Chain Step [{step_id}] -> Repository: {repo_name} | Target Directory: {repo_dir.resolve()}")
+        logger.info(f"⚙️ Processing Execution Chain Task [{step_id}] -> Repository: {repo_name} | Target Directory: {repo_dir.resolve()}")
 
         # A. Provision Stage (Clone + Checkout + Inject Config)
         if repo_dir.exists():
@@ -180,10 +193,8 @@ def main():
 
         # B. Execute Simulation Stage
         dropbox_sync_dir = base_dir / "input-output"
-        in_file = step_meta.get("input_file_name", "")
-        out_file = step_meta.get("output_file_name", "")
 
-        logger.info(f"  🚀 Building execution environment commands for step {step_id}...")
+        logger.info(f"  🚀 Building execution environment commands for task step {step_id}...")
         logger.info(f"  📂 Expected internal Dropbox context workspace folder path: {dropbox_sync_dir.resolve()}")
         logger.info(f"  📥 In-file asset parameter target: '{in_file}' | Out-file target: '{out_file}'")
         
@@ -200,7 +211,7 @@ def main():
         
         # Execute and append output capture telemetry streams cleanly to unified log target
         with open(log_file_path, "a") as log_out:
-            log_out.write(f"\n--- STEP {step_id} LOGS ({repo_name}) ---\n")
+            log_out.write(f"\n--- TASK STEP {step_id} LOGS ({repo_name}) ---\n")
             log_out.flush()
             
             result = subprocess.run(
@@ -211,15 +222,15 @@ def main():
                 text=True
             )
 
-        logger.info(f"  📉 Execution phase for step finished tracking. Process exit status return code code: {result.returncode}")
+        logger.info(f"  📉 Execution phase for task finished tracking. Process exit status return code: {result.returncode}")
 
         if result.returncode != 0:
-            logger.error(f"❌ CRITICAL: Step {step_id} reported execution failure (Exit Code: {result.returncode}).")
+            logger.error(f"❌ CRITICAL: Task Step {step_id} reported execution failure (Exit Code: {result.returncode}).")
             sys.exit(result.returncode)
             
-        logger.info(f"  ✅ Step {step_id} finished processing successfully.")
+        logger.info(f"  ✅ Task Step {step_id} finished processing successfully.")
 
-    logger.info("🎉 All sequence execution steps executed nominally across the pipeline graph chain.")
+    logger.info("🎉 All sequence execution tasks executed nominally across the pipeline graph chain.")
     sys.exit(0)
 
 if __name__ == "__main__":
