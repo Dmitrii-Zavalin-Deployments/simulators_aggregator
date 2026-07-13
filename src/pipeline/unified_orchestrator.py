@@ -115,6 +115,7 @@ def main():
         tasks = sorted(tasks, key=lambda x: x.get("order", 0))
     except Exception as e:
         logger.error(f"⚠️ Failed to sort task data array items by order parameter. Error: {e}")
+        sys.exit(1)
 
     repo_root = Path("data/testing-input-output/repositories")
     logger.info(f"📁 Allocating system workspace storage root framework at: {repo_root.resolve()}")
