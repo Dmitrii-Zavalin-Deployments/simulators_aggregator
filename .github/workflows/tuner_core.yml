@@ -578,13 +578,13 @@ jobs:
         if: always()
         run: |
           if [[ "${{ job.status }}" == "success" ]]; then
-            echo "✅ All systems nominal. No anomalies detected."
-            cat <<EOF > debug/forensic_audit_production.sh
-          #!/bin/bash
-          # Description: Automated forensic audit for ACE solver failures.
-          # Status: Dormant (All systems nominal)
-          exit 0
-          EOF
+          #   echo "✅ All systems nominal. No anomalies detected."
+          #   cat <<EOF > debug/forensic_audit_production.sh
+          # #!/bin/bash
+          # # Description: Automated forensic audit for ACE solver failures.
+          # # Status: Dormant (All systems nominal)
+          # exit 0
+          # EOF
             chmod +x debug/forensic_audit_production.sh
             echo "🧹 Diagnostic script reset to Dormant mode."
           else
