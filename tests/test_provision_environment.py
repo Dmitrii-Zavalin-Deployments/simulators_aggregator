@@ -63,7 +63,7 @@ class TestProvisionEnvironment(unittest.TestCase):
     def test_main_clone_command_fails(self, mock_sub_run, mock_json_load, mock_file_open, mock_exists):
         """Branch: The git clone subcommand exits with a non-zero status code."""
         # Setup Path.exists to trigger the 'rm -rf' path and simulate valid task mapping
-        def exists_side_effect(path_obj, *args, **kwargs):
+        def exists_side_effect(path_obj=None, *args, **kwargs):
             return True  # Both task.json and old repo directory exist
         mock_exists.side_effect = exists_side_effect
         
@@ -86,7 +86,7 @@ class TestProvisionEnvironment(unittest.TestCase):
     @patch("subprocess.run")
     def test_main_clone_succeeds_but_missing_git_directory(self, mock_sub_run, mock_json_load, mock_file_open, mock_exists):
         """Branch: git clone returned zero, but verification .git folder doesn't exist."""
-        def exists_side_effect(path_obj, *args, **kwargs):
+        def exists_side_effect(path_obj=None, *args, **kwargs):
             # Simulate task.json exists, old repo clean doesn't exist, but .git fails validation check
             if "task.json" in str(path_obj):
                 return True
@@ -111,7 +111,7 @@ class TestProvisionEnvironment(unittest.TestCase):
     @patch("subprocess.run")
     def test_main_no_manifest_matches_found(self, mock_sub_run, mock_json_load, mock_file_open, mock_rglob, mock_mkdir, mock_exists):
         """Branch: Library cloned but rglob file target pattern match list is empty."""
-        def exists_side_effect(path_obj, *args, **kwargs):
+        def exists_side_effect(path_obj=None, *args, **kwargs):
             if "task.json" in str(path_obj) or ".git" in str(path_obj):
                 return True
             return False
@@ -134,7 +134,7 @@ class TestProvisionEnvironment(unittest.TestCase):
     @patch("subprocess.run")
     def test_main_manifest_has_no_explicit_setup_script(self, mock_sub_run, mock_json_load, mock_file_open, mock_rglob, mock_mkdir, mock_exists):
         """Branch: Manifest resolved but contains no execution scripts (Warning Path)."""
-        def exists_side_effect(path_obj, *args, **kwargs):
+        def exists_side_effect(path_obj=None, *args, **kwargs):
             return "task.json" in str(path_obj) or ".git" in str(path_obj)
         mock_exists.side_effect = exists_side_effect
         
@@ -156,7 +156,7 @@ class TestProvisionEnvironment(unittest.TestCase):
     @patch("subprocess.Popen")
     def test_main_setup_script_runtime_fails(self, mock_popen, mock_sub_run, mock_json_load, mock_file_open, mock_rglob, mock_mkdir, mock_exists):
         """Branch: Dynamic execution engine logs Popen streams but script exits with non-zero code."""
-        def exists_side_effect(path_obj, *args, **kwargs):
+        def exists_side_effect(path_obj=None, *args, **kwargs):
             return "task.json" in str(path_obj) or ".git" in str(path_obj)
         mock_exists.side_effect = exists_side_effect
         
@@ -183,7 +183,7 @@ class TestProvisionEnvironment(unittest.TestCase):
     @patch("subprocess.Popen")
     def test_main_complete_success_flow(self, mock_popen, mock_sub_run, mock_json_load, mock_file_open, mock_rglob, mock_mkdir, mock_exists):
         """Branch: Full integration happy path execution running bash script pipelines perfectly."""
-        def exists_side_effect(path_obj, *args, **kwargs):
+        def exists_side_effect(path_obj=None, *args, **kwargs):
             return "task.json" in str(path_obj) or ".git" in str(path_obj)
         mock_exists.side_effect = exists_side_effect
         
