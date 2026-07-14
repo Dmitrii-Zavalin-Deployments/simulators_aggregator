@@ -65,7 +65,7 @@ class TestMatrixExploder(unittest.TestCase):
 
     @patch("matrix_exploder.argparse.ArgumentParser.parse_args")
     @patch("matrix_exploder.os.path.exists")
-    @patch("matrix_exploder.open", new_callable=mock_open)
+    @patch("builtins.open", new_callable=mock_open)
     @patch("matrix_exploder.json.load")
     def test_main_invalid_json_decode_error(self, mock_json_load, mock_file_open, mock_exists, mock_parse_args):
         """Branch: JSON parsing fails, raises JSONDecodeError, triggers sys.exit(1)."""
@@ -85,7 +85,7 @@ class TestMatrixExploder(unittest.TestCase):
 
     @patch("matrix_exploder.argparse.ArgumentParser.parse_args")
     @patch("matrix_exploder.os.path.exists")
-    @patch("matrix_exploder.open", new_callable=mock_open)
+    @patch("builtins.open", new_callable=mock_open)
     @patch("matrix_exploder.json.load")
     @patch("matrix_exploder.os.makedirs")
     @patch("matrix_exploder.json.dump")

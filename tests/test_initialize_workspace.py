@@ -25,7 +25,7 @@ class TestWorkspaceInitializer(unittest.TestCase):
         with self.assertRaises(EnvironmentError):
             fetch_inputs_from_dropbox(Path("/tmp/target"))
 
-    @patch("src.pipeline.initialize_workspace.CloudIngestor")
+    @patch("src.io.download_from_dropbox.CloudIngestor")
     @patch("src.io.dropbox_utils.TokenManager")
     @patch("pathlib.Path.mkdir")
     def test_fetch_inputs_dropbox_success(self, mock_mkdir, mock_tm, mock_ingestor):
