@@ -46,7 +46,7 @@ def main():
     logger.info(f"🔍 Validating physical existence of state mapping path: {state_path.resolve()}")
     if not state_path.exists():
         logger.error(f"❌ CRITICAL: Execution state file missing at {state_path.resolve()}")
-        sys.exit(1)
+        logger.error(f"EXITING AT LINE: {__import__("inspect").currentframe().f_lineno}"); sys.exit(1)
 
     base_dir = state_path.parent
     combinations_path = base_dir / "config_combinations_array.json"
@@ -54,7 +54,7 @@ def main():
     
     if not combinations_path.exists():
         logger.error(f"❌ CRITICAL: Matrix definition file missing at {combinations_path.resolve()}")
-        sys.exit(1)
+        logger.error(f"EXITING AT LINE: {__import__("inspect").currentframe().f_lineno}"); sys.exit(1)
 
     logger.info("📖 Reading configuration array variations matrix...")
     with open(combinations_path, "r") as f:
@@ -62,7 +62,7 @@ def main():
             combinations = json.load(f)
         except Exception as e:
             logger.error(f"❌ CRITICAL: Failed to parse JSON matrix from {combinations_path}. Error: {e}")
-            sys.exit(1)
+            logger.error(f"EXITING AT LINE: {__import__("inspect").currentframe().f_lineno}"); sys.exit(1)
 
     logger.info(f"📊 Configuration matrix structural analysis: Loaded type={type(combinations)}, Length={len(combinations) if isinstance(combinations, list) else 'N/A'}")
 
@@ -98,49 +98,49 @@ def main():
             state_data = json.load(f)
         except Exception as e:
             logger.error(f"❌ CRITICAL: Failed to parse state JSON structure. Error: {e}")
-            sys.exit(1)
+            logger.error(f"EXITING AT LINE: {__import__("inspect").currentframe().f_lineno}"); sys.exit(1)
 
     logger.info("🔍 --- SOVEREIGN STATE MAP DIAGNOSTIC PRINT ---")
     logger.info(f"📄 Full State Keys Discovered: {list(state_data.keys())}")
     
     if "task_details" not in state_data:
         logger.error("❌ CRITICAL: Key 'task_details' is completely absent from state.json.")
-        sys.exit(1)
+        logger.error(f"EXITING AT LINE: {__import__("inspect").currentframe().f_lineno}"); sys.exit(1)
         
     tasks = state_data["task_details"]
     logger.info(f"📋 'task_details' field inspection: type={type(tasks)}, count={len(tasks) if isinstance(tasks, list) else 'N/A'}")
     
     if not isinstance(tasks, list) or not tasks:
         logger.error("❌ DIAGNOSTIC ALERT: The 'task_details' list is EMPTY or structurally malformed. Loop cannot execute!")
-        sys.exit(1)
+        logger.error(f"EXITING AT LINE: {__import__("inspect").currentframe().f_lineno}"); sys.exit(1)
         
     # --- NO-DEFAULT POLICY VALIDATION LAYER ---
     logger.info("🛡️ Performing strict structural validation check over task properties...")
     for idx, task in enumerate(tasks):
         if not isinstance(task, dict):
             logger.error(f"❌ CRITICAL: Task configuration item at list index [{idx}] is not a valid JSON object structure.")
-            sys.exit(1)
+            logger.error(f"EXITING AT LINE: {__import__("inspect").currentframe().f_lineno}"); sys.exit(1)
         if "order" not in task or task["order"] is None:
             logger.error(f"❌ CRITICAL: Element property 'order' is missing or unassigned at list index [{idx}].")
-            sys.exit(1)
+            logger.error(f"EXITING AT LINE: {__import__("inspect").currentframe().f_lineno}"); sys.exit(1)
         if "repository_url" not in task or not str(task["repository_url"]).strip():
             logger.error(f"❌ CRITICAL: Required property 'repository_url' is missing or blank at list index [{idx}].")
-            sys.exit(1)
+            logger.error(f"EXITING AT LINE: {__import__("inspect").currentframe().f_lineno}"); sys.exit(1)
         if "version_tag" not in task or not str(task["version_tag"]).strip():
             logger.error(f"❌ CRITICAL: Required property 'version_tag' is missing or blank at list index [{idx}].")
-            sys.exit(1)
+            logger.error(f"EXITING AT LINE: {__import__("inspect").currentframe().f_lineno}"); sys.exit(1)
         if "input_file_name" not in task or not str(task["input_file_name"]).strip():
             logger.error(f"❌ CRITICAL: Required property 'input_file_name' is missing or blank at list index [{idx}].")
-            sys.exit(1)
+            logger.error(f"EXITING AT LINE: {__import__("inspect").currentframe().f_lineno}"); sys.exit(1)
         if "output_file_name" not in task or not str(task["output_file_name"]).strip():
             logger.error(f"❌ CRITICAL: Required property 'output_file_name' is missing or blank at list index [{idx}].")
-            sys.exit(1)
+            logger.error(f"EXITING AT LINE: {__import__("inspect").currentframe().f_lineno}"); sys.exit(1)
     
     try:
         tasks = sorted(tasks, key=lambda x: int(x["order"]))
     except Exception as e:
         logger.error(f"⚠️ Failed to sort task data array items by order parameter value. Error: {e}")
-        sys.exit(1)
+        logger.error(f"EXITING AT LINE: {__import__("inspect").currentframe().f_lineno}"); sys.exit(1)
 
     repo_root = Path("data/testing-input-output/repositories")
     logger.info(f"📁 Allocating system workspace storage root framework at: {repo_root.resolve()}")
