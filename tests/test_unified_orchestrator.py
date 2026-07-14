@@ -410,28 +410,30 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
     @patch("pathlib.Path.exists")
     def test_matrix_definition_file_missing(self, mock_path_exists, mock_parse_args):
-        """
-        Triggers lines 57-59: Verify system exits when the matrix file is absent.
-        """
-        # 1. Setup arguments
+        # 1. Setup
         self.args_mock.state_file = "valid/state.json"
         self.args_mock.log_file = "test.log"
         mock_parse_args.return_value = self.args_mock
         
-        # 2. Configure mock to pass state check but fail combinations check
-        def existence_router(path_obj, *args, **kwargs):
-            path_str = str(path_obj)
-            # Pass the state file check
+        # 2. Robust Router
+        def existence_router(*args, **kwargs):
+            # args[0] is the path object passed by Path.exists()
+            path_str = str(args[0])
+            
+            # Allow dormant check (which we deleted in setUp)
+            if "dormant.flag" in path_str:
+                return False
+            # Pass state file
             if "state.json" in path_str:
                 return True
-            # Fail the matrix definition check
+            # Fail matrix definition
             if "config_combinations_array.json" in path_str:
                 return False
             return True
             
         mock_path_exists.side_effect = existence_router
         
-        # 3. Execution & Assertion
+        # 3. Execution
         with self.assertRaises(SystemExit) as cm:
             main()
             
