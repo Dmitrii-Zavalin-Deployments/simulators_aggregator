@@ -35,6 +35,11 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         # Mock database of files for dynamic routing
         self.file_vault = {}
 
+    @staticmethod
+    def existence_router(path_obj=None, *args, **kwargs):
+        """Centralized fallback router for path existence checks."""
+        return False
+
     def dynamic_open_router(self, file_path, mode="r", *args, **kwargs):
         """A context-aware mock file provider that routes content based on paths."""
         path_str = str(file_path)
@@ -110,7 +115,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     def test_missing_state_file_raises_critical(self, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: State blueprint map file is physically missing."""
         mock_parse_args.return_value = self.args_mock
-        mock_exists.side_effect = existence_router
+        mock_exists.side_effect = self.existence_router
         mock_path_exists.return_value = False # state.json missing
 
         with self.assertRaises(SystemExit) as cm:
@@ -123,7 +128,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     def test_missing_matrix_combinations_file_raises_critical(self, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: config_combinations_array.json is physically missing."""
         mock_parse_args.return_value = self.args_mock
-        mock_exists.side_effect = existence_router
+        mock_exists.side_effect = self.existence_router
         
         # state.json exists, but config_combinations_array.json is missing
         mock_path_exists.side_effect = lambda *a, **kw: str(mock_path_exists.call_args[0][0]).endswith("state.json") if (mock_path_exists.call_args and len(mock_path_exists.call_args[0]) > 0) else False
@@ -140,7 +145,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     def test_corrupt_combinations_json_raises_critical(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: Combinations matrix file exists but contains invalid JSON structures."""
         mock_parse_args.return_value = self.args_mock
-        mock_exists.side_effect = existence_router
+        mock_exists.side_effect = self.existence_router
         mock_path_exists.return_value = True
         
         mock_open_func.side_effect = self.dynamic_open_router
@@ -158,7 +163,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     def test_empty_combinations_matrix_sets_dormancy_and_exits(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: Combinations matrix is empty -> sets dormancy flag and exits cleanly."""
         mock_parse_args.return_value = self.args_mock
-        mock_exists.side_effect = existence_router
+        mock_exists.side_effect = self.existence_router
         mock_path_exists.return_value = True
         
         mock_open_func.side_effect = self.dynamic_open_router
@@ -177,7 +182,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     def test_corrupt_state_json_raises_critical(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: Matrix pops safely but state.json blueprint contains invalid structures."""
         mock_parse_args.return_value = self.args_mock
-        mock_exists.side_effect = existence_router
+        mock_exists.side_effect = self.existence_router
         mock_path_exists.return_value = True
         mock_open_func.side_effect = self.dynamic_open_router
         
@@ -200,7 +205,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     def test_state_missing_task_details_key(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: Key 'task_details' is completely missing inside state.json."""
         mock_parse_args.return_value = self.args_mock
-        mock_exists.side_effect = existence_router
+        mock_exists.side_effect = self.existence_router
         mock_path_exists.return_value = True
         mock_open_func.side_effect = self.dynamic_open_router
         
@@ -218,7 +223,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     def test_state_task_details_empty_or_malformed(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: 'task_details' field is explicitly empty or is not a list structure."""
         mock_parse_args.return_value = self.args_mock
-        mock_exists.side_effect = existence_router
+        mock_exists.side_effect = self.existence_router
         mock_path_exists.return_value = True
         mock_open_func.side_effect = self.dynamic_open_router
         
@@ -282,7 +287,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     def test_task_sorting_by_order_fails(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: Order parameters cannot be converted to integers, triggering sort exception."""
         mock_parse_args.return_value = self.args_mock
-        mock_exists.side_effect = existence_router
+        mock_exists.side_effect = self.existence_router
         mock_path_exists.return_value = True
         mock_open_func.side_effect = self.dynamic_open_router
         
