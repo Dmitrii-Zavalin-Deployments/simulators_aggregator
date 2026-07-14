@@ -406,6 +406,36 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         
         # Validate target mapping address updates handled translation layer protocols
         self.assertIn("https://github.com/org/sim-engine.git", str(clone_calls[0]))
+    
+    @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("pathlib.Path.exists")
+    def test_matrix_definition_file_missing(self, mock_path_exists, mock_parse_args):
+        """
+        Triggers lines 57-59: Verify system exits when the matrix file is absent.
+        """
+        # 1. Setup arguments
+        self.args_mock.state_file = "valid/state.json"
+        self.args_mock.log_file = "test.log"
+        mock_parse_args.return_value = self.args_mock
+        
+        # 2. Configure mock to pass state check but fail combinations check
+        def existence_router(path_obj, *args, **kwargs):
+            path_str = str(path_obj)
+            # Pass the state file check
+            if "state.json" in path_str:
+                return True
+            # Fail the matrix definition check
+            if "config_combinations_array.json" in path_str:
+                return False
+            return True
+            
+        mock_path_exists.side_effect = existence_router
+        
+        # 3. Execution & Assertion
+        with self.assertRaises(SystemExit) as cm:
+            main()
+            
+        self.assertEqual(cm.exception.code, 1)
 
 if __name__ == "__main__":
     unittest.main()
