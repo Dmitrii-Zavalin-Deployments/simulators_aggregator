@@ -77,11 +77,17 @@ class TestWorkspaceInitializer(unittest.TestCase):
         """Test that system exits if configuration file is not found."""
         mock_args.return_value = MagicMock(repo_path="/fake/repo", config_path="config.json")
         
-        # Return valid task for first load, but empty rglob for config search
-        mock_json.side_effect = [{"pipeline_id": "p1"}, {"config": "missing.json"}]
-        mock_rglob.side_effect = [[Path("task.json")], []] 
+        # 1. Include 'modules_input_output_folder' to prevent Path(None) crash
+        mock_json.side_effect = [
+            {"pipeline_id": "p1"}, 
+            {
+                "config": "missing.json", 
+                "modules_input_output_folder": "dummy_folder"
+            }
+        ]
+        mock_rglob.side_effect = [[Path("task.json")], []] # Config not found
         
-        # Corrected patch paths using the full module path
+        # 2. Use fully qualified patch paths
         with patch("src.pipeline.initialize_workspace.fetch_inputs_from_dropbox"), \
              patch("src.pipeline.initialize_workspace.TunerState"), \
              self.assertRaises(SystemExit) as cm:
