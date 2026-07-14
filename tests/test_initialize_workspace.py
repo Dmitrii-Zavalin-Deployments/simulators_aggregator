@@ -81,7 +81,9 @@ class TestWorkspaceInitializer(unittest.TestCase):
         mock_json.side_effect = [{"pipeline_id": "p1"}, {"config": "missing.json", "config_path": "missing.json"}]
         mock_rglob.side_effect = [[Path("task.json")], []] # Config not found
         
-        with self.assertRaises(SystemExit) as cm:
+        with patch("initialize_workspace.fetch_inputs_from_dropbox"), \
+             patch("initialize_workspace.TunerState"), \
+             self.assertRaises(SystemExit) as cm:
             main()
         self.assertEqual(cm.exception.code, 1)
 
