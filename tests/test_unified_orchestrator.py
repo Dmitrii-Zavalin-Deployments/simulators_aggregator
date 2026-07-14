@@ -408,41 +408,56 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         self.assertIn("https://github.com/org/sim-engine.git", str(clone_calls[0]))
     
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
-    @patch("src.pipeline.unified_orchestrator.open")
+    @patch("src.pipeline.unified_orchestrator.os.path.exists")
+    @patch("src.pipeline.unified_orchestrator.os.remove")
     @patch("pathlib.Path.exists")
-    def test_matrix_json_parse_error(self, mock_path_exists, mock_open, mock_parse_args):
-        """Triggers Lines 65-68: JSON Decode error handling."""
+    @patch("pathlib.Path.mkdir")
+    @patch("src.pipeline.unified_orchestrator.open")
+    @patch("src.pipeline.unified_orchestrator.json.load")
+    @patch("src.pipeline.unified_orchestrator.json.loads")
+    @patch("src.pipeline.unified_orchestrator.subprocess.run")
+    def test_matrix_json_parse_error(self, mock_sub_run, mock_json_loads, mock_json_load, mock_open_func, mock_path_mkdir, mock_path_exists, mock_os_remove, mock_exists, mock_parse_args):
+        """Triggers Lines 65-68: JSON Decode error handling when matrix configuration is malformed."""
         self.args_mock.state_file = "valid/state.json"
         self.args_mock.log_file = "test.log"
         mock_parse_args.return_value = self.args_mock
         
-        # Everything exists
+        # Force all path existence validations to pass cleanly
         mock_path_exists.return_value = True
+        mock_exists.return_value = False # Keeps dormant.flag invisible
         
-        # Mock open to return a file handle that yields invalid JSON
-        mock_file = MagicMock()
-        mock_file.__enter__.return_value = mock_file
-        # This will cause json.load(f) to crash
-        mock_file.read.return_value = "{ invalid_json: ... " 
+        # Directly force json.load to throw a parsing error when hit
+        mock_json_load.side_effect = json.JSONDecodeError("Expecting value", "", 0)
         
-        # Important: Ensure the correct file (combinations) is what we are "reading"
-        def side_effect_open(path, *args, **kwargs):
-            if "config_combinations_array.json" in str(path):
-                # Return the mock that will cause the error
-                mock_broken_file = MagicMock()
-                mock_broken_file.__enter__.return_value = mock_broken_file
-                # When json.load tries to read from this, it will fail 
-                # unless we actually mock json.load itself to raise an error
-                return mock_broken_file
-            return mock_file
-
-        mock_open.side_effect = side_effect_open
+        with self.assertRaises(SystemExit) as cm:
+            main()
+            
+        self.assertEqual(cm.exception.code, 1)
+    
+    @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("src.pipeline.unified_orchestrator.os.path.exists")
+    @patch("src.pipeline.unified_orchestrator.os.remove")
+    @patch("pathlib.Path.exists")
+    @patch("pathlib.Path.mkdir")
+    @patch("src.pipeline.unified_orchestrator.open")
+    @patch("src.pipeline.unified_orchestrator.json.load")
+    @patch("src.pipeline.unified_orchestrator.json.loads")
+    @patch("src.pipeline.unified_orchestrator.subprocess.run")
+    def test_matrix_definition_file_missing(self, mock_sub_run, mock_json_loads, mock_json_load, mock_open_func, mock_path_mkdir, mock_path_exists, mock_os_remove, mock_exists, mock_parse_args):
+        """Triggers Lines 57-59: Verifies script exits with code 1 if matrix array config is missing."""
+        self.args_mock.state_file = "valid/state.json"
+        self.args_mock.log_file = "test.log"
+        mock_parse_args.return_value = self.args_mock
         
-        # Patch json.load to raise the specific error we want to test
-        with patch("json.load", side_effect=json.JSONDecodeError("Expecting value", "", 0)):
-            with self.assertRaises(SystemExit) as cm:
-                main()
-            self.assertEqual(cm.exception.code, 1)
+        # Turn off path string inspection entirely to prevent type or index errors.
+        # First call (state_path.exists) returns True. Second call (combinations_path.exists) returns False.
+        mock_path_exists.side_effect = [True, False, True, True]
+        mock_exists.return_value = False # Keeps dormant.flag invisible
+        
+        with self.assertRaises(SystemExit) as cm:
+            main()
+            
+        self.assertEqual(cm.exception.code, 1)
 
 if __name__ == "__main__":
     unittest.main()
