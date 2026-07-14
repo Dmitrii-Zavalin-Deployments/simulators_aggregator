@@ -355,13 +355,14 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         mock_parse_args.return_value = self.args_mock
         mock_open_func.side_effect = self.dynamic_open_router
         
-        # ROBUST JSON MOCK: Use a function to ensure it doesn't "run out" of data during loops
+        # PRECISE JSON MOCK: Return types based on expected file context
         def json_load_side_effect(file_obj, *args, **kwargs):
-            # Check file name in the file object (or path) to return correct structure
             file_name = str(file_obj.name) if hasattr(file_obj, 'name') else ""
             if "state" in file_name:
                 return self.valid_state
-            return self.valid_combinations
+            if "combinations" in file_name:
+                return self.valid_combinations
+            return {} # Default dict return
             
         mock_json_load.side_effect = json_load_side_effect
         mock_json_loads.return_value = {} 
@@ -375,7 +376,6 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         # All tracking operations finish nominally
         mock_sub_run.return_value = MagicMock(returncode=0)
 
-        # The orchestrator should finish with exit code 0
         with self.assertRaises(SystemExit) as cm:
             main()
             
@@ -393,8 +393,6 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         # Verify residual variation matrix pool slice was safely written back
         self.assertIn("workspace/config_combinations_array.json", self.file_vault)
         remaining_pool = json.loads(self.file_vault["workspace/config_combinations_array.json"])
-        # Should be 1 because valid_state has 1 task, and valid_combinations has 2, 
-        # but the orchestrator only consumes the combination it processes.
         self.assertEqual(len(remaining_pool), 1)
 
 if __name__ == "__main__":
