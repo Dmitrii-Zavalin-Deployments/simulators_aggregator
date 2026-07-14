@@ -355,21 +355,27 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         mock_parse_args.return_value = self.args_mock
         mock_open_func.side_effect = self.dynamic_open_router
         
-        # PRECISE JSON MOCK: Return types based on expected file context
+        # PRECISE JSON MOCK
         def json_load_side_effect(file_obj, *args, **kwargs):
             file_name = str(file_obj.name) if hasattr(file_obj, 'name') else ""
             if "state" in file_name:
                 return self.valid_state
             if "combinations" in file_name:
                 return self.valid_combinations
-            return {} # Default dict return
+            return {}
             
         mock_json_load.side_effect = json_load_side_effect
         mock_json_loads.return_value = {} 
         
-        # PERMISSIVE ROUTER: Return True for existence checks to allow flow
+        # TARGETED ROUTER:
+        # Return False for the repo path so the orchestrator triggers 'git clone'
+        # Return True for everything else so configuration files are found
         def existence_router(path_obj=None, *args, **kwargs):
+            path_str = str(path_obj)
+            if "sim-engine" in path_str:
+                return False
             return True
+            
         mock_path_exists.side_effect = existence_router
         mock_exists.side_effect = existence_router
         
@@ -381,7 +387,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
             
         self.assertEqual(cm.exception.code, 0)
         
-        # ROBUST ASSERTION: Find the git clone command in the call history
+        # ROBUST ASSERTION: Find the git clone command
         clone_calls = [
             call[0][0] for call in mock_sub_run.call_args_list 
             if isinstance(call[0][0], list) and "clone" in call[0][0]
