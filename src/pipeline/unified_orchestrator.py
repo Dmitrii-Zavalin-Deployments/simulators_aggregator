@@ -7,7 +7,6 @@ import sys
 import argparse
 import logging
 import subprocess
-import shutil
 from pathlib import Path
 
 def setup_logging():
