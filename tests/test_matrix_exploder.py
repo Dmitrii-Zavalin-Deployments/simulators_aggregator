@@ -1,6 +1,5 @@
 import unittest
 import json
-import sys
 from unittest.mock import patch, MagicMock, mock_open
 
 # Import functions from your module
