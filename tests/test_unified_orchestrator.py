@@ -3,7 +3,7 @@ import json
 from unittest.mock import patch, MagicMock
 
 # Import the orchestrator main function
-from unified_orchestrator import main
+from src.pipeline.unified_orchestrator import main
 
 
 class TestUnifiedOrchestrator(unittest.TestCase):
