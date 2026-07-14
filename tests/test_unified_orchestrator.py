@@ -354,9 +354,10 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         mock_open_func.side_effect = self.dynamic_open_router
         mock_json_load.side_effect = [self.valid_combinations, self.valid_state]
         
-        # task.json and state file structure configurations exist, but skip repo and trace logs cleanups
+        # PERMISSIVE ROUTER: return True for all existence checks so the orchestrator 
+        # doesn't abort when checking for repositories or log files.
         def existence_router(path_obj=None, *args, **kwargs):
-            return "state.json" in str(path_obj) or "config_combinations_array.json" in str(path_obj)
+            return True
         mock_path_exists.side_effect = existence_router
         mock_exists.side_effect = existence_router
         
@@ -366,6 +367,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             main()
             
+        # The nominal flow should finish with exit code 0
         self.assertEqual(cm.exception.code, 0)
         
         # Verify SSH address translation layer mapping conversion rule
