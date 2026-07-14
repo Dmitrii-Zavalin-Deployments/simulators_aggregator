@@ -26,7 +26,7 @@ class TestWorkspaceInitializer(unittest.TestCase):
             fetch_inputs_from_dropbox(Path("/tmp/target"))
 
     @patch("src.pipeline.initialize_workspace.CloudIngestor")
-    @patch("src.pipeline.initialize_workspace.TokenManager")
+    @patch("src.io.dropbox_utils.TokenManager")
     @patch("pathlib.Path.mkdir")
     def test_fetch_inputs_dropbox_success(self, mock_mkdir, mock_tm, mock_ingestor):
         """Test successful Dropbox sync."""
@@ -48,7 +48,7 @@ class TestWorkspaceInitializer(unittest.TestCase):
         """Test the happy path of the main() function."""
         
         # Setup mocks
-        mock_args.return_value = MagicMock(repo_path="/fake/repo")
+        mock_args.return_value = MagicMock(repo_path="/fake/repo", config_path="config.json")
         
         # Mock json content
         task_data = {"pipeline_id": "test_pipeline", "steps": {}, "execution_chain": []}
@@ -75,7 +75,7 @@ class TestWorkspaceInitializer(unittest.TestCase):
     @patch("pathlib.Path.rglob")
     def test_main_missing_config_fails(self, mock_rglob, mock_json, mock_open, mock_args):
         """Test that system exits if configuration file is not found."""
-        mock_args.return_value = MagicMock(repo_path="/fake/repo")
+        mock_args.return_value = MagicMock(repo_path="/fake/repo", config_path="config.json")
         
         # Return valid task but empty rglob for config
         mock_json.side_effect = [{"pipeline_id": "p1"}, {"config": "missing.json"}]
