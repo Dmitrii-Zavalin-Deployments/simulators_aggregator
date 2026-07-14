@@ -343,12 +343,13 @@ class TestUnifiedOrchestrator(unittest.TestCase):
 
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
     @patch("src.pipeline.unified_orchestrator.os.path.exists")
+    @patch("src.pipeline.unified_orchestrator.os.remove")
     @patch("pathlib.Path.exists")
     @patch("pathlib.Path.mkdir")
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("src.pipeline.unified_orchestrator.json.load")
     @patch("src.pipeline.unified_orchestrator.subprocess.run")
-    def test_pipeline_loop_complete_nominal_flow(self, mock_sub_run, mock_json_load, mock_open_func, mock_path_mkdir, mock_path_exists, mock_exists, mock_parse_args):
+    def test_pipeline_loop_complete_nominal_flow(self, mock_sub_run, mock_json_load, mock_open_func, mock_path_mkdir, mock_path_exists, mock_os_remove, mock_exists, mock_parse_args):
         """Branches: Full happy path execution. Converts SSH Git signatures to HTTPS URLs, clones, and completes loop runs smoothly."""
         mock_parse_args.return_value = self.args_mock
         mock_open_func.side_effect = self.dynamic_open_router
@@ -378,7 +379,6 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         self.assertIn("workspace/config_combinations_array.json", self.file_vault)
         remaining_pool = json.loads(self.file_vault["workspace/config_combinations_array.json"])
         self.assertEqual(len(remaining_pool), 1) # First matrix row was popped out and run
-
 
 if __name__ == "__main__":
     unittest.main()
