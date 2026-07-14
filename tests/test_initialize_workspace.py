@@ -78,7 +78,7 @@ class TestWorkspaceInitializer(unittest.TestCase):
         mock_args.return_value = MagicMock(repo_path="/fake/repo", config_path="config.json")
         
         # Return valid task but empty rglob for config
-        mock_json.side_effect = [{"pipeline_id": "p1"}, {"config": "missing.json"}]
+        mock_json.side_effect = [{"pipeline_id": "p1"}, {"config": "missing.json", "config_path": "missing.json"}]
         mock_rglob.side_effect = [[Path("task.json")], []] # Config not found
         
         with self.assertRaises(SystemExit) as cm:
