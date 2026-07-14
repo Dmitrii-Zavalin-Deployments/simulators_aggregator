@@ -95,15 +95,18 @@ jobs:
               if [ -n "$(git status --porcelain)" ]; then
                 echo "🌅 WAKING ENGINE: State changed to ACTIVE. Syncing..."
                 git commit -m "🤖 robot: reset dormant flag to active [Engine]"
-                TARGET_COMMIT=$(git rev-parse HEAD)
-
-                # Fetch remote notes
+                
+                # 1. Fetch remote notes
                 git fetch origin refs/notes/commits:refs/notes/commits || true
 
-                # Add note locally
+                # 2. Add note locally
+                TARGET_COMMIT=$(git rev-parse HEAD)
                 git notes add -f -m "robot: true" "$TARGET_COMMIT"
 
-                # Push commit and notes
+                # 3. Pull remote changes with rebase before pushing
+                git pull --rebase origin "${{ github.ref_name }}"
+
+                # 4. Push commit and notes
                 git push origin HEAD
                 git push --force origin refs/notes/commits
               else
