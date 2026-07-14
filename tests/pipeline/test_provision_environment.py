@@ -5,11 +5,11 @@ from unittest.mock import patch, MagicMock, mock_open
 # Import the main script execution pathway
 from src.pipeline.provision_environment import main
 
-
 class TestProvisionEnvironment(unittest.TestCase):
 
     def setUp(self):
-        # Establish reusable pristine metadata payloads
+        # Establish reusable pristine metadata payloads used to simulate
+        # standard task manifests and environment configurations.
         self.valid_task_data = {
             "library_repository_url": "https://github.com/org/repo.git",
             "version_tag": "v1.0.0",
@@ -19,9 +19,14 @@ class TestProvisionEnvironment(unittest.TestCase):
             "setup_script": "scripts/provision_nodes.sh"
         }
 
+    # -------------------------------------------------------------------------
+    # Stage 1: Workspace Integrity & Parser Robustness
+    # -------------------------------------------------------------------------
+
     @patch("pathlib.Path.exists")
     def test_main_missing_task_json(self, mock_exists):
-        """Branch: task.json is completely absent at the workspace root."""
+        # We verify the environment entrypoint enforces structural presence.
+        # If the root workspace lacks a task.json manifest, the system halts.
         mock_exists.return_value = False
 
         with self.assertRaises(SystemExit) as cm:
@@ -32,7 +37,9 @@ class TestProvisionEnvironment(unittest.TestCase):
     @patch("builtins.open", new_callable=mock_open)
     @patch("json.load")
     def test_main_corrupt_json_format(self, mock_json_load, mock_file_open, mock_exists):
-        """Branch: task.json exists but contains broken/malformed structures."""
+        # Malformed configuration manifests represent a failure to comply with 
+        # contract definitions. We simulate a parser exception and verify
+        # that the system exits with a non-zero status.
         mock_exists.return_value = True
         mock_json_load.side_effect = Exception("Malformed JSON unexpected token")
 
@@ -44,9 +51,10 @@ class TestProvisionEnvironment(unittest.TestCase):
     @patch("builtins.open", new_callable=mock_open)
     @patch("json.load")
     def test_main_missing_vital_metadata(self, mock_json_load, mock_file_open, mock_exists):
-        """Branch: task.json parsed successfully but lacks required deployment keys."""
+        # A valid JSON schema is insufficient; the schema must also contain 
+        # required deployment keys (pipeline_id). We verify that parsing 
+        # incomplete metadata triggers an abort.
         mock_exists.return_value = True
-        # Missing 'pipeline_id'
         mock_json_load.return_value = {
             "library_repository_url": "https://github.com/org/repo.git",
             "version_tag": "v1.0.0"
@@ -56,16 +64,21 @@ class TestProvisionEnvironment(unittest.TestCase):
             main()
         self.assertEqual(cm.exception.code, 1)
 
+    # -------------------------------------------------------------------------
+    # Stage 2: Dependency Resolution (Git Clone Lifecycle)
+    # -------------------------------------------------------------------------
+
     @patch("pathlib.Path.exists")
     @patch("builtins.open", new_callable=mock_open)
     @patch("json.load")
     @patch("subprocess.run")
     def test_main_clone_command_fails(self, mock_sub_run, mock_json_load, mock_file_open, mock_exists):
-        """Branch: The git clone subcommand exits with a non-zero status code."""
+        # Environment provisioning relies on external git resources. 
+        # If the transport layer (git clone) fails, the pipeline must recognize 
+        # the non-zero exit code and terminate immediately.
         mock_exists.return_value = True
         mock_json_load.return_value = self.valid_task_data
         
-        # Mock git clone return failure status code
         mock_result = MagicMock()
         mock_result.returncode = 128
         mock_sub_run.return_value = mock_result
@@ -79,16 +92,16 @@ class TestProvisionEnvironment(unittest.TestCase):
     @patch("json.load")
     @patch("subprocess.run")
     def test_main_clone_succeeds_but_missing_git_directory(self, mock_sub_run, mock_json_load, mock_file_open, mock_exists):
-        """Branch: git clone returned zero, but verification .git folder doesn't exist."""
+        # Even if the git command reports success, we perform an integrity 
+        # audit for the presence of the '.git' directory. Absent this 
+        # directory, the repository is deemed incomplete/unverified.
         def exists_side_effect(path_obj=None, *args, **kwargs):
-            # task.json exists, but repo verification path (.git) does not
             if "task.json" in str(path_obj):
                 return True
             return False
         mock_exists.side_effect = exists_side_effect
         
         mock_json_load.return_value = self.valid_task_data
-        
         mock_result = MagicMock()
         mock_result.returncode = 0
         mock_sub_run.return_value = mock_result
@@ -97,6 +110,10 @@ class TestProvisionEnvironment(unittest.TestCase):
             main()
         self.assertEqual(cm.exception.code, 1)
 
+    # -------------------------------------------------------------------------
+    # Stage 3: Execution & Manifest Lifecycle
+    # -------------------------------------------------------------------------
+
     @patch("pathlib.Path.exists")
     @patch("pathlib.Path.mkdir")
     @patch("pathlib.Path.rglob")
@@ -104,7 +121,9 @@ class TestProvisionEnvironment(unittest.TestCase):
     @patch("json.load")
     @patch("subprocess.run")
     def test_main_no_manifest_matches_found(self, mock_sub_run, mock_json_load, mock_file_open, mock_rglob, mock_mkdir, mock_exists):
-        """Branch: Library cloned but rglob file target pattern match list is empty."""
+        # After successful cloning, the system attempts to resolve local execution 
+        # manifests via glob pattern matching. If no manifests are resolved, 
+        # the provisioning process cannot proceed.
         mock_exists.return_value = True
         mock_json_load.return_value = self.valid_task_data
         mock_sub_run.return_value = MagicMock(returncode=0)
@@ -121,7 +140,9 @@ class TestProvisionEnvironment(unittest.TestCase):
     @patch("json.load")
     @patch("subprocess.run")
     def test_main_manifest_has_no_explicit_setup_script(self, mock_sub_run, mock_json_load, mock_file_open, mock_rglob, mock_mkdir, mock_exists):
-        """Branch: Manifest resolved but contains no execution scripts (Warning Path)."""
+        # Some manifests are purely informational. If a manifest is resolved but
+        # does not define a 'setup_script', the system exits gracefully (No-Op),
+        # as there is no executable payload to initialize.
         mock_exists.return_value = True
         mock_json_load.side_effect = [self.valid_task_data, {}]
         mock_sub_run.return_value = MagicMock(returncode=0)
@@ -138,7 +159,9 @@ class TestProvisionEnvironment(unittest.TestCase):
     @patch("subprocess.run")
     @patch("subprocess.Popen")
     def test_main_setup_script_runtime_fails(self, mock_popen, mock_sub_run, mock_json_load, mock_file_open, mock_rglob, mock_mkdir, mock_exists):
-        """Branch: Dynamic execution engine logs Popen streams but script exits with non-zero code."""
+        # We verify that during the dynamic execution phase, should the 
+        # provisioning script exit with a non-zero code (e.g., 255), the 
+        # orchestrator correctly captures this failure and propagates the status.
         mock_exists.return_value = True
         mock_json_load.side_effect = [self.valid_task_data, self.valid_manifest_data]
         mock_sub_run.return_value = MagicMock(returncode=0)
@@ -161,7 +184,9 @@ class TestProvisionEnvironment(unittest.TestCase):
     @patch("subprocess.run")
     @patch("subprocess.Popen")
     def test_main_complete_success_flow(self, mock_popen, mock_sub_run, mock_json_load, mock_file_open, mock_rglob, mock_mkdir, mock_exists):
-        """Branch: Full integration happy path execution running bash script pipelines perfectly."""
+        # The 'Happy Path' integration test: We simulate a full provisioning 
+        # lifecycle including repository cloning, manifest resolution, 
+        # and successful runtime script execution.
         mock_exists.return_value = True
         mock_json_load.side_effect = [self.valid_task_data, self.valid_manifest_data]
         mock_sub_run.return_value = MagicMock(returncode=0)
@@ -174,7 +199,9 @@ class TestProvisionEnvironment(unittest.TestCase):
 
         main()
         
+        # Verify Git orchestration parameters
         mock_sub_run.assert_any_call(["git", "clone", "--depth", "1", "--branch", "v1.0.0", "https://github.com/org/repo.git", "repositories/payload_library"])
+        # Verify script execution
         mock_popen.assert_called_once()
 
 

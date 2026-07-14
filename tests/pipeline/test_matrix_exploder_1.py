@@ -8,14 +8,14 @@ from src.pipeline import matrix_exploder
 # 1. Logic Verification: The Recursive Exploder
 # ==============================================================================
 
-# The `explode_dict` function is the engine of our configuration processing.
-# It must recursively traverse a dictionary and compute the Cartesian product 
-# of all lists found within it.
+# The `explode_dict` function serves as the computational engine for 
+# configuration processing. It recursively traverses input dictionaries
+# and computes the Cartesian product of all list-based parameters.
 
-# We test the standard recursive path where both keys and nested structures exist.
-# Input structure: {"x": [1, 2], "params": {"y": [10, 20]}}
-# Expected outcome: 4 combinations (2x2) correctly maintaining the nested hierarchy.
 def test_explode_dict_recursion():
+    # Scenario: We process a nested structure requiring recursive expansion.
+    # Given the input: {"x": [1, 2], "params": {"y": [10, 20]}}
+    # The Cartesian product yields 2 * 2 = 4 unique permutations.
     input_map = {
         "x": [1, 2],
         "params": {"y": [10, 20]}
@@ -23,54 +23,51 @@ def test_explode_dict_recursion():
     
     result = matrix_exploder.explode_dict(input_map)
     
-    # Assert we have exactly 2 * 2 = 4 permutations.
+    # We verify the cardinality of the generated set and the structural integrity
+    # of the resulting permutations.
     assert len(result) == 4
-    # Assert structural integrity for a specific permutation.
     assert {"x": 1, "params": {"y": 10}} in result
     assert {"x": 2, "params": {"y": 20}} in result
 
-# To ensure robustness, we define the behavior when the input is not a dictionary.
-# The system must return the input wrapped in a list, treating it as a single unit.
 def test_explode_dict_non_dict_input():
-    # Input is an integer; the function must return [100].
+    # If the input is not a dictionary (e.g., an integer), it cannot be expanded.
+    # The system correctly treats this as an atomic unit and wraps it in a list.
     val = 100
     assert matrix_exploder.explode_dict(val) == [100]
 
-# We must verify the leaf-node handling. If the value within the dictionary is 
-# neither a list nor a dictionary (e.g., a scalar integer), it must be treated 
-# as a single-element list to maintain the Cartesian product logic.
 def test_explode_dict_scalar_value():
+    # When encountering leaf-node values that are scalars (e.g., integers),
+    # the function must treat them as single-item lists to satisfy the 
+    # expected Cartesian output schema.
     input_data = {"key": 5}
-    # Expected: {"key": 5} wrapped in a list.
     assert matrix_exploder.explode_dict(input_data) == [{"key": 5}]
 
 # ==============================================================================
 # 2. Main Orchestrator: Failure Modes & Logging
 # ==============================================================================
 
-# The `main()` function manages filesystem I/O and CLI execution. 
-# It must handle failures gracefully, ensuring the user is notified via logs
-# and the process exits with a non-zero status code.
+# The `main()` function coordinates filesystem I/O and CLI execution.
+# It enforces robust error handling, ensuring that catastrophic failures
+# (like missing files or malformed JSON) result in logged errors and 
+# standard exit codes (SystemExit(1)).
 
-# Scenario: The input configuration file path is invalid.
-# The system must log an error and perform a SystemExit.
 def test_main_file_not_found(tmp_path, caplog):
+    # Scenario: The configuration file path provided via CLI is invalid.
     config_path = tmp_path / "missing.json"
     output_path = tmp_path / "out.json"
     
     with caplog.at_level(logging.ERROR):
         with patch("sys.argv", ["script", "--config-path", str(config_path), "--output-path", str(output_path)]):
+            # We expect the system to halt execution immediately.
             with pytest.raises(SystemExit) as exc:
                 matrix_exploder.main()
-            # Assert failure code 1
             assert exc.value.code == 1
     
-    # Assert error log presence
+    # We verify the user is notified of the missing dependency.
     assert "❌ Configuration file not found" in caplog.text
 
-# Scenario: The input file is malformed JSON.
-# The system must catch the decode error and log it clearly.
 def test_main_invalid_json(tmp_path, caplog):
+    # Scenario: The input file exists but contains invalid JSON syntax.
     config_path = tmp_path / "bad.json"
     config_path.write_text("{ incomplete json")
     output_path = tmp_path / "out.json"
@@ -79,23 +76,23 @@ def test_main_invalid_json(tmp_path, caplog):
         with patch("sys.argv", ["script", "--config-path", str(config_path), "--output-path", str(output_path)]):
             with pytest.raises(SystemExit) as exc:
                 matrix_exploder.main()
-            # Assert failure code 1
             assert exc.value.code == 1
     
+    # We ensure the decoder failure is explicitly reported.
     assert "❌ Failed to parse JSON" in caplog.text
 
 # ==============================================================================
 # 3. Integration: Success Path
 # ==============================================================================
 
-# We define the happy path where a valid configuration is provided.
-# The system must generate the correct permutations and write them to the 
-# designated output file.
+# We validate the end-to-end integration flow. Given a valid input configuration,
+# the system must compute permutations and persist them to the designated output.
+
 def test_main_success_path(tmp_path, caplog):
+    # Setup: We define a configuration with two lists of length 2 (2 x 2 = 4 combinations).
     config_path = tmp_path / "config.json"
     output_path = tmp_path / "result.json"
     
-    # Valid setup: Cross-product of lists (2 x 2 = 4 combinations).
     config_data = {
         "learning_rate": [0.01, 0.001],
         "boundary_map": {"width": [10, 20]}
@@ -106,21 +103,21 @@ def test_main_success_path(tmp_path, caplog):
         with patch("sys.argv", ["script", "--config-path", str(config_path), "--output-path", str(output_path)]):
             matrix_exploder.main()
     
-    # Validate successful execution signals.
+    # We confirm execution success via logs and filesystem persistence.
     assert "✅ Success: Generated 4 permutations" in caplog.text
     assert output_path.exists()
     
-    # Verify file content matches expected structural Cartesian product.
+    # Verify the contents match the calculated Cartesian product.
     with open(output_path, "r") as f:
         data = json.load(f)
         assert len(data) == 4
         assert {"learning_rate": 0.01, "boundary_map": {"width": 10}} in data
         assert {"learning_rate": 0.001, "boundary_map": {"width": 20}} in data
 
-# Edge Case: The configuration contains scalar root-level values.
-# The system must coerce these scalars into single-item lists to maintain
-# consistent product logic.
 def test_main_with_scalar_values(tmp_path):
+    # Edge Case: The configuration root contains scalar values.
+    # The system must coerce these scalars into single-item lists internally
+    # to prevent crashes during the expansion logic.
     config_path = tmp_path / "config.json"
     output_path = tmp_path / "result.json"
     
@@ -133,5 +130,5 @@ def test_main_with_scalar_values(tmp_path):
         
     with open(output_path, "r") as f:
         data = json.load(f)
-        # Expected: A list containing one dictionary with the scalar value.
+        # Expected: A list containing one dictionary with the scalar value preserved.
         assert data == [{"learning_rate": 0.01}]

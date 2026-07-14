@@ -9,7 +9,7 @@ from src.pipeline.unified_orchestrator import main
 class TestUnifiedOrchestrator(unittest.TestCase):
 
     def setUp(self):
-        # Establish reusable healthy target structures
+        # Establish reusable healthy target structures for dependency injection.
         self.args_mock = MagicMock(
             state_file="workspace/state.json",
             log_file="workspace/execution.log"
@@ -32,7 +32,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
             "task_details": [self.valid_task]
         }
 
-        # Mock database of files for dynamic routing
+        # Mock database of files for dynamic routing within the virtual filesystem
         self.file_vault = {}
 
     @staticmethod
@@ -72,6 +72,10 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     # PRE-FLIGHT AND SYSTEM DORMANCY GATES
     # ==========================================
 
+    # The orchestrator utilizes a dormancy gate mechanism to pause operations 
+    # during maintenance or system cooldowns. If the dormancy flag is set, 
+    # the pipeline must treat this as an expected exit, not a failure.
+
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
     @patch("src.pipeline.unified_orchestrator.os.path.exists")
     @patch("src.pipeline.unified_orchestrator.open")
@@ -79,7 +83,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         """Branch: dormant.flag is active and contains DORMANT status -> Clean Exit 0."""
         mock_parse_args.return_value = self.args_mock
         
-        # Route path existence checks
+        # Route path existence checks to trigger the dormant gate.
         mock_exists.side_effect = lambda path: str(path) == "dormant.flag"
         self.file_vault["dormant.flag"] = "STATUS: DORMANT\n"
         mock_open_func.side_effect = self.dynamic_open_router
@@ -93,21 +97,27 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("pathlib.Path.exists")
     def test_preflight_inactive_dormant_flag_continues(self, mock_path_exists, mock_open_func, mock_exists, mock_parse_args):
-        """Branch: dormant.flag exists but lacks DORMANT status string -> Continues."""
+        # If the dormant file exists but is not set to 'DORMANT', the pipeline 
+        # must attempt to proceed, eventually failing at the next state-validation gate.
         mock_parse_args.return_value = self.args_mock
         mock_exists.side_effect = lambda path: str(path) == "dormant.flag"
-        mock_path_exists.return_value = False # Stop right after at missing state mapping file
+        mock_path_exists.return_value = False 
         
         self.file_vault["dormant.flag"] = "STATUS: ACTIVE_RUNNING\n"
         mock_open_func.side_effect = self.dynamic_open_router
 
         with self.assertRaises(SystemExit) as cm:
             main()
-        self.assertEqual(cm.exception.code, 1) # Verify it got past gate 1 and failed at gate 2
+        self.assertEqual(cm.exception.code, 1)
 
     # ==========================================
     # FILE EXISTENCE AND STRUCTURAL PARSE GATES
     # ==========================================
+
+    # Before execution, the orchestrator performs a structural validation of 
+    # configuration files. It mandates the presence of 'state.json' and 
+    # 'config_combinations_array.json'. Failure to locate or parse these files 
+    # is a terminal condition.
 
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
     @patch("src.pipeline.unified_orchestrator.os.path.exists")
@@ -116,7 +126,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         """Branch: State blueprint map file is physically missing."""
         mock_parse_args.return_value = self.args_mock
         mock_exists.side_effect = self.existence_router
-        mock_path_exists.return_value = False # state.json missing
+        mock_path_exists.return_value = False 
 
         with self.assertRaises(SystemExit) as cm:
             main()
@@ -130,7 +140,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         mock_parse_args.return_value = self.args_mock
         mock_exists.side_effect = self.existence_router
         
-        # state.json exists, but config_combinations_array.json is missing
+        # Verify state file existence, but trigger absence of matrix file.
         mock_path_exists.side_effect = lambda *a, **kw: str(mock_path_exists.call_args[0][0]).endswith("state.json") if (mock_path_exists.call_args and len(mock_path_exists.call_args[0]) > 0) else False
 
         with self.assertRaises(SystemExit) as cm:
@@ -143,7 +153,8 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("src.pipeline.unified_orchestrator.json.load")
     def test_corrupt_combinations_json_raises_critical(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
-        """Branch: Combinations matrix file exists but contains invalid JSON structures."""
+        # Data integrity checks are absolute. Invalid JSON syntax results in 
+        # an immediate exit.
         mock_parse_args.return_value = self.args_mock
         mock_exists.side_effect = self.existence_router
         mock_path_exists.return_value = True
@@ -161,13 +172,14 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("src.pipeline.unified_orchestrator.json.load")
     def test_empty_combinations_matrix_sets_dormancy_and_exits(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
-        """Branch: Combinations matrix is empty -> sets dormancy flag and exits cleanly."""
+        # An empty matrix is not an error; it implies no work is defined.
+        # The system must set a dormancy flag and exit cleanly.
         mock_parse_args.return_value = self.args_mock
         mock_exists.side_effect = self.existence_router
         mock_path_exists.return_value = True
         
         mock_open_func.side_effect = self.dynamic_open_router
-        mock_json_load.return_value = [] # Matrix empty
+        mock_json_load.return_value = [] 
 
         with self.assertRaises(SystemExit) as cm:
             main()
@@ -196,6 +208,10 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     # ==========================================
     # DATA LAYER VALIDATION GATES (NO-DEFAULT POLICY)
     # ==========================================
+
+    # The pipeline enforces a strict schema for task details. Missing fields, 
+    # malformed structures, or invalid data types (e.g., non-integer orders) 
+    # violate the service contract and trigger critical failures.
 
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
     @patch("src.pipeline.unified_orchestrator.os.path.exists")
@@ -304,6 +320,11 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     # WORKSPACE RUNTIME PIPELINE EXECUTION LOOP
     # ==========================================
 
+    # The execution loop manages the lifecycle of each task: environment 
+    # preparation, repository checkout, and sub-process execution. 
+    # It must account for cleanup of stale resources and ensure exit code 
+    # propagation in case of sub-process failure.
+
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
     @patch("src.pipeline.unified_orchestrator.os.path.exists")
     @patch("src.pipeline.unified_orchestrator.os.remove")
@@ -318,13 +339,13 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         mock_open_func.side_effect = self.dynamic_open_router
         mock_json_load.side_effect = [self.valid_combinations, self.valid_state]
         
-        # Force existence checks to evaluate to True to test cleanup paths
+        # Enable cleanup-path testing by simulating existence of workspace artifacts.
         def existence_router(path_obj=None, *args, **kwargs):
             return True
         mock_path_exists.side_effect = existence_router
         mock_exists.side_effect = existence_router
         
-        # Mock simulation step execution report failure
+        # Mock simulation step execution to report failure.
         mock_failed_result = MagicMock()
         mock_failed_result.returncode = 1
         mock_sub_run.side_effect = [
@@ -338,7 +359,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
             main()
             
         self.assertEqual(cm.exception.code, 1)
-        mock_os_remove.assert_called_once() # Logs cleared out successfully
+        mock_os_remove.assert_called_once()
         self.assertEqual(mock_sub_run.call_count, 4)
 
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
@@ -351,10 +372,11 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("src.pipeline.unified_orchestrator.json.loads")
     @patch("src.pipeline.unified_orchestrator.subprocess.run")
     def test_pipeline_loop_complete_nominal_flow(self, mock_sub_run, mock_json_loads, mock_json_load, mock_open_func, mock_path_mkdir, mock_path_exists, mock_os_remove, mock_exists, mock_parse_args):
-        """Branches: Full happy path execution. Verifies clone command and loop completion."""
+        # 'Happy Path' validation: Ensure the full chain from resource eviction, 
+        # cloning, to execution completes without error.
         mock_parse_args.return_value = self.args_mock
         
-        # FIX 1: Explicitly force mock files to retain their string path identity
+        # Explicitly force mock files to retain their string path identity
         def local_open_router(file_path, mode="r", *args, **kwargs):
             mock_file = MagicMock()
             mock_file.name = str(file_path)
@@ -375,7 +397,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         mock_json_load.side_effect = json_load_side_effect
         mock_json_loads.return_value = {} 
         
-        # FIX 2: Safeguard path checking regardless of Path object instantiation
+        # Safeguard path checking regardless of Path object instantiation
         def existence_router(path_obj=None, *args, **kwargs):
             path_str = str(path_obj)
             if "sim-engine" in path_str:
@@ -391,7 +413,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
             
         self.assertEqual(cm.exception.code, 0)
         
-        # FIX 3: Permissive checking across both shell strings and execution lists
+        # Permissive checking across both shell strings and execution lists
         clone_calls = []
         for call in mock_sub_run.call_args_list:
             cmd_args = call[0][0]
