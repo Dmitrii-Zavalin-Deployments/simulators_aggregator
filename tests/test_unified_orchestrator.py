@@ -372,7 +372,8 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         self.assertEqual(cm.exception.code, 0)
         
         # Verify SSH address translation layer mapping conversion rule
-        called_clone_cmd = mock_sub_run.call_args_list[0][0][0]
+        # Index 0 is 'rm', Index 1 is the 'git clone' command
+        called_clone_cmd = mock_sub_run.call_args_list[1][0][0]
         self.assertIn("https://github.com/org/sim-engine.git", called_clone_cmd)
         
         # Verify residual variation matrix pool slice was safely written back
