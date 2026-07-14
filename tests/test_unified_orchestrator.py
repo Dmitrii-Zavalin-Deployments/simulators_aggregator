@@ -70,7 +70,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
     @patch("src.pipeline.unified_orchestrator.os.path.exists")
     @patch("src.pipeline.unified_orchestrator.open")
-    def test_preflight_dormant_flag_terminates_pipeline(self, mock_parse_args, mock_exists, mock_open_func):
+    def test_preflight_dormant_flag_terminates_pipeline(self, mock_open_func, mock_exists, mock_parse_args):
         """Branch: dormant.flag is active and contains DORMANT status -> Clean Exit 0."""
         mock_parse_args.return_value = self.args_mock
         
@@ -87,7 +87,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("src.pipeline.unified_orchestrator.os.path.exists")
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("pathlib.Path.exists")
-    def test_preflight_inactive_dormant_flag_continues(self, mock_parse_args, mock_exists, mock_open_func, mock_path_exists):
+    def test_preflight_inactive_dormant_flag_continues(self, mock_path_exists, mock_open_func, mock_exists, mock_parse_args):
         """Branch: dormant.flag exists but lacks DORMANT status string -> Continues."""
         mock_parse_args.return_value = self.args_mock
         mock_exists.side_effect = lambda path: str(path) == "dormant.flag"
@@ -107,7 +107,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
     @patch("src.pipeline.unified_orchestrator.os.path.exists")
     @patch("pathlib.Path.exists")
-    def test_missing_state_file_raises_critical(self, mock_parse_args, mock_exists, mock_path_exists):
+    def test_missing_state_file_raises_critical(self, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: State blueprint map file is physically missing."""
         mock_parse_args.return_value = self.args_mock
         mock_exists.return_value = False
@@ -120,7 +120,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
     @patch("src.pipeline.unified_orchestrator.os.path.exists")
     @patch("pathlib.Path.exists")
-    def test_missing_matrix_combinations_file_raises_critical(self, mock_parse_args, mock_exists, mock_path_exists):
+    def test_missing_matrix_combinations_file_raises_critical(self, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: config_combinations_array.json is physically missing."""
         mock_parse_args.return_value = self.args_mock
         mock_exists.return_value = False
@@ -137,7 +137,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("pathlib.Path.exists")
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("src.pipeline.unified_orchestrator.json.load")
-    def test_corrupt_combinations_json_raises_critical(self, mock_parse_args, mock_exists, mock_path_exists, mock_open_func, mock_json_load):
+    def test_corrupt_combinations_json_raises_critical(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: Combinations matrix file exists but contains invalid JSON structures."""
         mock_parse_args.return_value = self.args_mock
         mock_exists.return_value = False
@@ -155,7 +155,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("pathlib.Path.exists")
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("src.pipeline.unified_orchestrator.json.load")
-    def test_empty_combinations_matrix_sets_dormancy_and_exits(self, mock_parse_args, mock_exists, mock_path_exists, mock_open_func, mock_json_load):
+    def test_empty_combinations_matrix_sets_dormancy_and_exits(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: Combinations matrix is empty -> sets dormancy flag and exits cleanly."""
         mock_parse_args.return_value = self.args_mock
         mock_exists.return_value = False
@@ -174,7 +174,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("pathlib.Path.exists")
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("src.pipeline.unified_orchestrator.json.load")
-    def test_corrupt_state_json_raises_critical(self, mock_parse_args, mock_exists, mock_path_exists, mock_open_func, mock_json_load):
+    def test_corrupt_state_json_raises_critical(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: Matrix pops safely but state.json blueprint contains invalid structures."""
         mock_parse_args.return_value = self.args_mock
         mock_exists.return_value = False
@@ -197,7 +197,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("pathlib.Path.exists")
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("src.pipeline.unified_orchestrator.json.load")
-    def test_state_missing_task_details_key(self, mock_parse_args, mock_exists, mock_path_exists, mock_open_func, mock_json_load):
+    def test_state_missing_task_details_key(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: Key 'task_details' is completely missing inside state.json."""
         mock_parse_args.return_value = self.args_mock
         mock_exists.return_value = False
@@ -215,7 +215,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("pathlib.Path.exists")
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("src.pipeline.unified_orchestrator.json.load")
-    def test_state_task_details_empty_or_malformed(self, mock_parse_args, mock_exists, mock_path_exists, mock_open_func, mock_json_load):
+    def test_state_task_details_empty_or_malformed(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: 'task_details' field is explicitly empty or is not a list structure."""
         mock_parse_args.return_value = self.args_mock
         mock_exists.return_value = False
@@ -279,7 +279,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("pathlib.Path.exists")
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("src.pipeline.unified_orchestrator.json.load")
-    def test_task_sorting_by_order_fails(self, mock_parse_args, mock_exists, mock_path_exists, mock_open_func, mock_json_load):
+    def test_task_sorting_by_order_fails(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
         """Branch: Order parameters cannot be converted to integers, triggering sort exception."""
         mock_parse_args.return_value = self.args_mock
         mock_exists.return_value = False
@@ -307,7 +307,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("src.pipeline.unified_orchestrator.json.load")
     @patch("src.pipeline.unified_orchestrator.subprocess.run")
-    def test_pipeline_loop_handles_cleanup_and_sub_process_failures(self, mock_parse_args, mock_exists, mock_os_remove, mock_path_exists, mock_path_mkdir, mock_open_func, mock_json_load, mock_sub_run):
+    def test_pipeline_loop_handles_cleanup_and_sub_process_failures(self, mock_sub_run, mock_json_load, mock_open_func, mock_path_mkdir, mock_path_exists, mock_os_remove, mock_exists, mock_parse_args):
         """Branches: Verifies pre-existing trace log deletion, stale repository eviction, and task execution failure paths."""
         mock_parse_args.return_value = self.args_mock
         mock_open_func.side_effect = self.dynamic_open_router
@@ -343,7 +343,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("src.pipeline.unified_orchestrator.json.load")
     @patch("src.pipeline.unified_orchestrator.subprocess.run")
-    def test_pipeline_loop_complete_nominal_flow(self, mock_parse_args, mock_exists, mock_path_exists, mock_path_mkdir, mock_open_func, mock_json_load, mock_sub_run):
+    def test_pipeline_loop_complete_nominal_flow(self, mock_sub_run, mock_json_load, mock_open_func, mock_path_mkdir, mock_path_exists, mock_exists, mock_parse_args):
         """Branches: Full happy path execution. Converts SSH Git signatures to HTTPS URLs, clones, and completes loop runs smoothly."""
         mock_parse_args.return_value = self.args_mock
         mock_open_func.side_effect = self.dynamic_open_router
