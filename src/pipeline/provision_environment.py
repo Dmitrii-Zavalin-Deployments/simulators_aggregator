@@ -94,5 +94,5 @@ def main():
     else:
         logger.warning("⚠️ Warning: No explicit 'setup_script' entry discovered inside manifest header.")
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

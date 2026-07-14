@@ -232,5 +232,5 @@ def main():
     logger.info("🎉 All sequence execution tasks executed nominally across the pipeline graph chain.")
     sys.exit(0)
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

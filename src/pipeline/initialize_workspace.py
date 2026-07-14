@@ -102,5 +102,5 @@ def main():
     state_container.save_to_disk(str(target_state_json))
     logger.info(f"✅ SUCCESS: Workspace layout ready. State saved to: {target_state_json}")
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
