@@ -70,6 +70,19 @@ def test_constructor_steps_deep_validation():
 # 2. Dehydration & Hydration Validation
 # ==============================================================================
 
+def test_to_dict_serialization():
+    """Triggers Line 73: Verifies explicit serialization matching exact slots structural layout."""
+    state = TunerState(**VALID_STATE_DATA)
+    state_dict = state.to_dict()
+    
+    assert state_dict["pipeline_id"] == "test_pipe"
+    assert state_dict["successful_runs_archive"] == "out"
+    assert state_dict["failed_runs_archive"] == "err"
+    
+    # Ensure every designated slot attribute is accurately parsed into the output map keys
+    for slot in TunerState.__slots__:
+        assert slot in state_dict
+
 # Reconstruction of the state from a dictionary requires the exact internal schema.
 # If a key is missing from the dictionary, the system must raise a KeyError 
 # to prevent state corruption.
@@ -85,6 +98,22 @@ def test_from_dict_validation():
 # ==============================================================================
 # 3. Disk Persistence Verification
 # ==============================================================================
+
+def test_save_to_disk(tmp_path):
+    """Triggers Lines 92-93: Verifies atomic disk writes serialize context parameters correctly."""
+    file_path = tmp_path / "saved_state.json"
+    state = TunerState(**VALID_STATE_DATA)
+    
+    # Execution: Serialize instance data down to file target path
+    state.save_to_disk(str(file_path))
+    
+    # Assertion: Confirm target file physically exists and reads back perfectly parsed JSON
+    assert file_path.exists()
+    with open(file_path, "r") as f:
+        raw_json_data = json.load(f)
+        
+    assert raw_json_data["pipeline_id"] == "test_pipe"
+    assert raw_json_data["steps"]["1"]["output_file_name"] == "b.json"
 
 # The state must be serializable and deserializable from disk.
 # We verify the load_from_disk method correctly reads and parses the JSON.
