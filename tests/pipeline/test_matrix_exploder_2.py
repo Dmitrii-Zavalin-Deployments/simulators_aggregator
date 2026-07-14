@@ -48,8 +48,8 @@ class TestMatrixExploder(unittest.TestCase):
     # UNIT TESTS: main() Pipeline Flow
     # ==========================================
 
-    @patch("matrix_exploder.argparse.ArgumentParser.parse_args")
-    @patch("matrix_exploder.os.path.exists")
+    @patch("src.pipeline.matrix_exploder.argparse.ArgumentParser.parse_args")
+    @patch("src.pipeline.matrix_exploder.os.path.exists")
     def test_main_config_file_not_found(self, mock_exists, mock_parse_args):
         """Branch: Configuration file does not exist, triggers sys.exit(1)."""
         mock_parse_args.return_value = MagicMock(
@@ -63,10 +63,10 @@ class TestMatrixExploder(unittest.TestCase):
         
         self.assertEqual(cm.exception.code, 1)
 
-    @patch("matrix_exploder.argparse.ArgumentParser.parse_args")
-    @patch("matrix_exploder.os.path.exists")
-    @patch("matrix_exploder.open", new_callable=lambda: mock_open(read_data=b"{}"))
-    @patch("matrix_exploder.json.load")
+    @patch("src.pipeline.matrix_exploder.argparse.ArgumentParser.parse_args")
+    @patch("src.pipeline.matrix_exploder.os.path.exists")
+    @patch("src.pipeline.matrix_exploder.open", new_callable=lambda: mock_open(read_data=b"{}"))
+    @patch("src.pipeline.matrix_exploder.json.load")
     def test_main_invalid_json_decode_error(self, mock_json_load, mock_file_open, mock_exists, mock_parse_args):
         """Branch: JSON parsing fails, raises JSONDecodeError, triggers sys.exit(1)."""
         mock_parse_args.return_value = MagicMock(
@@ -83,12 +83,12 @@ class TestMatrixExploder(unittest.TestCase):
             
         self.assertEqual(cm.exception.code, 1)
 
-    @patch("matrix_exploder.argparse.ArgumentParser.parse_args")
-    @patch("matrix_exploder.os.path.exists")
-    @patch("matrix_exploder.open", new_callable=lambda: mock_open(read_data=b"{}"))
-    @patch("matrix_exploder.json.load")
-    @patch("matrix_exploder.os.makedirs")
-    @patch("matrix_exploder.json.dump")
+    @patch("src.pipeline.matrix_exploder.argparse.ArgumentParser.parse_args")
+    @patch("src.pipeline.matrix_exploder.os.path.exists")
+    @patch("src.pipeline.matrix_exploder.open", new_callable=lambda: mock_open(read_data=b"{}"))
+    @patch("src.pipeline.matrix_exploder.json.load")
+    @patch("src.pipeline.matrix_exploder.os.makedirs")
+    @patch("src.pipeline.matrix_exploder.json.dump")
     def test_main_success_flow(self, mock_json_dump, mock_makedirs, mock_json_load, mock_file_open, mock_exists, mock_parse_args):
         """Branches: Exhaustive integration test hitting all loop variations in main()."""
         mock_parse_args.return_value = MagicMock(
