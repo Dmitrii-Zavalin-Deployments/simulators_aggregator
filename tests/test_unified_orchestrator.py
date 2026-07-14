@@ -348,18 +348,19 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("pathlib.Path.mkdir")
     @patch("src.pipeline.unified_orchestrator.open")
     @patch("src.pipeline.unified_orchestrator.json.load")
+    @patch("src.pipeline.unified_orchestrator.json.loads")
     @patch("src.pipeline.unified_orchestrator.subprocess.run")
-    def test_pipeline_loop_complete_nominal_flow(self, mock_sub_run, mock_json_load, mock_open_func, mock_path_mkdir, mock_path_exists, mock_os_remove, mock_exists, mock_parse_args):
+    def test_pipeline_loop_complete_nominal_flow(self, mock_sub_run, mock_json_loads, mock_json_load, mock_open_func, mock_path_mkdir, mock_path_exists, mock_os_remove, mock_exists, mock_parse_args):
         """Branches: Full happy path execution. Converts SSH Git signatures to HTTPS URLs, clones, and completes loop runs smoothly."""
         mock_parse_args.return_value = self.args_mock
         mock_open_func.side_effect = self.dynamic_open_router
         
-        # Extend side_effect list: [combinations, state, default_config_for_loop]
-        mock_json_load.side_effect = [
-            self.valid_combinations, 
-            self.valid_state, 
-            {"config": "default"} # Fallback for subsequent calls in the loop
-        ]
+        # Robust side_effect function to handle any number of JSON calls
+        def json_side_effect(*args, **kwargs):
+            return self.valid_state # Default return that matches expected structure
+        
+        mock_json_load.side_effect = json_side_effect
+        mock_json_loads.side_effect = json_side_effect
         
         # PERMISSIVE ROUTER
         def existence_router(path_obj=None, *args, **kwargs):
@@ -373,6 +374,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             main()
             
+        # The nominal flow should finish with exit code 0
         self.assertEqual(cm.exception.code, 0)
         
         # Verify SSH address translation (Index 1 is git clone)
