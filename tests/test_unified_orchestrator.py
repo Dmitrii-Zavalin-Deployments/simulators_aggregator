@@ -353,10 +353,15 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         """Branches: Full happy path execution. Converts SSH Git signatures to HTTPS URLs, clones, and completes loop runs smoothly."""
         mock_parse_args.return_value = self.args_mock
         mock_open_func.side_effect = self.dynamic_open_router
-        mock_json_load.side_effect = [self.valid_combinations, self.valid_state]
         
-        # PERMISSIVE ROUTER: return True for all existence checks so the orchestrator 
-        # doesn't abort when checking for repositories or log files.
+        # Extend side_effect list: [combinations, state, default_config_for_loop]
+        mock_json_load.side_effect = [
+            self.valid_combinations, 
+            self.valid_state, 
+            {"config": "default"} # Fallback for subsequent calls in the loop
+        ]
+        
+        # PERMISSIVE ROUTER
         def existence_router(path_obj=None, *args, **kwargs):
             return True
         mock_path_exists.side_effect = existence_router
@@ -368,18 +373,16 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             main()
             
-        # The nominal flow should finish with exit code 0
         self.assertEqual(cm.exception.code, 0)
         
-        # Verify SSH address translation layer mapping conversion rule
-        # Index 0 is 'rm', Index 1 is the 'git clone' command
+        # Verify SSH address translation (Index 1 is git clone)
         called_clone_cmd = mock_sub_run.call_args_list[1][0][0]
         self.assertIn("https://github.com/org/sim-engine.git", called_clone_cmd)
         
         # Verify residual variation matrix pool slice was safely written back
         self.assertIn("workspace/config_combinations_array.json", self.file_vault)
         remaining_pool = json.loads(self.file_vault["workspace/config_combinations_array.json"])
-        self.assertEqual(len(remaining_pool), 1) # First matrix row was popped out and run
+        self.assertEqual(len(remaining_pool), 1)
 
 if __name__ == "__main__":
     unittest.main()
