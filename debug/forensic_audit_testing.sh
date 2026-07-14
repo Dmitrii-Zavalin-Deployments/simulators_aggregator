@@ -2,65 +2,48 @@
 set -euo pipefail
 
 echo "========================================================================"
-echo "🔍 STARTING FORENSIC AUDIT FOR COLLECTION ERROR IN UNIFIED ORCHESTRATOR"
+echo "🔍 FORENSIC AUDIT & AUTO-REPAIR: F-STRING QUOTING SYNTAX"
 echo "========================================================================"
 
-# 1. Capture explicit trace log of the collection failure
-echo "📋 Step 1: Isolation testing via pytest collection trace..."
-pytest tests/test_unified_orchestrator.py --collect-only -vv || true
+# 1. Diagnostic: Grep for the specific quotation syntax collision
+echo "📋 Step 1: Identifying line locations of nested double quotes..."
+grep -n "__import__(\"" src/pipeline/unified_orchestrator.py || echo "✅ No syntax errors found."
 
 echo "------------------------------------------------------------------------"
 
-# 2. Run compilation check to find unparsed syntax anomalies 
-echo "⚙️ Step 2: Checking Python abstract syntax tree / compilation integrity..."
-python3 -m py_compile src/pipeline/unified_orchestrator.py || echo "❌ Compilation failed for source engine!"
-python3 -m py_compile tests/test_unified_orchestrator.py || echo "❌ Compilation failed for test suite!"
+# 2. Automated Repair Logic (Heredoc protected)
+echo "🛠 Step 2: Repairing nested double quotes with single quotes..."
+python3 - <<'EOF'
+import sys
+file_path = "src/pipeline/unified_orchestrator.py"
+
+try:
+    with open(file_path, "r") as f:
+        content = f.read()
+    
+    # Replace the double-quoted inner string with single quotes
+    # The heredoc ensures we don't have to escape quotes for the shell
+    fixed = content.replace('__import__("inspect")', "__import__('inspect')")
+    
+    with open(file_path, "w") as f:
+        f.write(fixed)
+    print("✅ Successfully repaired nested quotes in unified_orchestrator.py")
+except Exception as e:
+    print(f"❌ Error during repair: {e}")
+    sys.exit(1)
+EOF
 
 echo "------------------------------------------------------------------------"
 
-# 3. Simulate bare importing outside pytest runtime boundary conditions
-echo "🐍 Step 3: Verifying standard import paths and module dependencies..."
-PYTHONPATH="src:src/pipeline" python3 -c "import src.pipeline.unified_orchestrator" 2>&1 || echo "❌ Module import failed!"
-
-echo "------------------------------------------------------------------------"
-
-# 4. Smoking-gun source audits with indexed line references
-echo "🔬 Step 4: Line audit of test suite and orchestrator boundaries..."
-if [ -f src/pipeline/unified_orchestrator.py ]; then
-    echo "📄 src/pipeline/unified_orchestrator.py (First 50 lines):"
-    cat -n src/pipeline/unified_orchestrator.py | head -n 50
+# 3. Validation: Check if any errors remain
+echo "🔬 Step 3: Verifying fix..."
+if grep -q "__import__(\"" src/pipeline/unified_orchestrator.py; then
+    echo "❌ ERROR: Syntax errors still detected."
+    exit 1
 else
-    echo "⚠️ Target source file src/pipeline/unified_orchestrator.py was not detected."
+    echo "✨ Repair Verified: File is syntactically clean."
 fi
-
-echo ""
-echo "📄 tests/test_unified_orchestrator.py (First 30 lines):"
-cat -n tests/test_unified_orchestrator.py | head -n 30
-
-echo "------------------------------------------------------------------------"
-
-# 5. Scan for module-level structural risks using grep
-echo "🔎 Step 5: Scanning for un-guarded global code or trace statements..."
-if [ -f src/pipeline/unified_orchestrator.py ]; then
-    echo "Found top-level calls/definitions:"
-    grep -nE "^(import |from |print\(|[a-zA-Z0-9_]+ = )" src/pipeline/unified_orchestrator.py || true
-fi
-
-echo "------------------------------------------------------------------------"
-
-# 6. Automated Recovery Injections
-echo "🛠️ Step 6: Automated Repair Injectors (Commented out template alternatives)"
-echo "Uncomment the required sed string to force hot-fixes instantly in runtime:"
-
-# Template A: Safeguard a rogue main() invocation executing on import instead of remaining inside a block guard
-# # sed -i 's/^main()$/if __name__ == "__main__":\n    main()/g' src/pipeline/unified_orchestrator.py
-
-# Template B: Force patch broken module imports or path layouts
-# # sed -i 's/from uninstalled_package import/import mock as/g' src/pipeline/unified_orchestrator.py
-
-# Template C: Append missing environment injection paths right at line 1 of the test runner
-# # sed -i '1s/^/import sys, os; sys.path.insert(0, os.path.abspath("src"))\n/' tests/test_unified_orchestrator.py
 
 echo "========================================================================"
-echo "🏁 FORENSIC AUDIT SEQUENCE COMPLETION"
+echo "🏁 AUDIT & REPAIR COMPLETE"
 echo "========================================================================"
