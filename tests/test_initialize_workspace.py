@@ -1,8 +1,7 @@
 import unittest
 import os
-import json
 from pathlib import Path
-from unittest.mock import patch, MagicMock, ANY
+from unittest.mock import patch, MagicMock
 
 # Import the main function
 from src.pipeline.initialize_workspace import main, fetch_inputs_from_dropbox
