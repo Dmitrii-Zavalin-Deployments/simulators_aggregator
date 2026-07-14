@@ -1,0 +1,380 @@
+import unittest
+import json
+import os
+import sys
+from pathlib import Path
+from unittest.mock import patch, MagicMock
+
+# Import the orchestrator main function
+from unified_orchestrator import main
+
+
+class TestUnifiedOrchestrator(unittest.TestCase):
+
+    def setUp(self):
+        # Establish reusable healthy target structures
+        self.args_mock = MagicMock(
+            state_file="workspace/state.json",
+            log_file="workspace/execution.log"
+        )
+        
+        self.valid_combinations = [
+            {"learning_rate": 0.01, "batch_size": 32},
+            {"learning_rate": 0.05, "batch_size": 64}
+        ]
+        
+        self.valid_task = {
+            "order": "1",
+            "repository_url": "git@github.com:org/sim-engine.git",
+            "version_tag": "model_v5",
+            "input_file_name": "sim_input.csv",
+            "output_file_name": "sim_output.csv"
+        }
+        
+        self.valid_state = {
+            "task_details": [self.valid_task]
+        }
+
+        # Mock database of files for dynamic routing
+        self.file_vault = {}
+
+    def dynamic_open_router(self, file_path, mode="r", *args, **kwargs):
+        """A context-aware mock file provider that routes content based on paths."""
+        path_str = str(file_path)
+        
+        # Define mock file behavior
+        mock_file = MagicMock()
+
+        if "r" in mode:
+            if path_str in self.file_vault:
+                content = self.file_vault[path_str]
+            else:
+                raise FileNotFoundError(f"Mock file not initialized: {path_str}")
+                
+            mock_file.read.return_value = content
+            # Support direct iteration over json loading if needed
+            if path_str.endswith(".json"):
+                mock_file.read.return_value = content
+        
+        elif "w" in mode or "a" in mode:
+            def write_side_effect(written_data):
+                self.file_vault[path_str] = written_data
+                return len(written_data)
+            mock_file.write.side_effect = write_side_effect
+            
+        # Support context manager protocol
+        mock_file.__enter__.return_value = mock_file
+        return mock_file
+
+    # ==========================================
+    # PRE-FLIGHT AND SYSTEM DORMANCY GATES
+    # ==========================================
+
+    @patch("unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("unified_orchestrator.os.path.exists")
+    @patch("unified_orchestrator.open")
+    def test_preflight_dormant_flag_terminates_pipeline(self, mock_open_func, mock_exists, mock_parse_args):
+        """Branch: dormant.flag is active and contains DORMANT status -> Clean Exit 0."""
+        mock_parse_args.return_value = self.args_mock
+        
+        # Route path existence checks
+        mock_exists.side_effect = lambda path: str(path) == "dormant.flag"
+        self.file_vault["dormant.flag"] = "STATUS: DORMANT\n"
+        mock_open_func.side_effect = self.dynamic_open_router
+
+        with self.assertRaises(SystemExit) as cm:
+            main()
+        self.assertEqual(cm.exception.code, 0)
+
+    @patch("unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("unified_orchestrator.os.path.exists")
+    @patch("unified_orchestrator.open")
+    @patch("pathlib.Path.exists")
+    def test_preflight_inactive_dormant_flag_continues(self, mock_path_exists, mock_open_func, mock_exists, mock_parse_args):
+        """Branch: dormant.flag exists but lacks DORMANT status string -> Continues."""
+        mock_parse_args.return_value = self.args_mock
+        mock_exists.side_effect = lambda path: str(path) == "dormant.flag"
+        mock_path_exists.return_value = False # Stop right after at missing state mapping file
+        
+        self.file_vault["dormant.flag"] = "STATUS: ACTIVE_RUNNING\n"
+        mock_open_func.side_effect = self.dynamic_open_router
+
+        with self.assertRaises(SystemExit) as cm:
+            main()
+        self.assertEqual(cm.exception.code, 1) # Verify it got past gate 1 and failed at gate 2
+
+    # ==========================================
+    # FILE EXISTENCE AND STRUCTURAL PARSE GATES
+    # ==========================================
+
+    @patch("unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("unified_orchestrator.os.path.exists")
+    @patch("pathlib.Path.exists")
+    def test_missing_state_file_raises_critical(self, mock_path_exists, mock_exists, mock_parse_args):
+        """Branch: State blueprint map file is physically missing."""
+        mock_parse_args.return_value = self.args_mock
+        mock_exists.return_value = False
+        mock_path_exists.return_value = False # state.json missing
+
+        with self.assertRaises(SystemExit) as cm:
+            main()
+        self.assertEqual(cm.exception.code, 1)
+
+    @patch("unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("unified_orchestrator.os.path.exists")
+    @patch("pathlib.Path.exists")
+    def test_missing_matrix_combinations_file_raises_critical(self, mock_path_exists, mock_exists, mock_parse_args):
+        """Branch: config_combinations_array.json is physically missing."""
+        mock_parse_args.return_value = self.args_mock
+        mock_exists.return_value = False
+        
+        # state.json exists, but config_combinations_array.json is missing
+        mock_path_exists.side_effect = lambda: str(mock_path_exists.call_args[0][0]).endswith("state.json")
+
+        with self.assertRaises(SystemExit) as cm:
+            main()
+        self.assertEqual(cm.exception.code, 1)
+
+    @patch("unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("unified_orchestrator.os.path.exists")
+    @patch("pathlib.Path.exists")
+    @patch("unified_orchestrator.open")
+    @patch("unified_orchestrator.json.load")
+    def test_corrupt_combinations_json_raises_critical(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
+        """Branch: Combinations matrix file exists but contains invalid JSON structures."""
+        mock_parse_args.return_value = self.args_mock
+        mock_exists.return_value = False
+        mock_path_exists.return_value = True
+        
+        mock_open_func.side_effect = self.dynamic_open_router
+        mock_json_load.side_effect = Exception("JSON Decode Crash")
+
+        with self.assertRaises(SystemExit) as cm:
+            main()
+        self.assertEqual(cm.exception.code, 1)
+
+    @patch("unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("unified_orchestrator.os.path.exists")
+    @patch("pathlib.Path.exists")
+    @patch("unified_orchestrator.open")
+    @patch("unified_orchestrator.json.load")
+    def test_empty_combinations_matrix_sets_dormancy_and_exits(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
+        """Branch: Combinations matrix is empty -> sets dormancy flag and exits cleanly."""
+        mock_parse_args.return_value = self.args_mock
+        mock_exists.return_value = False
+        mock_path_exists.return_value = True
+        
+        mock_open_func.side_effect = self.dynamic_open_router
+        mock_json_load.return_value = [] # Matrix empty
+
+        with self.assertRaises(SystemExit) as cm:
+            main()
+        self.assertEqual(cm.exception.code, 0)
+        self.assertIn("STATUS: DORMANT\n", self.file_vault["dormant.flag"])
+
+    @patch("unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("unified_orchestrator.os.path.exists")
+    @patch("pathlib.Path.exists")
+    @patch("unified_orchestrator.open")
+    @patch("unified_orchestrator.json.load")
+    def test_corrupt_state_json_raises_critical(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
+        """Branch: Matrix pops safely but state.json blueprint contains invalid structures."""
+        mock_parse_args.return_value = self.args_mock
+        mock_exists.return_value = False
+        mock_path_exists.return_value = True
+        mock_open_func.side_effect = self.dynamic_open_router
+        
+        # 1st call loads configurations, 2nd call throws while loading state mapping file
+        mock_json_load.side_effect = [self.valid_combinations, Exception("State Parse Error")]
+
+        with self.assertRaises(SystemExit) as cm:
+            main()
+        self.assertEqual(cm.exception.code, 1)
+
+    # ==========================================
+    # DATA LAYER VALIDATION GATES (NO-DEFAULT POLICY)
+    # ==========================================
+
+    @patch("unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("unified_orchestrator.os.path.exists")
+    @patch("pathlib.Path.exists")
+    @patch("unified_orchestrator.open")
+    @patch("unified_orchestrator.json.load")
+    def test_state_missing_task_details_key(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
+        """Branch: Key 'task_details' is completely missing inside state.json."""
+        mock_parse_args.return_value = self.args_mock
+        mock_exists.return_value = False
+        mock_path_exists.return_value = True
+        mock_open_func.side_effect = self.dynamic_open_router
+        
+        mock_json_load.side_effect = [self.valid_combinations, {"corrupt_key": []}]
+
+        with self.assertRaises(SystemExit) as cm:
+            main()
+        self.assertEqual(cm.exception.code, 1)
+
+    @patch("unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("unified_orchestrator.os.path.exists")
+    @patch("pathlib.Path.exists")
+    @patch("unified_orchestrator.open")
+    @patch("unified_orchestrator.json.load")
+    def test_state_task_details_empty_or_malformed(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
+        """Branch: 'task_details' field is explicitly empty or is not a list structure."""
+        mock_parse_args.return_value = self.args_mock
+        mock_exists.return_value = False
+        mock_path_exists.return_value = True
+        mock_open_func.side_effect = self.dynamic_open_router
+        
+        mock_json_load.side_effect = [self.valid_combinations, {"task_details": []}]
+
+        with self.assertRaises(SystemExit) as cm:
+            main()
+        self.assertEqual(cm.exception.code, 1)
+
+    def run_malformed_task_property_assertion(self, simulated_task_array):
+        """Helper to evaluate the no-default validation layer."""
+        with patch("unified_orchestrator.argparse.ArgumentParser.parse_args", return_value=self.args_mock), \
+             patch("unified_orchestrator.os.path.exists", return_value=False), \
+             patch("pathlib.Path.exists", return_value=True), \
+             patch("unified_orchestrator.open", side_effect=self.dynamic_open_router), \
+             patch("unified_orchestrator.json.load", side_effect=[self.valid_combinations, {"task_details": simulated_task_array}]):
+            
+            with self.assertRaises(SystemExit) as cm:
+                main()
+            self.assertEqual(cm.exception.code, 1)
+
+    def test_task_item_is_not_a_dictionary_structure(self):
+        """Branch: Task config array contains a raw string instead of a valid JSON object."""
+        self.run_malformed_task_property_assertion(["corrupt_string_element"])
+
+    def test_task_item_missing_order_parameter(self):
+        """Branch: Order field is completely unassigned or missing."""
+        task = self.valid_task.copy()
+        del task["order"]
+        self.run_malformed_task_property_assertion([task])
+
+    def test_task_item_missing_repository_url_parameter(self):
+        """Branch: Repository url mapping configuration is missing or blank."""
+        task = self.valid_task.copy()
+        task["repository_url"] = "   "
+        self.run_malformed_task_property_assertion([task])
+
+    def test_task_item_missing_version_tag_parameter(self):
+        """Branch: Version deployment tag is missing or blank."""
+        task = self.valid_task.copy()
+        task["version_tag"] = ""
+        self.run_malformed_task_property_assertion([task])
+
+    def test_task_item_missing_input_file_name_parameter(self):
+        """Branch: Input context workspace target mapping is blank."""
+        task = self.valid_task.copy()
+        task["input_file_name"] = " "
+        self.run_malformed_task_property_assertion([task])
+
+    def test_task_item_missing_output_file_name_parameter(self):
+        """Branch: Output trace asset file target description is blank."""
+        task = self.valid_task.copy()
+        task["output_file_name"] = ""
+        self.run_malformed_task_property_assertion([task])
+
+    @patch("unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("unified_orchestrator.os.path.exists")
+    @patch("pathlib.Path.exists")
+    @patch("unified_orchestrator.open")
+    @patch("unified_orchestrator.json.load")
+    def test_task_sorting_by_order_fails(self, mock_json_load, mock_open_func, mock_path_exists, mock_exists, mock_parse_args):
+        """Branch: Order parameters cannot be converted to integers, triggering sort exception."""
+        mock_parse_args.return_value = self.args_mock
+        mock_exists.return_value = False
+        mock_path_exists.return_value = True
+        mock_open_func.side_effect = self.dynamic_open_router
+        
+        invalid_sort_task = self.valid_task.copy()
+        invalid_sort_task["order"] = "CANNOT_CONVERT_TO_INT"
+        
+        mock_json_load.side_effect = [self.valid_combinations, {"task_details": [invalid_sort_task]}]
+
+        with self.assertRaises(SystemExit) as cm:
+            main()
+        self.assertEqual(cm.exception.code, 1)
+
+    # ==========================================
+    # WORKSPACE RUNTIME PIPELINE EXECUTION LOOP
+    # ==========================================
+
+    @patch("unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("unified_orchestrator.os.path.exists")
+    @patch("unified_orchestrator.os.remove")
+    @patch("pathlib.Path.exists")
+    @patch("pathlib.Path.mkdir")
+    @patch("unified_orchestrator.open")
+    @patch("unified_orchestrator.json.load")
+    @patch("unified_orchestrator.subprocess.run")
+    def test_pipeline_loop_handles_cleanup_and_sub_process_failures(self, mock_sub_run, mock_json_load, mock_open_func, mock_path_mkdir, mock_path_exists, mock_os_remove, mock_exists, mock_parse_args):
+        """Branches: Verifies pre-existing trace log deletion, stale repository eviction, and task execution failure paths."""
+        mock_parse_args.return_value = self.args_mock
+        mock_open_func.side_effect = self.dynamic_open_router
+        mock_json_load.side_effect = [self.valid_combinations, self.valid_state]
+        
+        # Force existence checks to evaluate to True to test cleanup paths
+        def existence_router(path_obj):
+            return True
+        mock_path_exists.side_effect = existence_router
+        mock_exists.return_value = False
+        
+        # Mock simulation step execution report failure
+        mock_failed_result = MagicMock()
+        mock_failed_result.returncode = 1
+        mock_sub_run.side_effect = [
+            MagicMock(returncode=0), # rm -rf stale repo command
+            MagicMock(returncode=0), # git clone command
+            MagicMock(returncode=0), # git checkout command
+            mock_failed_result       # xvfb-run main simulation execution command
+        ]
+
+        with self.assertRaises(SystemExit) as cm:
+            main()
+            
+        self.assertEqual(cm.exception.code, 1)
+        mock_os_remove.assert_called_once() # Logs cleared out successfully
+        self.assertEqual(mock_sub_run.call_count, 4)
+
+    @patch("unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("unified_orchestrator.os.path.exists")
+    @patch("pathlib.Path.exists")
+    @patch("pathlib.Path.mkdir")
+    @patch("unified_orchestrator.open")
+    @patch("unified_orchestrator.json.load")
+    @patch("unified_orchestrator.subprocess.run")
+    def test_pipeline_loop_complete_nominal_flow(self, mock_sub_run, mock_json_load, mock_open_func, mock_path_mkdir, mock_path_exists, mock_exists, mock_parse_args):
+        """Branches: Full happy path execution. Converts SSH Git signatures to HTTPS URLs, clones, and completes loop runs smoothly."""
+        mock_parse_args.return_value = self.args_mock
+        mock_open_func.side_effect = self.dynamic_open_router
+        mock_json_load.side_effect = [self.valid_combinations, self.valid_state]
+        
+        # task.json and state file structure configurations exist, but skip repo and trace logs cleanups
+        def existence_router(path_obj):
+            return "state.json" in str(path_obj) or "config_combinations_array.json" in str(path_obj)
+        mock_path_exists.side_effect = existence_router
+        mock_exists.return_value = False
+        
+        # All tracking operations finish nominally
+        mock_sub_run.return_value = MagicMock(returncode=0)
+
+        with self.assertRaises(SystemExit) as cm:
+            main()
+            
+        self.assertEqual(cm.exception.code, 0)
+        
+        # Verify SSH address translation layer mapping conversion rule
+        called_clone_cmd = mock_sub_run.call_args_list[0][0][0]
+        self.assertIn("https://github.com/org/sim-engine.git", called_clone_cmd)
+        
+        # Verify residual variation matrix pool slice was safely written back
+        self.assertIn("workspace/config_combinations_array.json", self.file_vault)
+        remaining_pool = json.loads(self.file_vault["workspace/config_combinations_array.json"])
+        self.assertEqual(len(remaining_pool), 1) # First matrix row was popped out and run
+
+
+if __name__ == "__main__":
+    unittest.main()
