@@ -314,7 +314,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         mock_json_load.side_effect = [self.valid_combinations, self.valid_state]
         
         # Force existence checks to evaluate to True to test cleanup paths
-        def existence_router(*args, **kwargs):
+        def existence_router(path_obj, *args, **kwargs):
             return True
         mock_path_exists.side_effect = existence_router
         mock_exists.return_value = False
@@ -350,7 +350,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         mock_json_load.side_effect = [self.valid_combinations, self.valid_state]
         
         # task.json and state file structure configurations exist, but skip repo and trace logs cleanups
-        def existence_router(*args, **kwargs):
+        def existence_router(path_obj, *args, **kwargs):
             return "state.json" in str(path_obj) or "config_combinations_array.json" in str(path_obj)
         mock_path_exists.side_effect = existence_router
         mock_exists.return_value = False
