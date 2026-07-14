@@ -95,6 +95,7 @@ class TestProvisionEnvironment(unittest.TestCase):
         
         mock_json_load.return_value = self.valid_task_data
         
+        # Mock successful git clone return status code
         mock_result = MagicMock()
         mock_result.returncode = 0
         mock_sub_run.return_value = mock_result
@@ -135,7 +136,8 @@ class TestProvisionEnvironment(unittest.TestCase):
     def test_main_manifest_has_no_explicit_setup_script(self, mock_sub_run, mock_json_load, mock_file_open, mock_rglob, mock_mkdir, mock_exists):
         """Branch: Manifest resolved but contains no execution scripts (Warning Path)."""
         def exists_side_effect(path_obj=None, *args, **kwargs):
-            return "task.json" in str(path_obj) or ".git" in str(path_obj)
+            path_str = str(path_obj)
+            return "task.json" in path_str or ".git" in path_str or ".json" in path_str
         mock_exists.side_effect = exists_side_effect
         
         # Sequence return values: 1st call loads task configuration, 2nd call loads manifest configuration
@@ -157,7 +159,8 @@ class TestProvisionEnvironment(unittest.TestCase):
     def test_main_setup_script_runtime_fails(self, mock_popen, mock_sub_run, mock_json_load, mock_file_open, mock_rglob, mock_mkdir, mock_exists):
         """Branch: Dynamic execution engine logs Popen streams but script exits with non-zero code."""
         def exists_side_effect(path_obj=None, *args, **kwargs):
-            return "task.json" in str(path_obj) or ".git" in str(path_obj)
+            path_str = str(path_obj)
+            return "task.json" in path_str or ".git" in path_str or ".json" in path_str or "sh" in path_str
         mock_exists.side_effect = exists_side_effect
         
         mock_json_load.side_effect = [self.valid_task_data, self.valid_manifest_data]
@@ -184,7 +187,8 @@ class TestProvisionEnvironment(unittest.TestCase):
     def test_main_complete_success_flow(self, mock_popen, mock_sub_run, mock_json_load, mock_file_open, mock_rglob, mock_mkdir, mock_exists):
         """Branch: Full integration happy path execution running bash script pipelines perfectly."""
         def exists_side_effect(path_obj=None, *args, **kwargs):
-            return "task.json" in str(path_obj) or ".git" in str(path_obj)
+            path_str = str(path_obj)
+            return "task.json" in path_str or ".git" in path_str or ".json" in path_str or "sh" in path_str
         mock_exists.side_effect = exists_side_effect
         
         mock_json_load.side_effect = [self.valid_task_data, self.valid_manifest_data]
