@@ -408,36 +408,41 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         self.assertIn("https://github.com/org/sim-engine.git", str(clone_calls[0]))
     
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
+    @patch("src.pipeline.unified_orchestrator.open")
     @patch("pathlib.Path.exists")
-    def test_matrix_definition_file_missing(self, mock_path_exists, mock_parse_args):
-        # 1. Setup
+    def test_matrix_json_parse_error(self, mock_path_exists, mock_open, mock_parse_args):
+        """Triggers Lines 65-68: JSON Decode error handling."""
         self.args_mock.state_file = "valid/state.json"
         self.args_mock.log_file = "test.log"
         mock_parse_args.return_value = self.args_mock
         
-        # 2. Robust Router
-        def existence_router(*args, **kwargs):
-            # args[0] is the path object passed by Path.exists()
-            path_str = str(args[0])
-            
-            # Allow dormant check (which we deleted in setUp)
-            if "dormant.flag" in path_str:
-                return False
-            # Pass state file
-            if "state.json" in path_str:
-                return True
-            # Fail matrix definition
-            if "config_combinations_array.json" in path_str:
-                return False
-            return True
-            
-        mock_path_exists.side_effect = existence_router
+        # Everything exists
+        mock_path_exists.return_value = True
         
-        # 3. Execution
-        with self.assertRaises(SystemExit) as cm:
-            main()
-            
-        self.assertEqual(cm.exception.code, 1)
+        # Mock open to return a file handle that yields invalid JSON
+        mock_file = MagicMock()
+        mock_file.__enter__.return_value = mock_file
+        # This will cause json.load(f) to crash
+        mock_file.read.return_value = "{ invalid_json: ... " 
+        
+        # Important: Ensure the correct file (combinations) is what we are "reading"
+        def side_effect_open(path, *args, **kwargs):
+            if "config_combinations_array.json" in str(path):
+                # Return the mock that will cause the error
+                mock_broken_file = MagicMock()
+                mock_broken_file.__enter__.return_value = mock_broken_file
+                # When json.load tries to read from this, it will fail 
+                # unless we actually mock json.load itself to raise an error
+                return mock_broken_file
+            return mock_file
+
+        mock_open.side_effect = side_effect_open
+        
+        # Patch json.load to raise the specific error we want to test
+        with patch("json.load", side_effect=json.JSONDecodeError("Expecting value", "", 0)):
+            with self.assertRaises(SystemExit) as cm:
+                main()
+            self.assertEqual(cm.exception.code, 1)
 
 if __name__ == "__main__":
     unittest.main()
