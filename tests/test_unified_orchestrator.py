@@ -351,18 +351,15 @@ class TestUnifiedOrchestrator(unittest.TestCase):
     @patch("src.pipeline.unified_orchestrator.json.loads")
     @patch("src.pipeline.unified_orchestrator.subprocess.run")
     def test_pipeline_loop_complete_nominal_flow(self, mock_sub_run, mock_json_loads, mock_json_load, mock_open_func, mock_path_mkdir, mock_path_exists, mock_os_remove, mock_exists, mock_parse_args):
-        """Branches: Full happy path execution. Converts SSH Git signatures to HTTPS URLs, clones, and completes loop runs smoothly."""
+        """Branches: Full happy path execution. Verifies clone command and loop completion."""
         mock_parse_args.return_value = self.args_mock
         mock_open_func.side_effect = self.dynamic_open_router
         
-        # Robust side_effect function to handle any number of JSON calls
-        def json_side_effect(*args, **kwargs):
-            return self.valid_state # Default return that matches expected structure
+        # Configure JSON mocks to safely return structures instead of crashing on empty input
+        mock_json_load.side_effect = [self.valid_combinations, self.valid_state, {}]
+        mock_json_loads.return_value = {} 
         
-        mock_json_load.side_effect = json_side_effect
-        mock_json_loads.side_effect = json_side_effect
-        
-        # PERMISSIVE ROUTER
+        # PERMISSIVE ROUTER: Return True for existence checks to allow flow
         def existence_router(path_obj=None, *args, **kwargs):
             return True
         mock_path_exists.side_effect = existence_router
@@ -374,17 +371,22 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             main()
             
-        # The nominal flow should finish with exit code 0
         self.assertEqual(cm.exception.code, 0)
         
-        # Verify SSH address translation (Index 1 is git clone)
-        called_clone_cmd = mock_sub_run.call_args_list[1][0][0]
-        self.assertIn("https://github.com/org/sim-engine.git", called_clone_cmd)
+        # ROBUST ASSERTION: Find the git clone command regardless of its position in the call list
+        # Look through all captured calls to find the one that contains 'clone'
+        clone_calls = [
+            call[0][0] for call in mock_sub_run.call_args_list 
+            if isinstance(call[0][0], list) and "clone" in call[0][0]
+        ]
+        
+        self.assertTrue(len(clone_calls) > 0, "Git clone command was never called.")
+        self.assertIn("https://github.com/org/sim-engine.git", clone_calls[0])
         
         # Verify residual variation matrix pool slice was safely written back
         self.assertIn("workspace/config_combinations_array.json", self.file_vault)
         remaining_pool = json.loads(self.file_vault["workspace/config_combinations_array.json"])
-        self.assertEqual(len(remaining_pool), 1)
+        self.assertEqual(len(remaining_pool), 1) # First matrix row was popped out and run
 
 if __name__ == "__main__":
     unittest.main()
