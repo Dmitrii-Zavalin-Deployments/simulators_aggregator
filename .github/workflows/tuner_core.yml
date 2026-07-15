@@ -370,6 +370,40 @@ jobs:
           # 🛑 IMMUNIZATION: Neutralize console clear hook scripts
           echo "" > ~/.bash_logout
 
+          # 0. PRE-FLIGHT ENVIRONMENT NORMALIZATION
+          PY_VER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+          echo "🔍 [ENV] Bootstrapping for Python $PY_VER..."
+          
+          CANDIDATES=(
+              "$HOME/.local/lib/python$PY_VER/site-packages"
+              "$HOME/.local/lib/python3.11/site-packages"
+              "/opt/hostedtoolcache/Python/3.11.*/x64/lib/python3.11/site-packages"
+              "/usr/local/lib/python$PY_VER/dist-packages"
+              "/usr/local/lib/python$PY_VER/site-packages"
+              "/usr/local/lib/python3.11/dist-packages"
+              "/usr/local/lib/python3.11/site-packages"
+              "./venv/lib/python$PY_VER/site-packages"
+              "./.venv/lib/python$PY_VER/site-packages"
+          )
+          
+          RECOVERED_PATHS=()
+          for candidate in "${CANDIDATES[@]}"; do
+              for resolved in $candidate; do
+                  if [ -d "$resolved" ]; then
+                      RECOVERED_PATHS+=("$resolved")
+                  fi
+              done
+          done
+          
+          if [ ${#RECOVERED_PATHS[@]} -gt 0 ]; then
+              IFS=":"
+              export PYTHONPATH="${RECOVERED_PATHS[*]}:${PYTHONPATH:-}"
+              unset IFS
+              echo "🔧 [ENV] Successfully bound dependencies: $PYTHONPATH"
+          else
+              echo "✅ [ENV] Native python environment appears healthy."
+          fi
+
           echo "📊 Setting up profiling tracking tools for workspace initialization..."
           rm -f /tmp/cpu_track.log /tmp/memory_profile.log
           
@@ -466,9 +500,12 @@ jobs:
           
           CANDIDATES=(
               "$HOME/.local/lib/python$PY_VER/site-packages"
-              "/opt/hostedtoolcache/Python/3.11.*/x64/lib/python$PY_VER/site-packages"
+              "$HOME/.local/lib/python3.11/site-packages"
+              "/opt/hostedtoolcache/Python/3.11.*/x64/lib/python3.11/site-packages"
               "/usr/local/lib/python$PY_VER/dist-packages"
               "/usr/local/lib/python$PY_VER/site-packages"
+              "/usr/local/lib/python3.11/dist-packages"
+              "/usr/local/lib/python3.11/site-packages"
               "./venv/lib/python$PY_VER/site-packages"
               "./.venv/lib/python$PY_VER/site-packages"
           )
