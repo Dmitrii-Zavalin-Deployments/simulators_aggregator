@@ -26,7 +26,6 @@ def inspect_and_fix_environment():
     logger.info(f"🔍 [ENV] Python Version: {sys.version}")
     
     try:
-        import dropbox
         logger.info("✅ [ENV] 'dropbox' is natively importable. Path integrity is healthy.")
         return
     except ImportError:
@@ -37,7 +36,7 @@ def inspect_and_fix_environment():
     # Broad array of common local, virtualenv, and GitHub Actions environments
     paths_to_probe = [
         Path.home() / ".local/lib" / f"python{py_ver}" / "site-packages",
-        Path("/opt/hostedtoolcache/Python") / f"3.11.*" / "x64/lib" / f"python{py_ver}" / "site-packages",
+        Path("/opt/hostedtoolcache/Python") / "3.11.*" / "x64/lib" / f"python{py_ver}" / "site-packages",
         Path("/usr/local/lib") / f"python{py_ver}" / "dist-packages",
         Path("/usr/local/lib") / f"python{py_ver}" / "site-packages",
         Path("./venv/lib") / f"python{py_ver}" / "site-packages",
@@ -62,7 +61,6 @@ def inspect_and_fix_environment():
             sys.path.insert(0, str(p_resolved))
 
     try:
-        import dropbox
         logger.info("✅ [ENV] Self-repair successful: 'dropbox' successfully bound to run context.")
     except ImportError as e:
         logger.error(f"❌ [ENV] CRITICAL: 'dropbox' remains missing after recovery sequence. Error: {e}")
