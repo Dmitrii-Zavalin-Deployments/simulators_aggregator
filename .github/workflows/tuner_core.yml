@@ -659,11 +659,15 @@ jobs:
           MEM_USAGE="${TUNING_ACTIVE_PEAK_MEM:-$(free -m | awk '/Mem:/ { print $3 "/" $2 "MB" }')}"
 
           # 2️⃣ Build the Markdown entry with the accurate Task and Runtime metadata
+          # Construct the URL for the current run
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
           NEW_ENTRY=$(cat <<EOF
           ### Audit: $RUN_DATE
           - **Pipeline:** \`$TASK_NAME\`
           - **Branch:** \`$CURRENT_BRANCH\`
           - **Status:** $STATUS
+          - **Run:** [View Execution Log]($RUN_URL)
           - **Modules Runtime:** Used ${SIM_ELAPSED} of ${SIM_ALLOWED} seconds (${SIM_STATE_LABEL})
           - **CPU Load:** $CPU_LOAD
           - **Memory Usage:** $MEM_USAGE
