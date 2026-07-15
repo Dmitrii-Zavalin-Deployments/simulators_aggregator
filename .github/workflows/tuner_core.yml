@@ -304,10 +304,27 @@ jobs:
           git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
           git config --global notes.rewriteRef "refs/notes/*"
 
+      # Setup Python (General base)
       - name: 🐍 Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+
+      # Setup Conda (Creates the target environment)
+      - name: 🐍 Set up Conda Environment
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: ${{ env.PYTHON_VERSION }}
+          conda-solver: libmamba
+          channels: conda-forge
+          channel-priority: strict
+          activate-environment: tuner-env
+
+      # Install dependencies (This will install them into 'tuner-env')
+      - name: 📦 Install Engine Pip Dependencies
+        shell: bash -el {0}
+        run: python -m pip install --no-cache-dir -r requirements.txt
       
       # 📥 STATE IMPORT: Check if a prior state zip exists on Dropbox
       - name: 📥 Check Pipeline State Existence
@@ -330,22 +347,6 @@ jobs:
           
           mkdir -p data/testing-input-output
           unzip -o data/testing-input-output/${{ env.TUNER_STATE_ARCHIVE }} -d data/testing-input-output/
-
-      # Setup Conda (Creates the target environment)
-      - name: 🐍 Set up Conda Environment
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          auto-update-conda: true
-          python-version: ${{ env.PYTHON_VERSION }}
-          conda-solver: libmamba
-          channels: conda-forge
-          channel-priority: strict
-          activate-environment: tuner-env
-
-      # Install dependencies (This will install them into 'tuner-env')
-      - name: 📦 Install Engine Pip Dependencies
-        shell: bash -el {0}
-        run: python -m pip install --no-cache-dir -r requirements.txt
 
       # HEADLESS GRAPHICS DRIVERS
       - name: 🌐 Install Headless Rendering Dependencies
