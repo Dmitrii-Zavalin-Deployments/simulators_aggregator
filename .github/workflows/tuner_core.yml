@@ -326,9 +326,10 @@ jobs:
         shell: bash -el {0}
         run: python -m pip install --no-cache-dir -r requirements.txt
       
-      # 📥 STATE IMPORT: Check if a prior state zip exists on Dropbox
+      # PIPELINE LOGIC (All Python steps now explicitly use bash -el {0})
       - name: 📥 Check Pipeline State Existence
         id: import_state
+        shell: bash -el {0}
         run: |
           python3 src/io/state_manager.py \
             --folder "${{ env.DROPBOX_FOLDER }}" \
@@ -340,6 +341,7 @@ jobs:
       # 📥 WARM START: Download and unpack state archive if found
       - name: 📥 Download Existing State Archive
         if: steps.import_state.outputs.state_status == 'found'
+        shell: bash -el {0}
         run: |
           python3 src/io/download_from_dropbox.py \
             --folder "${{ env.DROPBOX_FOLDER }}" \
@@ -555,6 +557,7 @@ jobs:
           exit 0
 
       - name: 📤 Package and Upload State Snapshot
+        shell: bash -el {0}
         run: |
           if [ -d "${{ env.WORKSPACE_DIR }}" ]; then
             echo "📦 Packing active state folder..."
