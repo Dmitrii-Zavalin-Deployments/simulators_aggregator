@@ -7,6 +7,7 @@ import json
 import shutil
 import logging
 import argparse
+import glob
 from pathlib import Path
 
 # Configure logging early so the self-healing diagnostic block can use it
@@ -43,7 +44,7 @@ def inspect_and_fix_environment():
         Path("./.venv/lib") / f"python{py_ver}" / "site-packages",
     ]
 
-    import glob
+#    import glob
     resolved_paths = []
     for candidate in paths_to_probe:
         candidate_str = str(candidate)
