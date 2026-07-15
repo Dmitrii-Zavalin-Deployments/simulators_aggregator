@@ -1,10 +1,16 @@
 import unittest
 import os
+import sys
+import builtins
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-# Import the main orchestration and ingestion functions.
-from src.pipeline.initialize_workspace import main, fetch_inputs_from_dropbox
+# Import the main orchestration, ingestion, and self-healing functions.
+from src.pipeline.initialize_workspace import (
+    main, 
+    fetch_inputs_from_dropbox, 
+    inspect_and_fix_environment
+)
 
 class TestWorkspaceInitializer(unittest.TestCase):
 
@@ -26,6 +32,91 @@ class TestWorkspaceInitializer(unittest.TestCase):
         }
 
     # -------------------------------------------------------------------------
+    # Environment Self-Healing Tests
+    # -------------------------------------------------------------------------
+
+    # Logic: If the environment is natively healthy, inspect_and_fix_environment
+    # must log a success message and return early without altering sys.path.
+    @patch("sys.path", list(sys.path))
+    def test_inspect_and_fix_environment_native_success(self):
+        original_import = builtins.__import__
+        mock_dropbox = MagicMock()
+
+        def mock_import(name, *args, **kwargs):
+            if name == "dropbox":
+                return mock_dropbox
+            return original_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=mock_import), \
+             patch("src.pipeline.initialize_workspace.logger") as mock_logger:
+            
+            inspect_and_fix_environment()
+            
+            mock_logger.info.assert_any_call("✅ [ENV] 'dropbox' is natively importable. Path integrity is healthy.")
+
+    # Logic: If native import fails, the function must probe paths, resolve 
+    # candidates, append missing search spaces, and succeed on retry.
+    @patch("sys.path", list(sys.path))
+    @patch("src.pipeline.initialize_workspace.Path.resolve")
+    @patch("src.pipeline.initialize_workspace.glob.glob")
+    def test_inspect_and_fix_environment_recovery_success(self, mock_glob, mock_resolve):
+        original_import = builtins.__import__
+        import_attempts = []
+        mock_dropbox = MagicMock()
+
+        # Simulate initial failure followed by success after path manipulation
+        def mock_import(name, *args, **kwargs):
+            if name == "dropbox":
+                import_attempts.append(True)
+                if len(import_attempts) == 1:
+                    raise ImportError("No module named 'dropbox'")
+                return mock_dropbox
+            return original_import(name, *args, **kwargs)
+
+        # Force glob to return no wildcards, and mock Path.resolve to look like a valid directory
+        mock_glob.return_value = []
+        mock_resolved_path = MagicMock()
+        mock_resolved_path.exists.return_value = True
+        mock_resolved_path.__str__.return_value = "/mocked/site-packages"
+        mock_resolve.return_value = mock_resolved_path
+
+        with patch("builtins.__import__", side_effect=mock_import), \
+             patch("src.pipeline.initialize_workspace.logger") as mock_logger:
+            
+            inspect_and_fix_environment()
+            
+            self.assertIn("/mocked/site-packages", sys.path)
+            mock_logger.warning.assert_any_call("⚠️ [ENV] 'dropbox' not found natively. Initiating automatic system-path repair...")
+            mock_logger.info.assert_any_call("✅ [ENV] Self-repair successful: 'dropbox' successfully bound to run context.")
+
+    # Logic: If the package is completely absent, the function must exhaust
+    # path searches, fail to import, and log a critical error safely.
+    @patch("sys.path", list(sys.path))
+    @patch("src.pipeline.initialize_workspace.Path.resolve")
+    @patch("src.pipeline.initialize_workspace.glob.glob")
+    def test_inspect_and_fix_environment_recovery_failure(self, mock_glob, mock_resolve):
+        original_import = builtins.__import__
+
+        # Mock the import to persistently fail
+        def mock_import(name, *args, **kwargs):
+            if name == "dropbox":
+                raise ImportError("Still no module named 'dropbox'")
+            return original_import(name, *args, **kwargs)
+
+        mock_glob.return_value = []
+        mock_resolved_path = MagicMock()
+        mock_resolved_path.exists.return_value = True
+        mock_resolved_path.__str__.return_value = "/mocked/site-packages"
+        mock_resolve.return_value = mock_resolved_path
+
+        with patch("builtins.__import__", side_effect=mock_import), \
+             patch("src.pipeline.initialize_workspace.logger") as mock_logger:
+            
+            inspect_and_fix_environment()
+            
+            mock_logger.error.assert_called_with("❌ [ENV] CRITICAL: 'dropbox' remains missing after recovery sequence. Error: Still no module named 'dropbox'")
+
+    # -------------------------------------------------------------------------
     # Dropbox Integration Tests
     # -------------------------------------------------------------------------
 
@@ -37,7 +128,7 @@ class TestWorkspaceInitializer(unittest.TestCase):
         with self.assertRaises(EnvironmentError):
             fetch_inputs_from_dropbox(Path("/tmp/target"))
 
-    # To verify the sync operation, we assume a authenticated environment.
+    # To verify the sync operation, we assume an authenticated environment.
     # We mock the CloudIngestor and TokenManager dependencies to isolate 
     # the sync logic from actual network calls.
     @patch("src.io.download_from_dropbox.CloudIngestor")

@@ -9,15 +9,69 @@ import logging
 import argparse
 from pathlib import Path
 
-# Heavy core imports are now perfectly safe
-from src.state.tuner_state import TunerState
-
+# Configure logging early so the self-healing diagnostic block can use it
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger("WorkspaceInitializer")
+
+def inspect_and_fix_environment():
+    """
+    Diagnoses environment mismatches and dynamically repairs sys.path 
+    if libraries (like dropbox) are installed in a different Python runtime context.
+    """
+    logger.info(f"🔍 [ENV] Runtime Interpreter: {sys.executable}")
+    logger.info(f"🔍 [ENV] Python Version: {sys.version}")
+    
+    try:
+        import dropbox
+        logger.info("✅ [ENV] 'dropbox' is natively importable. Path integrity is healthy.")
+        return
+    except ImportError:
+        logger.warning("⚠️ [ENV] 'dropbox' not found natively. Initiating automatic system-path repair...")
+
+    py_ver = f"{sys.version_info.major}.{sys.version_info.minor}"
+    
+    # Broad array of common local, virtualenv, and GitHub Actions environments
+    paths_to_probe = [
+        Path.home() / ".local/lib" / f"python{py_ver}" / "site-packages",
+        Path("/opt/hostedtoolcache/Python") / f"3.11.*" / "x64/lib" / f"python{py_ver}" / "site-packages",
+        Path("/usr/local/lib") / f"python{py_ver}" / "dist-packages",
+        Path("/usr/local/lib") / f"python{py_ver}" / "site-packages",
+        Path("./venv/lib") / f"python{py_ver}" / "site-packages",
+        Path("./.venv/lib") / f"python{py_ver}" / "site-packages",
+    ]
+
+    import glob
+    resolved_paths = []
+    for candidate in paths_to_probe:
+        candidate_str = str(candidate)
+        if "*" in candidate_str:
+            matches = glob.glob(candidate_str)
+            for m in matches:
+                resolved_paths.append(Path(m))
+        else:
+            resolved_paths.append(candidate)
+
+    for p in resolved_paths:
+        p_resolved = p.resolve()
+        if p_resolved.exists() and str(p_resolved) not in sys.path:
+            logger.info(f"🔧 [ENV] Dynamic path recovery: Appending {p_resolved}")
+            sys.path.insert(0, str(p_resolved))
+
+    try:
+        import dropbox
+        logger.info("✅ [ENV] Self-repair successful: 'dropbox' successfully bound to run context.")
+    except ImportError as e:
+        logger.error(f"❌ [ENV] CRITICAL: 'dropbox' remains missing after recovery sequence. Error: {e}")
+
+# Run environment healing check immediately before custom internal module imports
+inspect_and_fix_environment()
+
+# Custom local module imports (safe now that sys.path is normalized)
+from src.state.tuner_state import TunerState
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="ACE Loop Cold Start Workspace Map Initializer")
