@@ -666,11 +666,11 @@ jobs:
           ### Audit: $RUN_DATE
           - **Pipeline:** \`$TASK_NAME\`
           - **Branch:** \`$CURRENT_BRANCH\`
-          - **Status:** $STATUS
+          - **Status:** \`$STATUS\`
           - **Run:** [Detailed Execution Logs]($RUN_URL)
           - **Modules Runtime:** Used ${SIM_ELAPSED} of ${SIM_ALLOWED} seconds (${SIM_STATE_LABEL})
-          - **CPU Load:** $CPU_LOAD
-          - **Memory Usage:** $MEM_USAGE
+          - **CPU Load:** \`$CPU_LOAD\`
+          - **Memory Usage:** \`$MEM_USAGE\`
           ---
           EOF
           )
