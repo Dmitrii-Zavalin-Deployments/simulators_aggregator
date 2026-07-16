@@ -1,8 +1,15 @@
 # 🛰️ Simulators Aggregator Performance Audit
-
-### Audit: 2026-07-16 22:00:51 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
+### 📚 Resources & Documentation
+- **Tutorial/Book:** ***currently in development***
+---
+### Audit: 2026-07-16 22:04:11 UTC
+- **Pipeline:** `bernoulli5_e296154`
 - **Branch:** `bernoulli5_e296154`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29538094769)
+- **Modules Runtime:** Used 5 of 300 seconds (failed)
+- **CPU Load:** `100%`
+- **Memory Usage:** `265/15993MB`
 ---
 ### 📚 Resources & Documentation
 - **Tutorial/Book:** ***currently in development***
