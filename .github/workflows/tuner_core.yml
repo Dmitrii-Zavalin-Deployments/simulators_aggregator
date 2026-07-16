@@ -316,9 +316,14 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ env.PYTHON_VERSION }}
-          channels: conda-forge,pip
+          channels: conda-forge
           channel-priority: strict
           activate-environment: tuner-env
+
+      # Ensure Pip is installed in the newly created conda environment
+      - name: 🛠️ Ensure Pip is installed
+        shell: bash -el {0}
+        run: conda install -y pip
 
       # Install dependencies (This will install them into 'tuner-env')
       - name: 📦 Install Engine Pip Dependencies
