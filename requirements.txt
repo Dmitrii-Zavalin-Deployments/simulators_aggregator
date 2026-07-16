@@ -1,23 +1,17 @@
 # --- Core Orchestration & Logic ---
-# Phase C, Rule 0: Law of Performance (Minimal I/O)
-requests==2.31.0          # For Manifest Ingestion and GitHub API Dispatch
-pathlib==1.0.1            # Deterministic I/O management
-# Rule 4: Zero-Default Policy (Explicit Validation)
-jsonschema==4.20.0        # Required for manifest integrity & forensic scans
+requests>=2.31.0
+pathlib>=1.0.1
+jsonschema>=4.20.0
 
 # --- Cloud & I/O Modules ---
-# Phase C, Rule 5: Operational Hygiene
-dropbox==11.36.2          # Required for CloudIngestor and CloudUploader
+dropbox>=11.36.2
 
 # --- Infrastructure & Tooling ---
-# Phase C, Rule 5: Automated Hygiene
-autoflake==2.2.1          # Removes unused variables/imports automatically
-ruff==0.1.9               # High-speed static analysis and linting
-# Rule 6: Forensic Deletion Rule
-vulture==2.10             # Dead-code elimination for "Lean Wiring"
+autoflake>=2.2.1
+ruff>=0.1.9
+vulture>=2.10
 
 # --- Verification & Quality Gates ---
-# Phase C, Rule 2: Zero-Debt Mandate
-pytest==7.4.3             # Real-disk I/O validation
-pytest-cov==4.1.0         # Enforces 100% coverage mandate
-responses==0.24.1         # Mocking Network I/O for Forensic Integrity Checks
+pytest>=7.4.3
+pytest-cov>=4.1.0
+responses>=0.24.1
