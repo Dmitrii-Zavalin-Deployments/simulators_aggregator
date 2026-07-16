@@ -1,5 +1,5 @@
 {
-  "pipeline_id": "bernoulli_solver_pipeline_ce64f10.json",
-  "library_repository_url": "https://github.com/Dmitrii-Zavalin-Deployments/fluid_dynamics_simulator.git",
-  "version_tag": "main"
+    "pipeline_id": "bernoulli10_ca117b7",
+    "library_repository_url": "https://github.com/Dmitrii-Zavalin-Deployments/fluid_dynamics_simulator.git",
+    "version_tag": "prototype_10"
 }
