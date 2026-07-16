@@ -316,8 +316,7 @@ jobs:
         with:
           auto-update-conda: true
           python-version: ${{ env.PYTHON_VERSION }}
-          conda-solver: libmamba
-          channels: conda-forge
+          channels: conda-forge,pip
           channel-priority: strict
           activate-environment: tuner-env
 
