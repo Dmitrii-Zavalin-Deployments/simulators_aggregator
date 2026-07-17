@@ -7,16 +7,19 @@
 - **Branch:** `bernoulli10_ca117b7`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29568391896)
+---
 ### Audit: 2026-07-17 09:03:16 UTC
 - **Pipeline:** `bernoulli1_aee9914`
 - **Branch:** `bernoulli1_aee9914`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29568399429)
+---
 ### Audit: 2026-07-17 09:03:36 UTC
 - **Pipeline:** `bernoulli2_7021ece`
 - **Branch:** `bernoulli2_7021ece`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29568407010)
+---
 ### Audit: 2026-07-17 09:03:47 UTC
 - **Pipeline:** `bernoulli3_493afea`
 - **Branch:** `bernoulli3_493afea`
@@ -25,11 +28,13 @@
 - **Modules Runtime:** Used 0 of 300 seconds (success)
 - **CPU Load:** `%`
 - **Memory Usage:** `13/15993MB`
+---
 ### Audit: 2026-07-17 09:03:56 UTC
 - **Pipeline:** `bernoulli4_42d49af`
 - **Branch:** `bernoulli4_42d49af`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29568420590)
+---
 ### Audit: 2026-07-17 09:03:45 UTC
 - **Pipeline:** `bernoulli5_e296154`
 - **Branch:** `bernoulli5_e296154`
@@ -38,11 +43,13 @@
 - **Modules Runtime:** Used 0 of 300 seconds (success)
 - **CPU Load:** `%`
 - **Memory Usage:** `13/15993MB`
+---
 ### Audit: 2026-07-17 09:04:00 UTC
 - **Pipeline:** `bernoulli6_8eb1694`
 - **Branch:** `bernoulli6_8eb1694`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29568433603)
+---
 ### Audit: 2026-07-17 09:03:38 UTC
 - **Pipeline:** `bernoulli7_9838281`
 - **Branch:** `bernoulli7_9838281`
@@ -51,11 +58,13 @@
 - **Modules Runtime:** Used 0 of 300 seconds (success)
 - **CPU Load:** `%`
 - **Memory Usage:** `14/15989MB`
+---
 ### Audit: 2026-07-17 09:04:10 UTC
 - **Pipeline:** `bernoulli8_82e68de`
 - **Branch:** `bernoulli8_82e68de`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29568445930)
+---
 ### Audit: 2026-07-17 09:03:55 UTC
 - **Pipeline:** `bernoulli9_56a38d7`
 - **Branch:** `bernoulli9_56a38d7`
@@ -65,8 +74,7 @@
 - **CPU Load:** `%`
 - **Memory Usage:** `13/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-17 08:08:21 UTC
 - **Pipeline:** `bernoulli10_ca117b7`
@@ -76,6 +84,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-17 08:03:28 UTC
 - **Pipeline:** `bernoulli1_aee9914`
 - **Branch:** `bernoulli1_aee9914`
@@ -84,6 +93,7 @@
 - **Modules Runtime:** Used 4 of 300 seconds (failed)
 - **CPU Load:** `32.5%`
 - **Memory Usage:** `206/15993MB`
+---
 ### Audit: 2026-07-17 08:03:18 UTC
 - **Pipeline:** `bernoulli2_7021ece`
 - **Branch:** `bernoulli2_7021ece`
@@ -92,6 +102,7 @@
 - **Modules Runtime:** Used 3 of 300 seconds (failed)
 - **CPU Load:** `23.3%`
 - **Memory Usage:** `206/15989MB`
+---
 ### Audit: 2026-07-17 08:08:49 UTC
 - **Pipeline:** `bernoulli3_493afea`
 - **Branch:** `bernoulli3_493afea`
@@ -100,6 +111,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-17 08:08:28 UTC
 - **Pipeline:** `bernoulli4_42d49af`
 - **Branch:** `bernoulli4_42d49af`
@@ -108,6 +120,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-17 08:08:58 UTC
 - **Pipeline:** `bernoulli5_e296154`
 - **Branch:** `bernoulli5_e296154`
@@ -116,6 +129,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15988MB`
+---
 ### Audit: 2026-07-17 08:08:45 UTC
 - **Pipeline:** `bernoulli6_8eb1694`
 - **Branch:** `bernoulli6_8eb1694`
@@ -124,6 +138,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-17 08:08:37 UTC
 - **Pipeline:** `bernoulli7_9838281`
 - **Branch:** `bernoulli7_9838281`
@@ -132,6 +147,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-17 08:03:53 UTC
 - **Pipeline:** `bernoulli8_82e68de`
 - **Branch:** `bernoulli8_82e68de`
@@ -140,6 +156,7 @@
 - **Modules Runtime:** Used 5 of 300 seconds (failed)
 - **CPU Load:** `88.3%`
 - **Memory Usage:** `502/15989MB`
+---
 ### Audit: 2026-07-17 08:08:44 UTC
 - **Pipeline:** `bernoulli9_56a38d7`
 - **Branch:** `bernoulli9_56a38d7`
@@ -149,8 +166,7 @@
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15988MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-17 07:08:03 UTC
 - **Pipeline:** `bernoulli10_ca117b7`
@@ -160,6 +176,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15988MB`
+---
 ### Audit: 2026-07-17 07:03:00 UTC
 - **Pipeline:** `bernoulli1_aee9914`
 - **Branch:** `bernoulli1_aee9914`
@@ -168,16 +185,19 @@
 - **Modules Runtime:** Used 3 of 300 seconds (failed)
 - **CPU Load:** `86.3%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-17 07:08:33 UTC
 - **Pipeline:** `bernoulli2_7021ece`
 - **Branch:** `bernoulli2_7021ece`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29561718931)
+---
 ### Audit: 2026-07-17 07:08:45 UTC
 - **Pipeline:** `bernoulli3_493afea`
 - **Branch:** `bernoulli3_493afea`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29561725136)
+---
 ### Audit: 2026-07-17 07:08:41 UTC
 - **Pipeline:** `bernoulli4_42d49af`
 - **Branch:** `bernoulli4_42d49af`
@@ -186,11 +206,13 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-17 07:08:48 UTC
 - **Pipeline:** `bernoulli6_8eb1694`
 - **Branch:** `bernoulli6_8eb1694`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29561743659)
+---
 ### Audit: 2026-07-17 07:08:42 UTC
 - **Pipeline:** `bernoulli7_9838281`
 - **Branch:** `bernoulli7_9838281`
@@ -199,11 +221,13 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15988MB`
+---
 ### Audit: 2026-07-17 07:08:40 UTC
 - **Pipeline:** `bernoulli8_82e68de`
 - **Branch:** `bernoulli8_82e68de`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29561754900)
+---
 ### Audit: 2026-07-17 07:09:15 UTC
 - **Pipeline:** `bernoulli9_56a38d7`
 - **Branch:** `bernoulli9_56a38d7`
@@ -213,14 +237,14 @@
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-17 06:07:46 UTC
 - **Pipeline:** `bernoulli10_ca117b7`
 - **Branch:** `bernoulli10_ca117b7`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29558804935)
+---
 ### Audit: 2026-07-17 06:03:29 UTC
 - **Pipeline:** `bernoulli1_aee9914`
 - **Branch:** `bernoulli1_aee9914`
@@ -229,6 +253,7 @@
 - **Modules Runtime:** Used 5 of 300 seconds (failed)
 - **CPU Load:** `26.2%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-17 06:08:33 UTC
 - **Pipeline:** `bernoulli2_7021ece`
 - **Branch:** `bernoulli2_7021ece`
@@ -237,6 +262,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-17 06:08:34 UTC
 - **Pipeline:** `bernoulli3_493afea`
 - **Branch:** `bernoulli3_493afea`
@@ -245,11 +271,13 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-17 06:08:29 UTC
 - **Pipeline:** `bernoulli4_42d49af`
 - **Branch:** `bernoulli4_42d49af`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29558825369)
+---
 ### Audit: 2026-07-17 07:04:15 UTC
 - **Pipeline:** `bernoulli5_e296154`
 - **Branch:** `bernoulli5_e296154`
@@ -258,6 +286,7 @@
 - **Modules Runtime:** Used 7 of 300 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `265/15989MB`
+---
 ### Audit: 2026-07-17 06:03:20 UTC
 - **Pipeline:** `bernoulli6_8eb1694`
 - **Branch:** `bernoulli6_8eb1694`
@@ -266,6 +295,7 @@
 - **Modules Runtime:** Used 4 of 300 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `265/15988MB`
+---
 ### Audit: 2026-07-17 06:08:53 UTC
 - **Pipeline:** `bernoulli7_9838281`
 - **Branch:** `bernoulli7_9838281`
@@ -274,6 +304,7 @@
 - **Modules Runtime:** Used 301 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-17 06:03:48 UTC
 - **Pipeline:** `bernoulli8_82e68de`
 - **Branch:** `bernoulli8_82e68de`
@@ -282,6 +313,7 @@
 - **Modules Runtime:** Used 4 of 300 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `265/15989MB`
+---
 ### Audit: 2026-07-17 06:08:53 UTC
 - **Pipeline:** `bernoulli9_56a38d7`
 - **Branch:** `bernoulli9_56a38d7`
@@ -291,8 +323,7 @@
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15988MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-17 05:08:07 UTC
 - **Pipeline:** `bernoulli10_ca117b7`
@@ -302,6 +333,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15992MB`
+---
 ### Audit: 2026-07-17 05:03:23 UTC
 - **Pipeline:** `bernoulli1_aee9914`
 - **Branch:** `bernoulli1_aee9914`
@@ -310,6 +342,7 @@
 - **Modules Runtime:** Used 4 of 300 seconds (failed)
 - **CPU Load:** `19.1%`
 - **Memory Usage:** `206/15989MB`
+---
 ### Audit: 2026-07-17 05:02:56 UTC
 - **Pipeline:** `bernoulli2_7021ece`
 - **Branch:** `bernoulli2_7021ece`
@@ -318,6 +351,7 @@
 - **Modules Runtime:** Used 3 of 300 seconds (failed)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `206/15988MB`
+---
 ### Audit: 2026-07-17 05:08:30 UTC
 - **Pipeline:** `bernoulli3_493afea`
 - **Branch:** `bernoulli3_493afea`
@@ -326,6 +360,7 @@
 - **Modules Runtime:** Used 301 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15993MB`
+---
 ### Audit: 2026-07-17 06:08:12 UTC
 - **Pipeline:** `bernoulli5_e296154`
 - **Branch:** `bernoulli5_e296154`
@@ -333,16 +368,19 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29558831124)
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `97.8%`
+---
 ### Audit: 2026-07-17 05:08:53 UTC
 - **Pipeline:** `bernoulli6_8eb1694`
 - **Branch:** `bernoulli6_8eb1694`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29556237618)
+---
 ### Audit: 2026-07-17 05:08:48 UTC
 - **Pipeline:** `bernoulli7_9838281`
 - **Branch:** `bernoulli7_9838281`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29556242489)
+---
 ### Audit: 2026-07-17 05:09:14 UTC
 - **Pipeline:** `bernoulli8_82e68de`
 - **Branch:** `bernoulli8_82e68de`
@@ -356,8 +394,7 @@
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-17 04:08:21 UTC
 - **Pipeline:** `bernoulli10_ca117b7`
@@ -367,6 +404,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-17 04:03:22 UTC
 - **Pipeline:** `bernoulli1_aee9914`
 - **Branch:** `bernoulli1_aee9914`
@@ -375,6 +413,7 @@
 - **Modules Runtime:** Used 4 of 300 seconds (failed)
 - **CPU Load:** `37.2%`
 - **Memory Usage:** `206/15989MB`
+---
 ### Audit: 2026-07-17 04:03:59 UTC
 - **Pipeline:** `bernoulli2_7021ece`
 - **Branch:** `bernoulli2_7021ece`
@@ -383,6 +422,7 @@
 - **Modules Runtime:** Used 9 of 300 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `265/15989MB`
+---
 ### Audit: 2026-07-17 04:08:19 UTC
 - **Pipeline:** `bernoulli3_493afea`
 - **Branch:** `bernoulli3_493afea`
@@ -391,6 +431,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-17 05:08:41 UTC
 - **Pipeline:** `bernoulli4_42d49af`
 - **Branch:** `bernoulli4_42d49af`
@@ -399,11 +440,13 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15993MB`
+---
 ### Audit: 2026-07-17 05:08:49 UTC
 - **Pipeline:** `bernoulli5_e296154`
 - **Branch:** `bernoulli5_e296154`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29556232823)
+---
 ### Audit: 2026-07-17 04:08:41 UTC
 - **Pipeline:** `bernoulli6_8eb1694`
 - **Branch:** `bernoulli6_8eb1694`
@@ -412,6 +455,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15993MB`
+---
 ### Audit: 2026-07-17 04:08:20 UTC
 - **Pipeline:** `bernoulli7_9838281`
 - **Branch:** `bernoulli7_9838281`
@@ -420,6 +464,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-17 04:08:54 UTC
 - **Pipeline:** `bernoulli8_82e68de`
 - **Branch:** `bernoulli8_82e68de`
@@ -428,6 +473,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-17 04:09:03 UTC
 - **Pipeline:** `bernoulli9_56a38d7`
 - **Branch:** `bernoulli9_56a38d7`
@@ -437,14 +483,14 @@
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15988MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-16 23:08:26 UTC
 - **Pipeline:** `bernoulli10_ca117b7`
 - **Branch:** `bernoulli10_ca117b7`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29541094588)
+---
 ### Audit: 2026-07-16 23:03:12 UTC
 - **Pipeline:** `bernoulli1_aee9914`
 - **Branch:** `bernoulli1_aee9914`
@@ -453,6 +499,7 @@
 - **Modules Runtime:** Used 3 of 300 seconds (failed)
 - **CPU Load:** `26.2%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-16 23:07:55 UTC
 - **Pipeline:** `bernoulli2_7021ece`
 - **Branch:** `bernoulli2_7021ece`
@@ -461,11 +508,13 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-16 23:09:02 UTC
 - **Pipeline:** `bernoulli3_493afea`
 - **Branch:** `bernoulli3_493afea`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29541115873)
+---
 ### Audit: 2026-07-17 04:03:40 UTC
 - **Pipeline:** `bernoulli4_42d49af`
 - **Branch:** `bernoulli4_42d49af`
@@ -474,22 +523,26 @@
 - **Modules Runtime:** Used 5 of 300 seconds (failed)
 - **CPU Load:** `26.8%`
 - **Memory Usage:** `502/15989MB`
+---
 ### Audit: 2026-07-17 04:08:48 UTC
 - **Pipeline:** `bernoulli5_e296154`
 - **Branch:** `bernoulli5_e296154`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29553780560)
+---
 ### Audit: 2026-07-16 23:09:01 UTC
 - **Pipeline:** `bernoulli6_8eb1694`
 - **Branch:** `bernoulli6_8eb1694`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29541135289)
 - **Modules Runtime:** Used 301 of 300 seconds (timeout)
+---
 ### Audit: 2026-07-16 23:09:08 UTC
 - **Pipeline:** `bernoulli7_9838281`
 - **Branch:** `bernoulli7_9838281`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29541141109)
+---
 ### Audit: 2026-07-16 23:09:25 UTC
 - **Pipeline:** `bernoulli8_82e68de`
 - **Branch:** `bernoulli8_82e68de`
@@ -498,6 +551,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-16 23:09:18 UTC
 - **Pipeline:** `bernoulli9_56a38d7`
 - **Branch:** `bernoulli9_56a38d7`
@@ -507,14 +561,14 @@
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-16 22:08:00 UTC
 - **Pipeline:** `bernoulli10_ca117b7`
 - **Branch:** `bernoulli10_ca117b7`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29538045590)
+---
 ### Audit: 2026-07-16 22:03:21 UTC
 - **Pipeline:** `bernoulli1_aee9914`
 - **Branch:** `bernoulli1_aee9914`
@@ -523,11 +577,13 @@
 - **Modules Runtime:** Used 4 of 300 seconds (failed)
 - **CPU Load:** `83.3%`
 - **Memory Usage:** `206/15989MB`
+---
 ### Audit: 2026-07-16 22:08:42 UTC
 - **Pipeline:** `bernoulli2_7021ece`
 - **Branch:** `bernoulli2_7021ece`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29538073447)
+---
 ### Audit: 2026-07-16 22:08:13 UTC
 - **Pipeline:** `bernoulli3_493afea`
 - **Branch:** `bernoulli3_493afea`
@@ -536,6 +592,7 @@
 - **Modules Runtime:** Used 301 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-16 23:03:48 UTC
 - **Pipeline:** `bernoulli4_42d49af`
 - **Branch:** `bernoulli4_42d49af`
@@ -544,11 +601,13 @@
 - **Modules Runtime:** Used 4 of 300 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `501/15989MB`
+---
 ### Audit: 2026-07-16 23:08:51 UTC
 - **Pipeline:** `bernoulli5_e296154`
 - **Branch:** `bernoulli5_e296154`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29541128771)
+---
 ### Audit: 2026-07-16 22:08:39 UTC
 - **Pipeline:** `bernoulli6_8eb1694`
 - **Branch:** `bernoulli6_8eb1694`
@@ -557,6 +616,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-16 22:09:28 UTC
 - **Pipeline:** `bernoulli7_9838281`
 - **Branch:** `bernoulli7_9838281`
@@ -565,6 +625,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15988MB`
+---
 ### Audit: 2026-07-16 22:09:41 UTC
 - **Pipeline:** `bernoulli8_82e68de`
 - **Branch:** `bernoulli8_82e68de`
@@ -573,6 +634,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15993MB`
+---
 ### Audit: 2026-07-16 22:09:46 UTC
 - **Pipeline:** `bernoulli9_56a38d7`
 - **Branch:** `bernoulli9_56a38d7`
@@ -582,14 +644,14 @@
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-16 21:08:54 UTC
 - **Pipeline:** `bernoulli10_ca117b7`
 - **Branch:** `bernoulli10_ca117b7`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29534341767)
+---
 ### Audit: 2026-07-16 21:03:39 UTC
 - **Pipeline:** `bernoulli1_aee9914`
 - **Branch:** `bernoulli1_aee9914`
@@ -598,11 +660,13 @@
 - **Modules Runtime:** Used 4 of 300 seconds (failed)
 - **CPU Load:** `18.7%`
 - **Memory Usage:** `205/15988MB`
+---
 ### Audit: 2026-07-16 21:08:06 UTC
 - **Pipeline:** `bernoulli2_7021ece`
 - **Branch:** `bernoulli2_7021ece`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29534354430)
+---
 ### Audit: 2026-07-16 21:08:12 UTC
 - **Pipeline:** `bernoulli3_493afea`
 - **Branch:** `bernoulli3_493afea`
@@ -611,6 +675,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15988MB`
+---
 ### Audit: 2026-07-16 22:08:50 UTC
 - **Pipeline:** `bernoulli4_42d49af`
 - **Branch:** `bernoulli4_42d49af`
@@ -618,6 +683,7 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29538085156)
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `97.8%`
+---
 ### Audit: 2026-07-16 22:04:11 UTC
 - **Pipeline:** `bernoulli5_e296154`
 - **Branch:** `bernoulli5_e296154`
@@ -626,11 +692,13 @@
 - **Modules Runtime:** Used 5 of 300 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `265/15993MB`
+---
 ### Audit: 2026-07-16 21:08:32 UTC
 - **Pipeline:** `bernoulli6_8eb1694`
 - **Branch:** `bernoulli6_8eb1694`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29534380789)
+---
 ### Audit: 2026-07-16 21:04:15 UTC
 - **Pipeline:** `bernoulli7_9838281`
 - **Branch:** `bernoulli7_9838281`
@@ -639,6 +707,7 @@
 - **Modules Runtime:** Used 5 of 300 seconds (failed)
 - **CPU Load:** `47.6%`
 - **Memory Usage:** `265/15988MB`
+---
 ### Audit: 2026-07-16 21:08:55 UTC
 - **Pipeline:** `bernoulli8_82e68de`
 - **Branch:** `bernoulli8_82e68de`
@@ -646,6 +715,7 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29534393051)
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `95.5%`
+---
 ### Audit: 2026-07-16 21:09:34 UTC
 - **Pipeline:** `bernoulli9_56a38d7`
 - **Branch:** `bernoulli9_56a38d7`
@@ -655,8 +725,7 @@
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-16 20:03:45 UTC
 - **Pipeline:** `bernoulli10_ca117b7`
@@ -666,6 +735,7 @@
 - **Modules Runtime:** Used 5 of 300 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `265/15988MB`
+---
 ### Audit: 2026-07-16 20:03:48 UTC
 - **Pipeline:** `bernoulli1_aee9914`
 - **Branch:** `bernoulli1_aee9914`
@@ -674,6 +744,7 @@
 - **Modules Runtime:** Used 6 of 300 seconds (failed)
 - **CPU Load:** `40%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-16 20:08:23 UTC
 - **Pipeline:** `bernoulli2_7021ece`
 - **Branch:** `bernoulli2_7021ece`
@@ -682,6 +753,7 @@
 - **Modules Runtime:** Used 301 of 300 seconds (timeout)
 - **CPU Load:** `91.1%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-16 20:08:22 UTC
 - **Pipeline:** `bernoulli3_493afea`
 - **Branch:** `bernoulli3_493afea`
@@ -690,11 +762,13 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-16 21:08:35 UTC
 - **Pipeline:** `bernoulli4_42d49af`
 - **Branch:** `bernoulli4_42d49af`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29534366920)
+---
 ### Audit: 2026-07-16 21:08:44 UTC
 - **Pipeline:** `bernoulli5_e296154`
 - **Branch:** `bernoulli5_e296154`
@@ -704,8 +778,7 @@
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15993MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-16 16:08:40 UTC
 - **Pipeline:** `bernoulli10_ca117b7`
@@ -724,6 +797,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1129/15989MB`
+---
 ### Audit: 2026-07-16 16:07:09 UTC
 - **Pipeline:** `bernoulli2_7021ece`
 - **Branch:** `bernoulli2_7021ece`
@@ -732,6 +806,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1147/15989MB`
+---
 ### Audit: 2026-07-16 20:03:41 UTC
 - **Pipeline:** `bernoulli4_42d49af`
 - **Branch:** `bernoulli4_42d49af`
@@ -739,6 +814,7 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29530265564)
 - **Modules Runtime:** Used 6 of 300 seconds (failed)
 - **CPU Load:** `59.5%`
+---
 ### Audit: 2026-07-16 20:04:09 UTC
 - **Pipeline:** `bernoulli5_e296154`
 - **Branch:** `bernoulli5_e296154`
@@ -747,6 +823,7 @@
 - **Modules Runtime:** Used 6 of 300 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `501/15989MB`
+---
 ### Audit: 2026-07-16 20:08:59 UTC
 - **Pipeline:** `bernoulli6_8eb1694`
 - **Branch:** `bernoulli6_8eb1694`
@@ -755,6 +832,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-16 20:09:12 UTC
 - **Pipeline:** `bernoulli7_9838281`
 - **Branch:** `bernoulli7_9838281`
@@ -763,6 +841,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-16 20:09:06 UTC
 - **Pipeline:** `bernoulli8_82e68de`
 - **Branch:** `bernoulli8_82e68de`
@@ -771,6 +850,7 @@
 - **Modules Runtime:** Used 300 of 300 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-16 20:04:18 UTC
 - **Pipeline:** `bernoulli9_56a38d7`
 - **Branch:** `bernoulli9_56a38d7`
@@ -780,8 +860,7 @@
 - **CPU Load:** `100%`
 - **Memory Usage:** `265/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-16 16:07:05 UTC
 - **Pipeline:** `bernoulli1_aee9914`
@@ -791,6 +870,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `13.6%`
 - **Memory Usage:** `1128/15989MB`
+---
 ### Audit: 2026-07-16 16:06:58 UTC
 - **Pipeline:** `bernoulli3_493afea`
 - **Branch:** `bernoulli3_493afea`
@@ -799,6 +879,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1203/15989MB`
+---
 ### Audit: 2026-07-16 16:07:31 UTC
 - **Pipeline:** `bernoulli4_42d49af`
 - **Branch:** `bernoulli4_42d49af`
@@ -807,6 +888,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1090/15989MB`
+---
 ### Audit: 2026-07-16 16:06:56 UTC
 - **Pipeline:** `bernoulli5_e296154`
 - **Branch:** `bernoulli5_e296154`
@@ -815,6 +897,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1234/15989MB`
+---
 ### Audit: 2026-07-16 16:07:12 UTC
 - **Pipeline:** `bernoulli6_8eb1694`
 - **Branch:** `bernoulli6_8eb1694`
@@ -823,6 +906,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1159/15989MB`
+---
 ### Audit: 2026-07-16 16:07:26 UTC
 - **Pipeline:** `bernoulli7_9838281`
 - **Branch:** `bernoulli7_9838281`
@@ -831,6 +915,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1099/15989MB`
+---
 ### Audit: 2026-07-16 16:07:01 UTC
 - **Pipeline:** `bernoulli8_82e68de`
 - **Branch:** `bernoulli8_82e68de`
@@ -839,6 +924,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1139/15989MB`
+---
 ### Audit: 2026-07-16 16:07:08 UTC
 - **Pipeline:** `bernoulli9_56a38d7`
 - **Branch:** `bernoulli9_56a38d7`
@@ -929,8 +1015,7 @@
 - **CPU Load:** `0%`
 - **Memory Usage:** `1328/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-16 09:03:03 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
@@ -941,8 +1026,7 @@
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1355/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-16 08:03:03 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
@@ -953,8 +1037,7 @@
 - **CPU Load:** `7.3%`
 - **Memory Usage:** `1290/15988MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-16 07:02:33 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
@@ -965,8 +1048,7 @@
 - **CPU Load:** `5%`
 - **Memory Usage:** `1332/15993MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-16 06:02:17 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
@@ -977,8 +1059,7 @@
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1230/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-15 23:02:26 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
@@ -990,12 +1071,12 @@
 - **Memory Usage:** `1381/15989MB`
 ---
 
+---
 ### Audit: 2026-07-15 21:00:05 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `bernoulli_solver_pipeline_36d1c5a`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-15 20:02:23 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
@@ -1006,8 +1087,7 @@
 - **CPU Load:** `2.3%`
 - **Memory Usage:** `1257/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-15 19:37:35 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
@@ -1017,6 +1097,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1176/15989MB`
+---
 ### Audit: 2026-07-15 23:19:33 UTC
 - **Pipeline:** `bernoulli_solver_pipeline_c76a9fe.json`
 - **Branch:** `main`
@@ -1553,59 +1634,71 @@
 - **Memory Usage:** 1610/15989MB
 ---
 
+---
 ### Audit: 2026-07-11 11:00:21 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_4`
 ---
 
+---
 ### Audit: 2026-07-11 10:00:25 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_4`
 ---
 
+---
 ### Audit: 2026-07-11 08:00:23 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_4`
 ---
 
+---
 ### Audit: 2026-07-11 07:00:21 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_4`
 ---
 
+---
 ### Audit: 2026-07-11 06:00:23 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_4`
 ---
 
+---
 ### Audit: 2026-07-11 05:00:21 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_4`
 ---
 
+---
 ### Audit: 2026-07-11 04:00:24 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_4`
 ---
 
+---
 ### Audit: 2026-07-10 22:00:33 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_4`
 ---
 
+---
 ### Audit: 2026-07-10 21:00:36 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_4`
 ---
 
+---
 ### Audit: 2026-07-10 20:00:34 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_4`
 ---
 
+---
 ### Audit: 2026-07-10 19:00:24 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_4`
+---
 ### Audit: 2026-07-11 12:01:58 UTC
 - **Pipeline:** `nozzle_pipeline6_7b290a2.json`
 - **Branch:** `nozzle_6`
@@ -1615,65 +1708,79 @@
 - **Memory Usage:** 1484/15988MB
 ---
 
+---
 ### Audit: 2026-07-11 11:00:32 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_6`
 ---
 
+---
 ### Audit: 2026-07-11 10:00:37 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_6`
 ---
 
+---
 ### Audit: 2026-07-11 08:00:35 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_6`
 ---
 
+---
 ### Audit: 2026-07-11 07:00:33 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_6`
 ---
 
+---
 ### Audit: 2026-07-11 06:00:35 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_6`
 ---
 
+---
 ### Audit: 2026-07-11 05:00:32 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_6`
 ---
 
+---
 ### Audit: 2026-07-11 04:00:37 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_6`
 ---
 
+---
 ### Audit: 2026-07-10 22:00:50 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_6`
 ---
 
+---
 ### Audit: 2026-07-10 21:00:55 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_6`
 ---
 
+---
 ### Audit: 2026-07-10 20:00:52 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_6`
 ---
 
+---
 ### Audit: 2026-07-10 19:00:36 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `nozzle_6`
+---
 ### Audit: 2026-07-11 10:02:29 UTC
 - **Pipeline:** `nozzle_pipeline8_894c0c8.json`
 - **Branch:** `nozzle_8`
+---
 ### Audit: 2026-07-11 10:02:33 UTC
 - **Pipeline:** `nozzle_pipeline7_ca9870f.json`
 - **Branch:** `nozzle_7`
+---
 ### Audit: 2026-07-11 10:02:12 UTC
 - **Pipeline:** `nozzle_pipeline5_4e2e143.json`
 - **Branch:** `nozzle_5`
@@ -1681,6 +1788,7 @@
 - **Modules Runtime:** Used 0 of 360 seconds (success)
 - **CPU Load:** 0.0%
 - **Memory Usage:** 3/15988MB
+---
 ### Audit: 2026-07-11 10:02:10 UTC
 - **Pipeline:** `nozzle_pipeline3_73261a1.json`
 - **Branch:** `nozzle_3`
@@ -1688,6 +1796,7 @@
 - **Modules Runtime:** Used 0 of 360 seconds (success)
 - **CPU Load:** 0.0%
 - **Memory Usage:** 3/15989MB
+---
 ### Audit: 2026-07-11 10:01:54 UTC
 - **Pipeline:** `nozzle_pipeline2_9c2b952.json`
 - **Branch:** `nozzle_2`
@@ -1695,6 +1804,7 @@
 - **Modules Runtime:** Used 0 of 360 seconds (success)
 - **CPU Load:** 0.0%
 - **Memory Usage:** 3/15993MB
+---
 ### Audit: 2026-07-11 10:01:47 UTC
 - **Pipeline:** `nozzle_pipeline1_a9c4c3e.json`
 - **Branch:** `nozzle_1`
@@ -1703,8 +1813,7 @@
 - **CPU Load:** 0.0%
 - **Memory Usage:** 3/15989MB
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-11 08:02:40 UTC
 - **Pipeline:** `nozzle_pipeline8_894c0c8.json`
@@ -1712,18 +1821,21 @@
 - **Status:** success
 - **Modules Runtime:** Used 4 of 360 seconds (failed)
 - **CPU Load:** 26.2%
+---
 ### Audit: 2026-07-11 08:02:28 UTC
 - **Pipeline:** `nozzle_pipeline7_ca9870f.json`
 - **Branch:** `nozzle_7`
 - **Status:** success
 - **Modules Runtime:** Used 3 of 360 seconds (failed)
 - **CPU Load:** 19%
+---
 ### Audit: 2026-07-11 08:02:18 UTC
 - **Pipeline:** `nozzle_pipeline5_4e2e143.json`
 - **Branch:** `nozzle_5`
 - **Status:** success
 - **Modules Runtime:** Used 4 of 360 seconds (failed)
 - **CPU Load:** 41.8%
+---
 ### Audit: 2026-07-11 08:08:02 UTC
 - **Pipeline:** `nozzle_pipeline2_9c2b952.json`
 - **Branch:** `nozzle_2`
@@ -1731,6 +1843,7 @@
 - **Modules Runtime:** Used 360 of 360 seconds (timeout)
 - **CPU Load:** 100%
 - **Memory Usage:** 3/15989MB
+---
 ### Audit: 2026-07-11 08:02:06 UTC
 - **Pipeline:** `nozzle_pipeline1_a9c4c3e.json`
 - **Branch:** `nozzle_1`
@@ -1739,8 +1852,7 @@
 - **CPU Load:** 28.6%
 - **Memory Usage:** 194/15989MB
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-11 07:03:13 UTC
 - **Pipeline:** `nozzle_pipeline8_894c0c8.json`
@@ -1749,6 +1861,7 @@
 - **Modules Runtime:** Used 3 of 360 seconds (failed)
 - **CPU Load:** 84.5%
 - **Memory Usage:** 193/15993MB
+---
 ### Audit: 2026-07-11 07:02:18 UTC
 - **Pipeline:** `nozzle_pipeline7_ca9870f.json`
 - **Branch:** `nozzle_7`
@@ -1756,12 +1869,14 @@
 - **Modules Runtime:** Used 2 of 360 seconds (failed)
 - **CPU Load:** 7.3%
 - **Memory Usage:** 194/15989MB
+---
 ### Audit: 2026-07-11 07:02:21 UTC
 - **Pipeline:** `nozzle_pipeline5_4e2e143.json`
 - **Branch:** `nozzle_5`
 - **Status:** success
 - **Modules Runtime:** Used 3 of 360 seconds (failed)
 - **CPU Load:** 28.6%
+---
 ### Audit: 2026-07-11 08:02:15 UTC
 - **Pipeline:** `nozzle_pipeline3_73261a1.json`
 - **Branch:** `nozzle_3`
@@ -1769,6 +1884,7 @@
 - **Modules Runtime:** Used 3 of 360 seconds (failed)
 - **CPU Load:** 78.6%
 - **Memory Usage:** 254/15989MB
+---
 ### Audit: 2026-07-11 07:01:57 UTC
 - **Pipeline:** `nozzle_pipeline2_9c2b952.json`
 - **Branch:** `nozzle_2`
@@ -1776,6 +1892,7 @@
 - **Modules Runtime:** Used 5 of 360 seconds (failed)
 - **CPU Load:** 100%
 - **Memory Usage:** 489/15989MB
+---
 ### Audit: 2026-07-11 07:01:56 UTC
 - **Pipeline:** `nozzle_pipeline1_a9c4c3e.json`
 - **Branch:** `nozzle_1`
@@ -1784,8 +1901,7 @@
 - **CPU Load:** 23.8%
 - **Memory Usage:** 194/15988MB
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-11 06:02:34 UTC
 - **Pipeline:** `nozzle_pipeline8_894c0c8.json`
@@ -1794,6 +1910,7 @@
 - **Modules Runtime:** Used 2 of 360 seconds (failed)
 - **CPU Load:** 43.9%
 - **Memory Usage:** 194/15993MB
+---
 ### Audit: 2026-07-11 06:02:36 UTC
 - **Pipeline:** `nozzle_pipeline7_ca9870f.json`
 - **Branch:** `nozzle_7`
@@ -1801,6 +1918,7 @@
 - **Modules Runtime:** Used 5 of 360 seconds (failed)
 - **CPU Load:** 26.2%
 - **Memory Usage:** 193/15989MB
+---
 ### Audit: 2026-07-11 07:08:19 UTC
 - **Pipeline:** `nozzle_pipeline3_73261a1.json`
 - **Branch:** `nozzle_3`
@@ -1808,6 +1926,7 @@
 - **Modules Runtime:** Used 360 of 360 seconds (timeout)
 - **CPU Load:** 100%
 - **Memory Usage:** 3/15989MB
+---
 ### Audit: 2026-07-11 06:08:00 UTC
 - **Pipeline:** `nozzle_pipeline2_9c2b952.json`
 - **Branch:** `nozzle_2`
@@ -1815,6 +1934,7 @@
 - **Modules Runtime:** Used 360 of 360 seconds (timeout)
 - **CPU Load:** 100%
 - **Memory Usage:** 3/15988MB
+---
 ### Audit: 2026-07-11 06:02:07 UTC
 - **Pipeline:** `nozzle_pipeline1_a9c4c3e.json`
 - **Branch:** `nozzle_1`
@@ -1823,8 +1943,7 @@
 - **CPU Load:** 25%
 - **Memory Usage:** 194/15989MB
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-10 18:42:58 UTC
 - **Pipeline:** `nozzle_pipeline6_7b290a2.json`
@@ -1833,12 +1952,14 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** 2.4%
 - **Memory Usage:** 1324/15989MB
+---
 ### Audit: 2026-07-11 05:02:44 UTC
 - **Pipeline:** `nozzle_pipeline8_894c0c8.json`
 - **Branch:** `nozzle_8`
 - **Status:** success
 - **Modules Runtime:** Used 2 of 360 seconds (failed)
 - **CPU Load:** 4.8%
+---
 ### Audit: 2026-07-11 05:02:47 UTC
 - **Pipeline:** `nozzle_pipeline7_ca9870f.json`
 - **Branch:** `nozzle_7`
@@ -1846,6 +1967,7 @@
 - **Modules Runtime:** Used 4 of 360 seconds (failed)
 - **CPU Load:** 30.2%
 - **Memory Usage:** 194/15989MB
+---
 ### Audit: 2026-07-11 06:02:14 UTC
 - **Pipeline:** `nozzle_pipeline5_4e2e143.json`
 - **Branch:** `nozzle_5`
@@ -1853,6 +1975,7 @@
 - **Modules Runtime:** Used 3 of 360 seconds (failed)
 - **CPU Load:** 48.8%
 - **Memory Usage:** 193/15993MB
+---
 ### Audit: 2026-07-11 06:01:59 UTC
 - **Pipeline:** `nozzle_pipeline3_73261a1.json`
 - **Branch:** `nozzle_3`
@@ -1860,6 +1983,7 @@
 - **Modules Runtime:** Used 4 of 360 seconds (failed)
 - **CPU Load:** 97.9%
 - **Memory Usage:** 253/15993MB
+---
 ### Audit: 2026-07-11 05:02:03 UTC
 - **Pipeline:** `nozzle_pipeline2_9c2b952.json`
 - **Branch:** `nozzle_2`
@@ -1867,6 +1991,7 @@
 - **Modules Runtime:** Used 4 of 360 seconds (failed)
 - **CPU Load:** 47.8%
 - **Memory Usage:** 253/15989MB
+---
 ### Audit: 2026-07-11 05:01:41 UTC
 - **Pipeline:** `nozzle_pipeline1_a9c4c3e.json`
 - **Branch:** `nozzle_1`
@@ -1875,8 +2000,7 @@
 - **CPU Load:** 4.4%
 - **Memory Usage:** 195/15989MB
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-11 04:02:52 UTC
 - **Pipeline:** `nozzle_pipeline8_894c0c8.json`
@@ -1884,18 +2008,21 @@
 - **Status:** success
 - **Modules Runtime:** Used 3 of 360 seconds (failed)
 - **CPU Load:** 26.2%
+---
 ### Audit: 2026-07-11 04:02:37 UTC
 - **Pipeline:** `nozzle_pipeline7_ca9870f.json`
 - **Branch:** `nozzle_7`
 - **Status:** success
 - **Modules Runtime:** Used 3 of 360 seconds (failed)
 - **CPU Load:** 22.7%
+---
 ### Audit: 2026-07-11 05:02:17 UTC
 - **Pipeline:** `nozzle_pipeline5_4e2e143.json`
 - **Branch:** `nozzle_5`
 - **Status:** success
 - **Modules Runtime:** Used 3 of 360 seconds (failed)
 - **CPU Load:** 9.5%
+---
 ### Audit: 2026-07-11 05:07:54 UTC
 - **Pipeline:** `nozzle_pipeline3_73261a1.json`
 - **Branch:** `nozzle_3`
@@ -1903,6 +2030,7 @@
 - **Modules Runtime:** Used 360 of 360 seconds (timeout)
 - **CPU Load:** 100%
 - **Memory Usage:** 3/15989MB
+---
 ### Audit: 2026-07-11 04:02:21 UTC
 - **Pipeline:** `nozzle_pipeline2_9c2b952.json`
 - **Branch:** `nozzle_2`
@@ -1910,6 +2038,7 @@
 - **Modules Runtime:** Used 5 of 360 seconds (failed)
 - **CPU Load:** 24.4%
 - **Memory Usage:** 253/15993MB
+---
 ### Audit: 2026-07-11 04:01:54 UTC
 - **Pipeline:** `nozzle_pipeline1_a9c4c3e.json`
 - **Branch:** `nozzle_1`
@@ -1918,8 +2047,7 @@
 - **CPU Load:** 17.5%
 - **Memory Usage:** 194/15989MB
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-10 18:40:15 UTC
 - **Pipeline:** `nozzle_pipeline4_fa2bf55.json`
@@ -1928,6 +2056,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** 2.4%
 - **Memory Usage:** 1453/15989MB
+---
 ### Audit: 2026-07-10 22:02:59 UTC
 - **Pipeline:** `nozzle_pipeline8_894c0c8.json`
 - **Branch:** `nozzle_8`
@@ -1935,6 +2064,7 @@
 - **Modules Runtime:** Used 2 of 360 seconds (failed)
 - **CPU Load:** 51.1%
 - **Memory Usage:** 193/15989MB
+---
 ### Audit: 2026-07-10 22:03:03 UTC
 - **Pipeline:** `nozzle_pipeline7_ca9870f.json`
 - **Branch:** `nozzle_7`
@@ -1942,12 +2072,14 @@
 - **Modules Runtime:** Used 2 of 360 seconds (failed)
 - **CPU Load:** 52.4%
 - **Memory Usage:** 194/15993MB
+---
 ### Audit: 2026-07-11 04:02:18 UTC
 - **Pipeline:** `nozzle_pipeline5_4e2e143.json`
 - **Branch:** `nozzle_5`
 - **Status:** success
 - **Modules Runtime:** Used 2 of 360 seconds (failed)
 - **CPU Load:** 26.2%
+---
 ### Audit: 2026-07-11 04:08:12 UTC
 - **Pipeline:** `nozzle_pipeline3_73261a1.json`
 - **Branch:** `nozzle_3`
@@ -1955,6 +2087,7 @@
 - **Modules Runtime:** Used 361 of 360 seconds (timeout)
 - **CPU Load:** 100%
 - **Memory Usage:** 3/15989MB
+---
 ### Audit: 2026-07-10 22:02:11 UTC
 - **Pipeline:** `nozzle_pipeline2_9c2b952.json`
 - **Branch:** `nozzle_2`
@@ -1962,6 +2095,7 @@
 - **Modules Runtime:** Used 4 of 360 seconds (failed)
 - **CPU Load:** 55.8%
 - **Memory Usage:** 489/15989MB
+---
 ### Audit: 2026-07-10 22:02:10 UTC
 - **Pipeline:** `nozzle_pipeline1_a9c4c3e.json`
 - **Branch:** `nozzle_1`
@@ -1970,8 +2104,7 @@
 - **CPU Load:** 4.8%
 - **Memory Usage:** 194/15989MB
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-10 21:03:07 UTC
 - **Pipeline:** `nozzle_pipeline8_894c0c8.json`
@@ -1979,6 +2112,7 @@
 - **Status:** success
 - **Modules Runtime:** Used 2 of 360 seconds (failed)
 - **CPU Load:** 24.4%
+---
 ### Audit: 2026-07-10 21:02:38 UTC
 - **Pipeline:** `nozzle_pipeline7_ca9870f.json`
 - **Branch:** `nozzle_7`
@@ -1986,15 +2120,18 @@
 - **Modules Runtime:** Used 3 of 360 seconds (failed)
 - **CPU Load:** 88.1%
 - **Memory Usage:** 193/15989MB
+---
 ### Audit: 2026-07-10 22:03:01 UTC
 - **Pipeline:** `nozzle_pipeline5_4e2e143.json`
 - **Branch:** `nozzle_5`
 - **Status:** success
 - **Modules Runtime:** Used 5 of 360 seconds (failed)
 - **CPU Load:** 26.2%
+---
 ### Audit: 2026-07-10 22:08:26 UTC
 - **Pipeline:** `nozzle_pipeline3_73261a1.json`
 - **Branch:** `nozzle_3`
+---
 ### Audit: 2026-07-10 21:08:09 UTC
 - **Pipeline:** `nozzle_pipeline2_9c2b952.json`
 - **Branch:** `nozzle_2`
@@ -2002,6 +2139,7 @@
 - **Modules Runtime:** Used 360 of 360 seconds (timeout)
 - **CPU Load:** 100%
 - **Memory Usage:** 3/15989MB
+---
 ### Audit: 2026-07-10 21:02:02 UTC
 - **Pipeline:** `nozzle_pipeline1_a9c4c3e.json`
 - **Branch:** `nozzle_1`
@@ -2010,8 +2148,7 @@
 - **CPU Load:** 14.6%
 - **Memory Usage:** 194/15989MB
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-10 20:03:09 UTC
 - **Pipeline:** `nozzle_pipeline8_894c0c8.json`
@@ -2020,6 +2157,7 @@
 - **Modules Runtime:** Used 3 of 360 seconds (failed)
 - **CPU Load:** 26.8%
 - **Memory Usage:** 193/15989MB
+---
 ### Audit: 2026-07-10 20:03:04 UTC
 - **Pipeline:** `nozzle_pipeline7_ca9870f.json`
 - **Branch:** `nozzle_7`
@@ -2027,15 +2165,18 @@
 - **Modules Runtime:** Used 3 of 360 seconds (failed)
 - **CPU Load:** 25%
 - **Memory Usage:** 195/15992MB
+---
 ### Audit: 2026-07-10 21:02:38 UTC
 - **Pipeline:** `nozzle_pipeline5_4e2e143.json`
 - **Branch:** `nozzle_5`
 - **Status:** success
 - **Modules Runtime:** Used 3 of 360 seconds (failed)
 - **CPU Load:** 47.6%
+---
 ### Audit: 2026-07-10 21:08:46 UTC
 - **Pipeline:** `nozzle_pipeline3_73261a1.json`
 - **Branch:** `nozzle_3`
+---
 ### Audit: 2026-07-10 20:08:19 UTC
 - **Pipeline:** `nozzle_pipeline2_9c2b952.json`
 - **Branch:** `nozzle_2`
@@ -2043,6 +2184,7 @@
 - **Modules Runtime:** Used 360 of 360 seconds (timeout)
 - **CPU Load:** 100%
 - **Memory Usage:** 3/15989MB
+---
 ### Audit: 2026-07-10 20:02:19 UTC
 - **Pipeline:** `nozzle_pipeline1_a9c4c3e.json`
 - **Branch:** `nozzle_1`
@@ -2051,8 +2193,7 @@
 - **CPU Load:** 14.6%
 - **Memory Usage:** 194/15989MB
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-10 19:02:55 UTC
 - **Pipeline:** `nozzle_pipeline8_894c0c8.json`
@@ -2061,6 +2202,7 @@
 - **Modules Runtime:** Used 2 of 360 seconds (failed)
 - **CPU Load:** 19.1%
 - **Memory Usage:** 194/15993MB
+---
 ### Audit: 2026-07-10 19:02:33 UTC
 - **Pipeline:** `nozzle_pipeline7_ca9870f.json`
 - **Branch:** `nozzle_7`
@@ -2068,6 +2210,7 @@
 - **Modules Runtime:** Used 2 of 360 seconds (failed)
 - **CPU Load:** 85.4%
 - **Memory Usage:** 194/15988MB
+---
 ### Audit: 2026-07-10 20:03:03 UTC
 - **Pipeline:** `nozzle_pipeline5_4e2e143.json`
 - **Branch:** `nozzle_5`
@@ -2075,6 +2218,7 @@
 - **Modules Runtime:** Used 6 of 360 seconds (failed)
 - **CPU Load:** 24.4%
 - **Memory Usage:** 194/15988MB
+---
 ### Audit: 2026-07-10 20:08:36 UTC
 - **Pipeline:** `nozzle_pipeline3_73261a1.json`
 - **Branch:** `nozzle_3`
@@ -2083,8 +2227,7 @@
 - **CPU Load:** 100%
 - **Memory Usage:** 3/15993MB
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-10 19:02:28 UTC
 - **Pipeline:** `nozzle_pipeline5_4e2e143.json`
@@ -2092,6 +2235,7 @@
 - **Status:** success
 - **Modules Runtime:** Used 4 of 360 seconds (failed)
 - **CPU Load:** 70.7%
+---
 ### Audit: 2026-07-10 19:02:14 UTC
 - **Pipeline:** `nozzle_pipeline3_73261a1.json`
 - **Branch:** `nozzle_3`
@@ -2099,6 +2243,7 @@
 - **Modules Runtime:** Used 4 of 360 seconds (failed)
 - **CPU Load:** 34.2%
 - **Memory Usage:** 253/15989MB
+---
 ### Audit: 2026-07-10 19:08:29 UTC
 - **Pipeline:** `nozzle_pipeline2_9c2b952.json`
 - **Branch:** `nozzle_2`
@@ -2106,6 +2251,7 @@
 - **Modules Runtime:** Used 360 of 360 seconds (timeout)
 - **CPU Load:** 100%
 - **Memory Usage:** 3/15988MB
+---
 ### Audit: 2026-07-10 19:02:07 UTC
 - **Pipeline:** `nozzle_pipeline1_a9c4c3e.json`
 - **Branch:** `nozzle_1`
@@ -2114,8 +2260,7 @@
 - **CPU Load:** 38.1%
 - **Memory Usage:** 194/15989MB
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
+
 ---
 ### Audit: 2026-07-10 18:44:54 UTC
 - **Pipeline:** `nozzle_pipeline8_894c0c8.json`
@@ -2124,6 +2269,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** 0%
 - **Memory Usage:** 1449/15989MB
+---
 ### Audit: 2026-07-10 18:43:46 UTC
 - **Pipeline:** `nozzle_pipeline7_ca9870f.json`
 - **Branch:** `nozzle_7`
@@ -2131,6 +2277,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** 4.4%
 - **Memory Usage:** 1352/15989MB
+---
 ### Audit: 2026-07-10 18:41:55 UTC
 - **Pipeline:** `nozzle_pipeline5_4e2e143.json`
 - **Branch:** `nozzle_5`
@@ -2138,6 +2285,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** 2.3%
 - **Memory Usage:** 1306/15993MB
+---
 ### Audit: 2026-07-10 18:39:16 UTC
 - **Pipeline:** `nozzle_pipeline3_73261a1.json`
 - **Branch:** `nozzle_3`
@@ -2145,6 +2293,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** 0%
 - **Memory Usage:** 1502/15989MB
+---
 ### Audit: 2026-07-10 18:38:04 UTC
 - **Pipeline:** `nozzle_pipeline2_9c2b952.json`
 - **Branch:** `nozzle_2`
@@ -2152,6 +2301,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** 0%
 - **Memory Usage:** 1487/15989MB
+---
 ### Audit: 2026-07-10 18:37:01 UTC
 - **Pipeline:** `nozzle_pipeline1_a9c4c3e.json`
 - **Branch:** `nozzle_1`
