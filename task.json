@@ -1,5 +1,5 @@
 {
-    "pipeline_id": "bernoulli10_f14864a.json",
+    "pipeline_id": "pre_navier_stokes_2c89383.json",
     "library_repository_url": "https://github.com/Dmitrii-Zavalin-Deployments/fluid_dynamics_simulator.git",
     "version_tag": "main"
 }
