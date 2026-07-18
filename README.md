@@ -1,8 +1,15 @@
 # 🛰️ Simulators Aggregator Performance Audit
-
-### Audit: 2026-07-18 13:00:10 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
+### 📚 Resources & Documentation
+- **Tutorial/Book:** ***currently in development***
+---
+### Audit: 2026-07-18 13:03:14 UTC
+- **Pipeline:** `pre_navier_stokes_solver1_5bf26e0.json`
 - **Branch:** `pre_navier_stokes_solver1_5bf26e0`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29645348001)
+- **Modules Runtime:** Used 4 of 450 seconds (failed)
+- **CPU Load:** `11.6%`
+- **Memory Usage:** `206/15989MB`
 ---
 ### 📚 Resources & Documentation
 - **Tutorial/Book:** ***currently in development***
