@@ -1,5 +1,5 @@
 {
-    "pipeline_id": "pre_navier_stokes_solver9_4e0c2ed.json",
+    "pipeline_id": "main_branch_pipeline_7ac6b20.json",
     "library_repository_url": "https://github.com/Dmitrii-Zavalin-Deployments/fluid_dynamics_simulator.git",
-    "version_tag": "prototype_12"
+    "version_tag": "main"
 }
