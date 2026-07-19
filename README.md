@@ -10,36 +10,43 @@
 - **Modules Runtime:** Used 0 of 450 seconds (success)
 - **CPU Load:** `%`
 - **Memory Usage:** `13/15988MB`
+---
 ### Audit: 2026-07-18 14:03:05 UTC
 - **Pipeline:** `pre_navier_stokes_solver1_5bf26e0.json`
 - **Branch:** `pre_navier_stokes_solver1_5bf26e0`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29647197787)
+---
 ### Audit: 2026-07-18 14:03:06 UTC
 - **Pipeline:** `pre_navier_stokes_solver2_07c17a0.json`
 - **Branch:** `pre_navier_stokes_solver2_07c17a0`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29647201324)
+---
 ### Audit: 2026-07-18 14:04:16 UTC
 - **Pipeline:** `pre_navier_stokes_solver3_9c3c51a.json`
 - **Branch:** `pre_navier_stokes_solver3_9c3c51a`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29647204970)
+---
 ### Audit: 2026-07-18 14:04:04 UTC
 - **Pipeline:** `pre_navier_stokes_solver4_4540739.json`
 - **Branch:** `pre_navier_stokes_solver4_4540739`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29647208883)
+---
 ### Audit: 2026-07-18 14:03:31 UTC
 - **Pipeline:** `pre_navier_stokes_solver5_d98c8a5.json`
 - **Branch:** `pre_navier_stokes_solver5_d98c8a5`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29647212129)
+---
 ### Audit: 2026-07-18 14:03:53 UTC
 - **Pipeline:** `pre_navier_stokes_solver6_05dea64.json`
 - **Branch:** `pre_navier_stokes_solver6_05dea64`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29647215240)
+---
 ### Audit: 2026-07-18 14:03:41 UTC
 - **Pipeline:** `pre_navier_stokes_solver7_52bb9fe.json`
 - **Branch:** `pre_navier_stokes_solver7_52bb9fe`
@@ -48,11 +55,13 @@
 - **Modules Runtime:** Used 0 of 450 seconds (success)
 - **CPU Load:** `%`
 - **Memory Usage:** `13/15988MB`
+---
 ### Audit: 2026-07-18 14:03:53 UTC
 - **Pipeline:** `pre_navier_stokes_solver8_68c2265.json`
 - **Branch:** `pre_navier_stokes_solver8_68c2265`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29647221500)
+---
 ### Audit: 2026-07-18 14:04:02 UTC
 - **Pipeline:** `pre_navier_stokes_solver9_4e0c2ed.json`
 - **Branch:** `pre_navier_stokes_solver9_4e0c2ed`
@@ -62,9 +71,6 @@
 - **CPU Load:** `%`
 - **Memory Usage:** `13/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
----
 ### Audit: 2026-07-18 13:03:32 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_ae06dc4.json`
 - **Branch:** `pre_navier_stokes_solver10_ae06dc4`
@@ -73,6 +79,7 @@
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `11.9%`
 - **Memory Usage:** `206/15988MB`
+---
 ### Audit: 2026-07-18 13:03:14 UTC
 - **Pipeline:** `pre_navier_stokes_solver1_5bf26e0.json`
 - **Branch:** `pre_navier_stokes_solver1_5bf26e0`
@@ -80,6 +87,7 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29645348001)
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `11.6%`
+---
 ### Audit: 2026-07-18 13:03:01 UTC
 - **Pipeline:** `pre_navier_stokes_solver2_07c17a0.json`
 - **Branch:** `pre_navier_stokes_solver2_07c17a0`
@@ -87,6 +95,7 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29645351724)
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `26.2%`
+---
 ### Audit: 2026-07-18 13:10:52 UTC
 - **Pipeline:** `pre_navier_stokes_solver3_9c3c51a.json`
 - **Branch:** `pre_navier_stokes_solver3_9c3c51a`
@@ -95,6 +104,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-18 13:10:47 UTC
 - **Pipeline:** `pre_navier_stokes_solver4_4540739.json`
 - **Branch:** `pre_navier_stokes_solver4_4540739`
@@ -103,6 +113,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `88.3%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-18 13:03:48 UTC
 - **Pipeline:** `pre_navier_stokes_solver5_d98c8a5.json`
 - **Branch:** `pre_navier_stokes_solver5_d98c8a5`
@@ -111,6 +122,7 @@
 - **Modules Runtime:** Used 5 of 450 seconds (failed)
 - **CPU Load:** `78.3%`
 - **Memory Usage:** `500/15989MB`
+---
 ### Audit: 2026-07-18 13:03:45 UTC
 - **Pipeline:** `pre_navier_stokes_solver6_05dea64.json`
 - **Branch:** `pre_navier_stokes_solver6_05dea64`
@@ -118,6 +130,7 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29645366144)
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `23.8%`
+---
 ### Audit: 2026-07-18 13:03:25 UTC
 - **Pipeline:** `pre_navier_stokes_solver7_52bb9fe.json`
 - **Branch:** `pre_navier_stokes_solver7_52bb9fe`
@@ -126,6 +139,7 @@
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `206/15988MB`
+---
 ### Audit: 2026-07-18 13:11:34 UTC
 - **Pipeline:** `pre_navier_stokes_solver8_68c2265.json`
 - **Branch:** `pre_navier_stokes_solver8_68c2265`
@@ -134,6 +148,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-18 13:03:34 UTC
 - **Pipeline:** `pre_navier_stokes_solver9_4e0c2ed.json`
 - **Branch:** `pre_navier_stokes_solver9_4e0c2ed`
@@ -143,9 +158,6 @@
 - **CPU Load:** `21.4%`
 - **Memory Usage:** `206/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
----
 ### Audit: 2026-07-18 12:03:14 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_ae06dc4.json`
 - **Branch:** `pre_navier_stokes_solver10_ae06dc4`
@@ -154,6 +166,7 @@
 - **Modules Runtime:** Used 5 of 450 seconds (failed)
 - **CPU Load:** `48.8%`
 - **Memory Usage:** `206/15989MB`
+---
 ### Audit: 2026-07-18 12:03:41 UTC
 - **Pipeline:** `pre_navier_stokes_solver1_5bf26e0.json`
 - **Branch:** `pre_navier_stokes_solver1_5bf26e0`
@@ -161,6 +174,7 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29643538659)
 - **Modules Runtime:** Used 5 of 450 seconds (failed)
 - **CPU Load:** `27.9%`
+---
 ### Audit: 2026-07-18 12:03:10 UTC
 - **Pipeline:** `pre_navier_stokes_solver2_07c17a0.json`
 - **Branch:** `pre_navier_stokes_solver2_07c17a0`
@@ -169,6 +183,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `26.2%`
 - **Memory Usage:** `206/15989MB`
+---
 ### Audit: 2026-07-18 12:11:14 UTC
 - **Pipeline:** `pre_navier_stokes_solver3_9c3c51a.json`
 - **Branch:** `pre_navier_stokes_solver3_9c3c51a`
@@ -177,6 +192,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-18 12:03:33 UTC
 - **Pipeline:** `pre_navier_stokes_solver4_4540739.json`
 - **Branch:** `pre_navier_stokes_solver4_4540739`
@@ -185,6 +201,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `34.9%`
 - **Memory Usage:** `501/15988MB`
+---
 ### Audit: 2026-07-18 12:11:27 UTC
 - **Pipeline:** `pre_navier_stokes_solver5_d98c8a5.json`
 - **Branch:** `pre_navier_stokes_solver5_d98c8a5`
@@ -193,6 +210,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15988MB`
+---
 ### Audit: 2026-07-18 12:03:56 UTC
 - **Pipeline:** `pre_navier_stokes_solver6_05dea64.json`
 - **Branch:** `pre_navier_stokes_solver6_05dea64`
@@ -201,6 +219,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `93.1%`
 - **Memory Usage:** `205/15988MB`
+---
 ### Audit: 2026-07-18 12:03:18 UTC
 - **Pipeline:** `pre_navier_stokes_solver7_52bb9fe.json`
 - **Branch:** `pre_navier_stokes_solver7_52bb9fe`
@@ -209,6 +228,7 @@
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `26.2%`
 - **Memory Usage:** `206/15989MB`
+---
 ### Audit: 2026-07-18 12:11:50 UTC
 - **Pipeline:** `pre_navier_stokes_solver8_68c2265.json`
 - **Branch:** `pre_navier_stokes_solver8_68c2265`
@@ -217,6 +237,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15988MB`
+---
 ### Audit: 2026-07-18 12:04:22 UTC
 - **Pipeline:** `pre_navier_stokes_solver9_4e0c2ed.json`
 - **Branch:** `pre_navier_stokes_solver9_4e0c2ed`
@@ -226,9 +247,6 @@
 - **CPU Load:** `50%`
 - **Memory Usage:** `205/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
----
 ### Audit: 2026-07-18 11:03:28 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_ae06dc4.json`
 - **Branch:** `pre_navier_stokes_solver10_ae06dc4`
@@ -237,6 +255,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `9.6%`
 - **Memory Usage:** `205/15988MB`
+---
 ### Audit: 2026-07-18 11:03:31 UTC
 - **Pipeline:** `pre_navier_stokes_solver1_5bf26e0.json`
 - **Branch:** `pre_navier_stokes_solver1_5bf26e0`
@@ -245,6 +264,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `52.4%`
 - **Memory Usage:** `206/15993MB`
+---
 ### Audit: 2026-07-18 11:03:44 UTC
 - **Pipeline:** `pre_navier_stokes_solver2_07c17a0.json`
 - **Branch:** `pre_navier_stokes_solver2_07c17a0`
@@ -253,6 +273,7 @@
 - **Modules Runtime:** Used 5 of 450 seconds (failed)
 - **CPU Load:** `53.7%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-18 11:03:48 UTC
 - **Pipeline:** `pre_navier_stokes_solver3_9c3c51a.json`
 - **Branch:** `pre_navier_stokes_solver3_9c3c51a`
@@ -261,6 +282,7 @@
 - **Modules Runtime:** Used 5 of 450 seconds (failed)
 - **CPU Load:** `92.9%`
 - **Memory Usage:** `265/15989MB`
+---
 ### Audit: 2026-07-18 11:03:44 UTC
 - **Pipeline:** `pre_navier_stokes_solver4_4540739.json`
 - **Branch:** `pre_navier_stokes_solver4_4540739`
@@ -269,6 +291,7 @@
 - **Modules Runtime:** Used 5 of 450 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `501/15989MB`
+---
 ### Audit: 2026-07-18 11:11:24 UTC
 - **Pipeline:** `pre_navier_stokes_solver5_d98c8a5.json`
 - **Branch:** `pre_navier_stokes_solver5_d98c8a5`
@@ -277,6 +300,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-18 11:03:39 UTC
 - **Pipeline:** `pre_navier_stokes_solver6_05dea64.json`
 - **Branch:** `pre_navier_stokes_solver6_05dea64`
@@ -285,6 +309,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `47.7%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-18 11:04:09 UTC
 - **Pipeline:** `pre_navier_stokes_solver7_52bb9fe.json`
 - **Branch:** `pre_navier_stokes_solver7_52bb9fe`
@@ -293,6 +318,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `12.5%`
 - **Memory Usage:** `206/15989MB`
+---
 ### Audit: 2026-07-18 11:04:00 UTC
 - **Pipeline:** `pre_navier_stokes_solver8_68c2265.json`
 - **Branch:** `pre_navier_stokes_solver8_68c2265`
@@ -301,6 +327,7 @@
 - **Modules Runtime:** Used 6 of 450 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `265/15989MB`
+---
 ### Audit: 2026-07-18 11:03:54 UTC
 - **Pipeline:** `pre_navier_stokes_solver9_4e0c2ed.json`
 - **Branch:** `pre_navier_stokes_solver9_4e0c2ed`
@@ -310,9 +337,6 @@
 - **CPU Load:** `95.3%`
 - **Memory Usage:** `205/15993MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
----
 ### Audit: 2026-07-18 10:02:50 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_ae06dc4.json`
 - **Branch:** `pre_navier_stokes_solver10_ae06dc4`
@@ -320,12 +344,14 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29640108598)
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `95.4%`
+---
 ### Audit: 2026-07-18 10:04:28 UTC
 - **Pipeline:** `pre_navier_stokes_solver1_5bf26e0.json`
 - **Branch:** `pre_navier_stokes_solver1_5bf26e0`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29640112363)
 - **Modules Runtime:** Used 2 of 450 seconds (failed)
+---
 ### Audit: 2026-07-18 10:03:27 UTC
 - **Pipeline:** `pre_navier_stokes_solver2_07c17a0.json`
 - **Branch:** `pre_navier_stokes_solver2_07c17a0`
@@ -333,6 +359,7 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29640115973)
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `95.4%`
+---
 ### Audit: 2026-07-18 10:03:49 UTC
 - **Pipeline:** `pre_navier_stokes_solver3_9c3c51a.json`
 - **Branch:** `pre_navier_stokes_solver3_9c3c51a`
@@ -341,6 +368,7 @@
 - **Modules Runtime:** Used 7 of 450 seconds (failed)
 - **CPU Load:** `97.8%`
 - **Memory Usage:** `265/15989MB`
+---
 ### Audit: 2026-07-18 10:04:06 UTC
 - **Pipeline:** `pre_navier_stokes_solver5_d98c8a5.json`
 - **Branch:** `pre_navier_stokes_solver5_d98c8a5`
@@ -349,6 +377,7 @@
 - **Modules Runtime:** Used 5 of 450 seconds (failed)
 - **CPU Load:** `69.1%`
 - **Memory Usage:** `264/15993MB`
+---
 ### Audit: 2026-07-18 10:04:01 UTC
 - **Pipeline:** `pre_navier_stokes_solver6_05dea64.json`
 - **Branch:** `pre_navier_stokes_solver6_05dea64`
@@ -357,6 +386,7 @@
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `23.8%`
 - **Memory Usage:** `205/15993MB`
+---
 ### Audit: 2026-07-18 10:03:50 UTC
 - **Pipeline:** `pre_navier_stokes_solver7_52bb9fe.json`
 - **Branch:** `pre_navier_stokes_solver7_52bb9fe`
@@ -364,6 +394,7 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29640133779)
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `40%`
+---
 ### Audit: 2026-07-18 10:04:29 UTC
 - **Pipeline:** `pre_navier_stokes_solver8_68c2265.json`
 - **Branch:** `pre_navier_stokes_solver8_68c2265`
@@ -372,6 +403,7 @@
 - **Modules Runtime:** Used 6 of 450 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `501/15989MB`
+---
 ### Audit: 2026-07-18 10:04:02 UTC
 - **Pipeline:** `pre_navier_stokes_solver9_4e0c2ed.json`
 - **Branch:** `pre_navier_stokes_solver9_4e0c2ed`
@@ -381,9 +413,6 @@
 - **CPU Load:** `19.1%`
 - **Memory Usage:** `206/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
----
 ### Audit: 2026-07-18 08:03:21 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_ae06dc4.json`
 - **Branch:** `pre_navier_stokes_solver10_ae06dc4`
@@ -392,6 +421,7 @@
 - **Modules Runtime:** Used 5 of 450 seconds (failed)
 - **CPU Load:** `35.7%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-18 08:03:19 UTC
 - **Pipeline:** `pre_navier_stokes_solver1_5bf26e0.json`
 - **Branch:** `pre_navier_stokes_solver1_5bf26e0`
@@ -400,6 +430,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `21.4%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-18 08:03:13 UTC
 - **Pipeline:** `pre_navier_stokes_solver2_07c17a0.json`
 - **Branch:** `pre_navier_stokes_solver2_07c17a0`
@@ -408,6 +439,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `6.8%`
 - **Memory Usage:** `205/15993MB`
+---
 ### Audit: 2026-07-18 08:03:41 UTC
 - **Pipeline:** `pre_navier_stokes_solver3_9c3c51a.json`
 - **Branch:** `pre_navier_stokes_solver3_9c3c51a`
@@ -416,6 +448,7 @@
 - **Modules Runtime:** Used 6 of 450 seconds (failed)
 - **CPU Load:** `50%`
 - **Memory Usage:** `501/15989MB`
+---
 ### Audit: 2026-07-18 10:11:27 UTC
 - **Pipeline:** `pre_navier_stokes_solver4_4540739.json`
 - **Branch:** `pre_navier_stokes_solver4_4540739`
@@ -424,6 +457,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-18 08:11:27 UTC
 - **Pipeline:** `pre_navier_stokes_solver5_d98c8a5.json`
 - **Branch:** `pre_navier_stokes_solver5_d98c8a5`
@@ -432,6 +466,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-18 08:03:59 UTC
 - **Pipeline:** `pre_navier_stokes_solver6_05dea64.json`
 - **Branch:** `pre_navier_stokes_solver6_05dea64`
@@ -440,6 +475,7 @@
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `53.5%`
 - **Memory Usage:** `205/15993MB`
+---
 ### Audit: 2026-07-18 08:03:47 UTC
 - **Pipeline:** `pre_navier_stokes_solver7_52bb9fe.json`
 - **Branch:** `pre_navier_stokes_solver7_52bb9fe`
@@ -448,6 +484,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `40.5%`
 - **Memory Usage:** `206/15988MB`
+---
 ### Audit: 2026-07-18 08:11:31 UTC
 - **Pipeline:** `pre_navier_stokes_solver8_68c2265.json`
 - **Branch:** `pre_navier_stokes_solver8_68c2265`
@@ -456,6 +493,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-18 08:04:02 UTC
 - **Pipeline:** `pre_navier_stokes_solver9_4e0c2ed.json`
 - **Branch:** `pre_navier_stokes_solver9_4e0c2ed`
@@ -465,9 +503,6 @@
 - **CPU Load:** `35.7%`
 - **Memory Usage:** `206/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
----
 ### Audit: 2026-07-18 07:03:27 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_ae06dc4.json`
 - **Branch:** `pre_navier_stokes_solver10_ae06dc4`
@@ -476,6 +511,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `9.6%`
 - **Memory Usage:** `206/15988MB`
+---
 ### Audit: 2026-07-18 07:03:42 UTC
 - **Pipeline:** `pre_navier_stokes_solver1_5bf26e0.json`
 - **Branch:** `pre_navier_stokes_solver1_5bf26e0`
@@ -484,6 +520,7 @@
 - **Modules Runtime:** Used 5 of 450 seconds (failed)
 - **CPU Load:** `25%`
 - **Memory Usage:** `206/15993MB`
+---
 ### Audit: 2026-07-18 07:03:29 UTC
 - **Pipeline:** `pre_navier_stokes_solver2_07c17a0.json`
 - **Branch:** `pre_navier_stokes_solver2_07c17a0`
@@ -492,6 +529,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `29.5%`
 - **Memory Usage:** `206/15989MB`
+---
 ### Audit: 2026-07-18 08:03:28 UTC
 - **Pipeline:** `pre_navier_stokes_solver4_4540739.json`
 - **Branch:** `pre_navier_stokes_solver4_4540739`
@@ -500,6 +538,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `501/15989MB`
+---
 ### Audit: 2026-07-18 07:11:20 UTC
 - **Pipeline:** `pre_navier_stokes_solver5_d98c8a5.json`
 - **Branch:** `pre_navier_stokes_solver5_d98c8a5`
@@ -508,6 +547,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-18 07:03:28 UTC
 - **Pipeline:** `pre_navier_stokes_solver6_05dea64.json`
 - **Branch:** `pre_navier_stokes_solver6_05dea64`
@@ -516,6 +556,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `33.4%`
 - **Memory Usage:** `207/15988MB`
+---
 ### Audit: 2026-07-18 07:04:16 UTC
 - **Pipeline:** `pre_navier_stokes_solver7_52bb9fe.json`
 - **Branch:** `pre_navier_stokes_solver7_52bb9fe`
@@ -524,6 +565,7 @@
 - **Modules Runtime:** Used 5 of 450 seconds (failed)
 - **CPU Load:** `67.4%`
 - **Memory Usage:** `206/15989MB`
+---
 ### Audit: 2026-07-18 07:11:17 UTC
 - **Pipeline:** `pre_navier_stokes_solver8_68c2265.json`
 - **Branch:** `pre_navier_stokes_solver8_68c2265`
@@ -532,6 +574,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-18 07:04:04 UTC
 - **Pipeline:** `pre_navier_stokes_solver9_4e0c2ed.json`
 - **Branch:** `pre_navier_stokes_solver9_4e0c2ed`
@@ -541,9 +584,6 @@
 - **CPU Load:** `13%`
 - **Memory Usage:** `205/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
----
 ### Audit: 2026-07-18 06:03:27 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_ae06dc4.json`
 - **Branch:** `pre_navier_stokes_solver10_ae06dc4`
@@ -551,6 +591,7 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29633231203)
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `19%`
+---
 ### Audit: 2026-07-18 06:03:08 UTC
 - **Pipeline:** `pre_navier_stokes_solver2_07c17a0.json`
 - **Branch:** `pre_navier_stokes_solver2_07c17a0`
@@ -559,6 +600,7 @@
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `47.6%`
 - **Memory Usage:** `206/15993MB`
+---
 ### Audit: 2026-07-18 07:11:01 UTC
 - **Pipeline:** `pre_navier_stokes_solver3_9c3c51a.json`
 - **Branch:** `pre_navier_stokes_solver3_9c3c51a`
@@ -567,6 +609,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-18 07:11:06 UTC
 - **Pipeline:** `pre_navier_stokes_solver4_4540739.json`
 - **Branch:** `pre_navier_stokes_solver4_4540739`
@@ -575,6 +618,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-18 06:11:09 UTC
 - **Pipeline:** `pre_navier_stokes_solver5_d98c8a5.json`
 - **Branch:** `pre_navier_stokes_solver5_d98c8a5`
@@ -583,6 +627,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-18 06:03:08 UTC
 - **Pipeline:** `pre_navier_stokes_solver6_05dea64.json`
 - **Branch:** `pre_navier_stokes_solver6_05dea64`
@@ -591,6 +636,7 @@
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `33.4%`
 - **Memory Usage:** `206/15989MB`
+---
 ### Audit: 2026-07-18 06:04:12 UTC
 - **Pipeline:** `pre_navier_stokes_solver7_52bb9fe.json`
 - **Branch:** `pre_navier_stokes_solver7_52bb9fe`
@@ -599,6 +645,7 @@
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `25%`
 - **Memory Usage:** `205/15993MB`
+---
 ### Audit: 2026-07-18 06:04:28 UTC
 - **Pipeline:** `pre_navier_stokes_solver8_68c2265.json`
 - **Branch:** `pre_navier_stokes_solver8_68c2265`
@@ -607,6 +654,7 @@
 - **Modules Runtime:** Used 6 of 450 seconds (failed)
 - **CPU Load:** `89.1%`
 - **Memory Usage:** `265/15989MB`
+---
 ### Audit: 2026-07-18 06:04:29 UTC
 - **Pipeline:** `pre_navier_stokes_solver9_4e0c2ed.json`
 - **Branch:** `pre_navier_stokes_solver9_4e0c2ed`
@@ -616,9 +664,6 @@
 - **CPU Load:** `19.1%`
 - **Memory Usage:** `205/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
----
 ### Audit: 2026-07-18 06:03:28 UTC
 - **Pipeline:** `pre_navier_stokes_solver1_5bf26e0.json`
 - **Branch:** `pre_navier_stokes_solver1_5bf26e0`
@@ -627,6 +672,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `62.8%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-18 05:03:51 UTC
 - **Pipeline:** `pre_navier_stokes_solver2_07c17a0.json`
 - **Branch:** `pre_navier_stokes_solver2_07c17a0`
@@ -634,6 +680,7 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29631503539)
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `55.8%`
+---
 ### Audit: 2026-07-18 06:10:53 UTC
 - **Pipeline:** `pre_navier_stokes_solver3_9c3c51a.json`
 - **Branch:** `pre_navier_stokes_solver3_9c3c51a`
@@ -642,6 +689,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-18 06:10:58 UTC
 - **Pipeline:** `pre_navier_stokes_solver4_4540739.json`
 - **Branch:** `pre_navier_stokes_solver4_4540739`
@@ -650,6 +698,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15988MB`
+---
 ### Audit: 2026-07-18 05:11:14 UTC
 - **Pipeline:** `pre_navier_stokes_solver5_d98c8a5.json`
 - **Branch:** `pre_navier_stokes_solver5_d98c8a5`
@@ -658,6 +707,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15993MB`
+---
 ### Audit: 2026-07-18 05:03:29 UTC
 - **Pipeline:** `pre_navier_stokes_solver6_05dea64.json`
 - **Branch:** `pre_navier_stokes_solver6_05dea64`
@@ -666,6 +716,7 @@
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `56.1%`
 - **Memory Usage:** `205/15988MB`
+---
 ### Audit: 2026-07-18 05:03:33 UTC
 - **Pipeline:** `pre_navier_stokes_solver7_52bb9fe.json`
 - **Branch:** `pre_navier_stokes_solver7_52bb9fe`
@@ -674,6 +725,7 @@
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `31.7%`
 - **Memory Usage:** `205/15988MB`
+---
 ### Audit: 2026-07-18 05:03:59 UTC
 - **Pipeline:** `pre_navier_stokes_solver8_68c2265.json`
 - **Branch:** `pre_navier_stokes_solver8_68c2265`
@@ -682,6 +734,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `264/15989MB`
+---
 ### Audit: 2026-07-18 05:04:07 UTC
 - **Pipeline:** `pre_navier_stokes_solver9_4e0c2ed.json`
 - **Branch:** `pre_navier_stokes_solver9_4e0c2ed`
@@ -691,9 +744,6 @@
 - **CPU Load:** `25.6%`
 - **Memory Usage:** `206/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
----
 ### Audit: 2026-07-18 05:03:21 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_ae06dc4.json`
 - **Branch:** `pre_navier_stokes_solver10_ae06dc4`
@@ -702,6 +752,7 @@
 - **Modules Runtime:** Used 5 of 450 seconds (failed)
 - **CPU Load:** `26.2%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-18 05:02:41 UTC
 - **Pipeline:** `pre_navier_stokes_solver1_5bf26e0.json`
 - **Branch:** `pre_navier_stokes_solver1_5bf26e0`
@@ -710,6 +761,7 @@
 - **Modules Runtime:** Used 5 of 450 seconds (failed)
 - **CPU Load:** `38.1%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-18 04:03:31 UTC
 - **Pipeline:** `pre_navier_stokes_solver2_07c17a0.json`
 - **Branch:** `pre_navier_stokes_solver2_07c17a0`
@@ -718,11 +770,13 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `28%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-18 05:10:39 UTC
 - **Pipeline:** `pre_navier_stokes_solver3_9c3c51a.json`
 - **Branch:** `pre_navier_stokes_solver3_9c3c51a`
 - **Status:** `success`
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29631507188)
+---
 ### Audit: 2026-07-18 05:10:59 UTC
 - **Pipeline:** `pre_navier_stokes_solver4_4540739.json`
 - **Branch:** `pre_navier_stokes_solver4_4540739`
@@ -732,9 +786,6 @@
 - **CPU Load:** `100%`
 - **Memory Usage:** `81/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
----
 ### Audit: 2026-07-18 04:02:58 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_ae06dc4.json`
 - **Branch:** `pre_navier_stokes_solver10_ae06dc4`
@@ -743,6 +794,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `16.7%`
 - **Memory Usage:** `205/15988MB`
+---
 ### Audit: 2026-07-18 04:03:23 UTC
 - **Pipeline:** `pre_navier_stokes_solver1_5bf26e0.json`
 - **Branch:** `pre_navier_stokes_solver1_5bf26e0`
@@ -751,6 +803,7 @@
 - **Modules Runtime:** Used 3 of 450 seconds (failed)
 - **CPU Load:** `26.2%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-18 04:10:47 UTC
 - **Pipeline:** `pre_navier_stokes_solver3_9c3c51a.json`
 - **Branch:** `pre_navier_stokes_solver3_9c3c51a`
@@ -759,6 +812,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-18 04:03:07 UTC
 - **Pipeline:** `pre_navier_stokes_solver4_4540739.json`
 - **Branch:** `pre_navier_stokes_solver4_4540739`
@@ -767,6 +821,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `100%`
 - **Memory Usage:** `265/15988MB`
+---
 ### Audit: 2026-07-18 04:11:11 UTC
 - **Pipeline:** `pre_navier_stokes_solver5_d98c8a5.json`
 - **Branch:** `pre_navier_stokes_solver5_d98c8a5`
@@ -775,6 +830,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `82/15989MB`
+---
 ### Audit: 2026-07-18 04:03:58 UTC
 - **Pipeline:** `pre_navier_stokes_solver6_05dea64.json`
 - **Branch:** `pre_navier_stokes_solver6_05dea64`
@@ -783,6 +839,7 @@
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `21.5%`
 - **Memory Usage:** `205/15989MB`
+---
 ### Audit: 2026-07-18 04:04:02 UTC
 - **Pipeline:** `pre_navier_stokes_solver7_52bb9fe.json`
 - **Branch:** `pre_navier_stokes_solver7_52bb9fe`
@@ -790,6 +847,7 @@
 - **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/29629827993)
 - **Modules Runtime:** Used 4 of 450 seconds (failed)
 - **CPU Load:** `16.4%`
+---
 ### Audit: 2026-07-18 04:11:37 UTC
 - **Pipeline:** `pre_navier_stokes_solver8_68c2265.json`
 - **Branch:** `pre_navier_stokes_solver8_68c2265`
@@ -798,6 +856,7 @@
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `97.8%`
 - **Memory Usage:** `81/15989MB`
+---
 ### Audit: 2026-07-18 04:03:57 UTC
 - **Pipeline:** `pre_navier_stokes_solver9_4e0c2ed.json`
 - **Branch:** `pre_navier_stokes_solver9_4e0c2ed`
@@ -807,9 +866,6 @@
 - **CPU Load:** `86.7%`
 - **Memory Usage:** `206/15989MB`
 ---
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
----
 ### Audit: 2026-07-17 23:04:10 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_ae06dc4.json`
 - **Branch:** `pre_navier_stokes_solver10_ae06dc4`
@@ -818,6 +874,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.3%`
 - **Memory Usage:** `1130/15989MB`
+---
 ### Audit: 2026-07-17 23:04:41 UTC
 - **Pipeline:** `pre_navier_stokes_solver1_5bf26e0.json`
 - **Branch:** `pre_navier_stokes_solver1_5bf26e0`
@@ -826,6 +883,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1153/15989MB`
+---
 ### Audit: 2026-07-17 23:04:35 UTC
 - **Pipeline:** `pre_navier_stokes_solver2_07c17a0.json`
 - **Branch:** `pre_navier_stokes_solver2_07c17a0`
@@ -834,6 +892,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.3%`
 - **Memory Usage:** `1158/15989MB`
+---
 ### Audit: 2026-07-17 23:04:43 UTC
 - **Pipeline:** `pre_navier_stokes_solver3_9c3c51a.json`
 - **Branch:** `pre_navier_stokes_solver3_9c3c51a`
@@ -842,6 +901,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1214/15989MB`
+---
 ### Audit: 2026-07-17 23:04:33 UTC
 - **Pipeline:** `pre_navier_stokes_solver4_4540739.json`
 - **Branch:** `pre_navier_stokes_solver4_4540739`
@@ -850,6 +910,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `9.7%`
 - **Memory Usage:** `1105/15989MB`
+---
 ### Audit: 2026-07-17 23:04:19 UTC
 - **Pipeline:** `pre_navier_stokes_solver5_d98c8a5.json`
 - **Branch:** `pre_navier_stokes_solver5_d98c8a5`
@@ -858,6 +919,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1108/15988MB`
+---
 ### Audit: 2026-07-17 23:05:07 UTC
 - **Pipeline:** `pre_navier_stokes_solver6_05dea64.json`
 - **Branch:** `pre_navier_stokes_solver6_05dea64`
@@ -866,6 +928,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.3%`
 - **Memory Usage:** `1074/15989MB`
+---
 ### Audit: 2026-07-17 23:04:19 UTC
 - **Pipeline:** `pre_navier_stokes_solver7_52bb9fe.json`
 - **Branch:** `pre_navier_stokes_solver7_52bb9fe`
@@ -874,6 +937,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1064/15989MB`
+---
 ### Audit: 2026-07-17 23:04:47 UTC
 - **Pipeline:** `pre_navier_stokes_solver8_68c2265.json`
 - **Branch:** `pre_navier_stokes_solver8_68c2265`
@@ -882,6 +946,7 @@
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1077/15989MB`
+---
 ### Audit: 2026-07-17 23:04:11 UTC
 - **Pipeline:** `pre_navier_stokes_solver9_4e0c2ed.json`
 - **Branch:** `pre_navier_stokes_solver9_4e0c2ed`
