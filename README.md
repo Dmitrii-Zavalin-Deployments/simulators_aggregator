@@ -8,6 +8,8 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 
 ### 🧮 Performance Audit:
 
+---
+
 ### 🧮 Performance Audit:
 
 ### Audit:
@@ -37,14 +39,6 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `readme_cleaner_testing`
 ---
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
-
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 
 ### Audit:
 2026-07-23 13:41:07 UTC
@@ -55,6 +49,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `21.1%`
 - **Memory Usage:** `1382/15989MB`
+---
 
 ### Audit:
 2026-07-22 20:56:22 UTC
@@ -65,6 +60,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 91 of 450 seconds (success)
 - **CPU Load:** `36.6%`
 - **Memory Usage:** `764/15989MB`
+---
 
 ### Audit:
 2026-07-22 20:50:57 UTC
@@ -75,3 +71,4 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `23.8%`
 - **Memory Usage:** `1134/15989MB`
+---
