@@ -1,9 +1,10 @@
-import unittest
 import json
-from unittest.mock import patch, MagicMock, mock_open
+import unittest
+from unittest.mock import MagicMock, mock_open, patch
 
 # Import functions from your module
 from src.pipeline.matrix_exploder import explode_dict, main
+
 
 class TestMatrixExploder(unittest.TestCase):
 
