@@ -1,4 +1,9 @@
-# Simulators Aggregator
+# 🛰️ Simulators Aggregator Performance Audit
+
+### Audit: 2026-07-23 14:00:06 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `readme_cleaner_testing`
+---
 Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
 
 ### 📚 Resources & Documentation
