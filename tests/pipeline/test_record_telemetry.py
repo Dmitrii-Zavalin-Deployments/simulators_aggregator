@@ -1,7 +1,9 @@
 import json
-import pytest
 import logging
 from unittest.mock import patch
+
+import pytest
+
 from src.pipeline import record_telemetry
 
 # ==============================================================================

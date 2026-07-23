@@ -10,7 +10,9 @@ Compliance:
 """
 
 from typing import Final
+
 import requests
+
 
 # The TokenManager encapsulates the OAuth2 handshake.
 # We utilize __slots__ to enforce fixed memory allocation, preventing

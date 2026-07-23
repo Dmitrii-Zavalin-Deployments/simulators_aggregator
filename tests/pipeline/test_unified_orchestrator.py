@@ -1,6 +1,6 @@
 import json
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 # Import the orchestrator main function
 from src.pipeline.unified_orchestrator import main
@@ -417,9 +417,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         clone_calls = []
         for call in mock_sub_run.call_args_list:
             cmd_args = call[0][0]
-            if isinstance(cmd_args, list) and any("clone" in str(arg) for arg in cmd_args):
-                clone_calls.append(cmd_args)
-            elif isinstance(cmd_args, str) and "clone" in cmd_args:
+            if isinstance(cmd_args, list) and any("clone" in str(arg) for arg in cmd_args) or isinstance(cmd_args, str) and "clone" in cmd_args:
                 clone_calls.append(cmd_args)
                 
         self.assertTrue(

@@ -6,10 +6,11 @@ Protocol. It covers environment enforcement, deterministic authentication,
 and atomic file operations.
 """
 
-import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
+
 import dropbox
+import pytest
 
 from src.io.download_from_dropbox import CloudIngestor, _get_required_env, main
 from src.io.dropbox_utils import TokenManager
