@@ -1,5 +1,6 @@
 import json
-from typing import List, Dict, Any
+from typing import Any
+
 
 class TunerState:
     """
@@ -22,8 +23,8 @@ class TunerState:
     def __init__(
         self, 
         pipeline_id: str, 
-        steps: Dict[str, Dict[str, str]],
-        task_details: List[Dict[str, Any]],
+        steps: dict[str, dict[str, str]],
+        task_details: list[dict[str, Any]],
         successful_runs_archive: str,
         failed_runs_archive: str
     ):
@@ -68,12 +69,12 @@ class TunerState:
 
     # --- Dehydration & Hydration Logic ---
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Converts state to flat dictionary schema mapping for persistent serialization."""
         return {slot: getattr(self, slot) for slot in self.__slots__}
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'TunerState':
+    def from_dict(cls, data: dict[str, Any]) -> 'TunerState':
         """Reconstructs state with validation checks ensuring no optional fallbacks exist."""
         for slot in cls.__slots__:
             if slot not in data:
@@ -101,7 +102,7 @@ class TunerState:
 
     # --- Output Compliance (SaaP Deliverable Validation) ---
 
-    def to_saap_deliverable(self) -> Dict[str, Any]:
+    def to_saap_deliverable(self) -> dict[str, Any]:
         """
         Transforms Sovereign Container properties into a nested dictionary
         perfectly matching the structural constraints of Tuner Output Schema.
