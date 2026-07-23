@@ -7,19 +7,22 @@ Compliance:
 - Rule 8 (API Minimalism): Single-responsibility ingestion logic.
 """
 
-import os
-import sys
 import argparse
 import logging
+import os
+import sys
 from pathlib import Path
+
 import dropbox
+
 from src.io.dropbox_utils import TokenManager
+
 
 def _get_required_env(key: str) -> str:
     """Helper to enforce No-Default policy for environment variables."""
     val = os.environ.get(key)
     if val is None or not val.strip():
-        raise EnvironmentError(f"Missing required environment variable: {key}")
+        raise OSError(f"Missing required environment variable: {key}")
     return val.strip()
 
 class CloudIngestor:

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-import json
-import os
-import sys
 import argparse
 import datetime
+import json
 import logging
+import os
+import sys
 
 # Configure logging for GitHub Actions console
 logging.basicConfig(
