@@ -7,6 +7,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 ---
 
 ### 🧮 Performance Audit:
+
 ### Audit: 2026-07-23 13:41:07 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
 - **Branch:** `main`
@@ -15,15 +16,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `21.1%`
 - **Memory Usage:** `1382/15989MB`
-# Simulators Aggregator
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
 
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 ### Audit: 2026-07-22 20:56:22 UTC
 - **Pipeline:** `main_branch_pipeline_28426da.json`
 - **Branch:** `main`
@@ -32,15 +25,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 91 of 450 seconds (success)
 - **CPU Load:** `36.6%`
 - **Memory Usage:** `764/15989MB`
-# Simulators Aggregator
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
 
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 ### Audit: 2026-07-22 20:50:57 UTC
 - **Pipeline:** `main_branch_pipeline_28426da.json`
 - **Branch:** `main`
