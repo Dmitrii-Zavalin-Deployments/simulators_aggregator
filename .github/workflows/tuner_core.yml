@@ -70,58 +70,39 @@ jobs:
       - name: Dynamically Clean and Deduplicate README
         run: |
           python3 - << 'EOF'
-          import re
-
           with open("README.md", "r", encoding="utf-8") as f:
               content = f.read()
 
           # 1. Dynamically locate the first '### Audit:' marker
-          audit_match = re.search(r'^### Audit:', content, flags=re.MULTILINE)
-          if not audit_match:
+          audit_pos = content.find("### Audit:")
+          if audit_pos == -1:
               print("No audit entries found; skipping cleanup.")
               exit(0)
 
-          audit_pos = audit_match.start()
+          # 2. Extract the complete dynamic header block as a single unit
+          header = content[:audit_pos].rstrip()
 
-          # 2. Extract and clean the dynamic base header
-          raw_header = content[:audit_pos]
-          header_clean = re.sub(r'###\s*🧮\s*Performance Audit:\s*$', '', raw_header.strip()).strip()
+          # 3. Create a filter set of all non-empty lines present in the header
+          header_lines = {line.strip() for line in header.splitlines() if line.strip()}
 
-          # 3. Build a dynamic noise filter from the lines of the extracted header
-          header_lines = {
-              line.strip() for line in header_clean.splitlines() 
-              if line.strip() and line.strip() != "---"
-          }
-
-          # 4. Filter the audit body line-by-line against the dynamic header lines
+          # 4. Filter out any line in the audit history that belongs to the dynamic header
           body = content[audit_pos:]
-          cleaned_body_lines = []
-          for line in body.splitlines():
-              stripped = line.strip()
-              if stripped in header_lines or stripped == "### 🧮 Performance Audit:":
-                  continue
-              cleaned_body_lines.append(line)
+          cleaned_lines = [line for line in body.splitlines() if line.strip() not in header_lines]
+          cleaned_body = "\n".join(cleaned_lines)
 
-          cleaned_body = "\n".join(cleaned_body_lines)
-
-          # 5. Isolate and deduplicate individual audit blocks
-          raw_audits = re.split(r'^### Audit:', cleaned_body, flags=re.MULTILINE)
+          # 5. Isolate and deduplicate audit entries cleanly
+          raw_blocks = cleaned_body.split("### Audit:")
           unique_audits = []
 
-          for item in raw_audits:
-              block = item.strip()
-              if not block:
-                  continue
-              # Strip lingering boundary horizontal rules
-              block = re.sub(r'^(---\s*)+', '', block).strip()
-              block = re.sub(r'(---\s*)+$', '', block).strip()
-              
-              entry = f"### Audit:\n{block}\n---"
-              if entry not in unique_audits:
-                  unique_audits.append(entry)
+          for block in raw_blocks:
+              b_stripped = block.strip()
+              if b_stripped:
+                  entry = f"### Audit: {b_stripped}"
+                  if entry not in unique_audits:
+                      unique_audits.append(entry)
 
-          # 6. Rebuild README cleanly: Dynamic Header + Standard Audit Header + Unique Audits
-          final_readme = f"{header_clean}\n\n---\n\n### 🧮 Performance Audit:\n\n" + "\n\n".join(unique_audits) + "\n"
+          # 6. Rebuild README: Atomic Dynamic Header + Deduplicated Audit History
+          final_readme = header + "\n\n" + "\n\n".join(unique_audits) + "\n"
 
           with open("README.md", "w", encoding="utf-8") as f:
               f.write(final_readme)
@@ -778,6 +759,7 @@ jobs:
           - **Modules Runtime:** Used ${SIM_ELAPSED} of ${SIM_ALLOWED} seconds (${SIM_STATE_LABEL})
           - **CPU Load:** \`$CPU_LOAD\`
           - **Memory Usage:** \`$MEM_USAGE\`
+          ---
           EOF
           )
 
