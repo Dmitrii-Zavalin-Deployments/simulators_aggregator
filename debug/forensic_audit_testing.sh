@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo "================================================================="
-echo "🛠️ APPLYING COMPLETE COMPILER REPAIRS & RUFF FIXES"
+echo "🛠️ EXECUTING ENHANCED FORENSIC REPAIR & MULTI-PASS RUFF LINT FIX"
 echo "================================================================="
 
 # 1. Fix EXE001: Grant execution permissions to script files with shebangs
@@ -52,9 +52,10 @@ new_slots = """__slots__ = [
         "successful_runs_archive",
         "task_details",
     ]"""
-content = content.replace(old_slots, new_slots)
-with open(path, "w") as f:
-    f.write(content)
+if old_slots in content:
+    content = content.replace(old_slots, new_slots)
+    with open(path, "w") as f:
+        f.write(content)
 '
 
 # 6. Fix PLW1510: Add explicit check=False to subprocess.run calls
@@ -64,36 +65,68 @@ python3 -c '
 path = "src/pipeline/unified_orchestrator.py"
 with open(path, "r") as f:
     content = f.read()
-content = content.replace(
-    "result = subprocess.run(\n                run_cmd,",
-    "result = subprocess.run(\n                run_cmd,\n                check=False,"
-)
-with open(path, "w") as f:
-    f.write(content)
+if "check=False" not in content:
+    content = content.replace(
+        "result = subprocess.run(\n                run_cmd,",
+        "result = subprocess.run(\n                run_cmd,\n                check=False,"
+    )
+    with open(path, "w") as f:
+        f.write(content)
 '
 
-# 7. Fix SIM103: Inline conditional return in test_unified_orchestrator.py
+# 7. Fix SIM103: Robustly update existence_router in test_unified_orchestrator.py using regex
 python3 -c '
 path = "tests/pipeline/test_unified_orchestrator.py"
 with open(path, "r") as f:
     content = f.read()
-old_block = """          def existence_router(path_obj=None, *args, **kwargs):
-              path_str = str(path_obj)
-              if "sim-engine" in path_str:
-                  return False  # Force missing repository to trigger clone step
-              return True       # Keep core setup blueprints active"""
-new_block = """          def existence_router(path_obj=None, *args, **kwargs):
-              path_str = str(path_obj)
-              return "sim-engine" not in path_str"""
-content = content.replace(old_block, new_block)
-with open(path, "w") as f:
-    f.write(content)
+
+import re
+pattern = r"(def existence_router\(path_obj=None, \*args, \*\*kwargs\):\s*path_str = str\(path_obj\))\s*if \"sim-engine\" in path_str:\s*return False.*?\s*return True.*"
+replacement = r"\1\n              return \"sim-engine\" not in path_str"
+
+# Generic fallback pattern if comments vary
+pattern_alt = r"def existence_router\(path_obj=None, \*args, \*\*kwargs\):\s*path_str = str\(path_obj\)\s*if \"sim-engine\" in path_str:\s*return False\s*else:\s*return True"
+
+if "\"sim-engine\" not in path_str" not in content:
+    new_content, count = re.subn(r"def existence_router\(.*?\):\s*path_str = str\(path_obj\)\s*if \"sim-engine\" in path_str:\s*return False[^\n]*\s*return True[^\n]*", lambda m: m.group(0).split("if")[0] + '  return "sim-engine" not in path_str', content, flags=re.DOTALL)
+    if count > 0:
+        with open(path, "w") as f:
+            f.write(new_content)
+        print("Successfully patched existence_router (SIM103)")
+    else:
+        # Direct line-by-line replacement approach
+        lines = content.splitlines()
+        new_lines = []
+        skip = False
+        for i, line in enumerate(lines):
+            if "def existence_router" in line:
+                new_lines.append(line)
+                new_lines.append("          path_str = str(path_obj)")
+                new_lines.append("          return \"sim-engine\" not in path_str")
+                skip = True
+                continue
+            if skip:
+                if "return True" in line or "return False" in line:
+                    skip = False
+                continue
+            new_lines.append(line)
+        with open(path, "w") as f:
+            f.write("\n".join(new_lines) + "\n")
+        print("Patched existence_router via line parser.")
 '
 
-# 8. Execute automated Ruff fixes (SIM117, RUF015, etc.)
-ruff check src tests --fix --unsafe-fixes
+echo "================================================================="
+echo "🔄 RUNNING ITERATIVE MULTI-PASS RUFF FIXES FOR NESTED WITH (SIM117)"
+echo "================================================================="
+
+# Run ruff check with --fix --unsafe-fixes iteratively to fully flatten nested context managers
+for i in {1..3}; do
+    echo "Ruff fix pass $i..."
+    ruff check src tests --fix --unsafe-fixes || true
+done
 
 echo "================================================================="
-echo "✅ ALL REPAIRS COMPLETED. RUNNING FINAL LINT CHECK..."
+echo "✅ VERIFYING LINT COMPLIANCE & TEST SUITE"
 echo "================================================================="
 ruff check src tests
+pytest
