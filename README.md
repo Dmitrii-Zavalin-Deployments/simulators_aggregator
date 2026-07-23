@@ -1,5 +1,20 @@
-# 🛰️ Simulators Aggregator Performance Audit
+# Simulators Aggregator
+Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
 
+### 📚 Resources & Documentation
+- **Tutorial/Book:** ***currently in development***
+
+---
+
+### 🧮 Performance Audit:
+### Audit: 2026-07-23 19:05:55 UTC
+- **Pipeline:** `pre_navier_stokes_solver9_7a81f3d.json`
+- **Branch:** `pre_navier_stokes_solver9_7a81f3d`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30036217429)
+- **Modules Runtime:** Used 123 of 450 seconds (success)
+- **CPU Load:** `50%`
+- **Memory Usage:** `746/15989MB`
 ### Audit: 2026-07-23 19:00:56 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `pre_navier_stokes_solver9_7a81f3d`
