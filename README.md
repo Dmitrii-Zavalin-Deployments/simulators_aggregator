@@ -1,6 +1,19 @@
-# 🛰️ Simulators Aggregator Performance Audit
+# Simulators Aggregator
+Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
+
 ### 📚 Resources & Documentation
 - **Tutorial/Book:** ***currently in development***
+
+### 🧮 Performance Audit:
+---
+### Audit: 2026-07-23 13:01:49 UTC
+- **Pipeline:** `main_branch_pipeline_28426da.json`
+- **Branch:** `main`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30009205725)
+- **Modules Runtime:** Used 0 of 450 seconds (success)
+- **CPU Load:** `%`
+- **Memory Usage:** `13/15988MB`
 ---
 ### Audit: 2026-07-22 20:56:22 UTC
 - **Pipeline:** `main_branch_pipeline_28426da.json`
