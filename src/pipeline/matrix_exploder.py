@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import argparse
-import json
 import itertools
-import os
+import json
 import logging
+import os
 import sys
 
 # Configure logging to output to stdout (ideal for GitHub Actions console)
