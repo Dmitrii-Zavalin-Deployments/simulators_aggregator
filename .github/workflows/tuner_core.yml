@@ -69,40 +69,42 @@ jobs:
 
       - name: Dynamically Clean and Deduplicate README
         run: |
-          if [ -f "README.md" ]; then
-            python3 - << 'EOF'
-            import re
+          python3 - << 'EOF'
+          with open("README.md", "r", encoding="utf-8") as f:
+              content = f.read()
 
-            with open("README.md", "r", encoding="utf-8") as f:
-                content = f.read()
+          # 1. Dynamically find the first occurrence of '### Audit:'
+          audit_pos = content.find("### Audit:")
+          if audit_pos == -1:
+              print("No audit entries found; skipping cleanup.")
+              exit(0)
 
-            # Dynamically extract everything above the first occurrence of '### Audit:' as the header[cite: 4]
-            audit_pos = content.find("### Audit:")
-            if audit_pos != -1:
-                header = content[:audit_pos].strip()
-                audits_content = content[audit_pos:]
-            else:
-                header = content.strip()
-                audits_content = ""
+          # 2. Extract everything above the first audit as the dynamic header
+          header = content[:audit_pos].strip()
 
-            # Isolate and deduplicate audit ledger entries starting with '### Audit:'
-            parts = audits_content.split("### Audit:")
-            unique_audits = []
-            for p in parts:
-                cleaned_part = p.strip()
-                if cleaned_part:
-                    unique_audits.append("### Audit:" + p)
+          # 3. Isolate the rest of the file (the audit history section)
+          audits_section = content[audit_pos:]
 
-            # Rebuild README: Dynamic header followed by clean audit blocks
-            new_readme = header + "\n\n" + "".join(unique_audits)
-            
-            with open("README.md", "w", encoding="utf-8") as f:
-                f.write(new_readme.strip() + "\n")
-            EOF
-          else
-            echo "README.md not found!"
-            exit 1
-          fi
+          # 4. Remove all duplicated instances of the dynamic header text from the body
+          cleaned_body = audits_section.replace(header, "").strip()
+
+          # 5. Split and deduplicate individual audit blocks
+          parts = cleaned_body.split("### Audit:")
+          unique_audits = []
+          for p in parts:
+              p_stripped = p.strip()
+              if p_stripped:
+                  # Reconstruct the audit entry tag cleanly
+                  entry = "### Audit:\n" + p_stripped if not p_stripped.startswith("### Audit:") else p_stripped
+                  if entry not in unique_audits:
+                      unique_audits.append(entry)
+
+          # 6. Rebuild the README cleanly: Dynamic Header + Standardized Section Header + Unique Audits
+          final_content = header + "\n\n### 🧮 Performance Audit:\n\n" + "\n\n".join(unique_audits) + "\n"
+
+          with open("README.md", "w", encoding="utf-8") as f:
+              f.write(final_content)
+          EOF
 
       - name: Commit and Push Cleaned README
         run: |
