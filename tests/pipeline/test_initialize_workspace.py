@@ -1,10 +1,11 @@
-import unittest
 import os
+import unittest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 # Import the main orchestration and ingestion functions.
-from src.pipeline.initialize_workspace import main, fetch_inputs_from_dropbox
+from src.pipeline.initialize_workspace import fetch_inputs_from_dropbox, main
+
 
 class TestWorkspaceInitializer(unittest.TestCase):
 

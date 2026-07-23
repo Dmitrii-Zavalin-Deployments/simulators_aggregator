@@ -1,9 +1,11 @@
 # tests/io/test_state_manager.py
 
 import os
-import pytest
 from unittest.mock import MagicMock, patch
+
 import dropbox
+import pytest
+
 from src.io.state_manager import _get_required_env, check_file_exists, main
 
 # ==============================================================================

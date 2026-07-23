@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # src/pipeline/provision_environment.py
 
-import sys
 import json
 import logging
 import subprocess
+import sys
 from pathlib import Path
 
 logging.basicConfig(
