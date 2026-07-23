@@ -63,47 +63,68 @@ jobs:
       - name: Set up Git identity
         run: |
           # 1. 🔧 GLOBAL ROBOT IDENTITY INITIALIZATION
-            git config --global user.name "Human-Assisted Processing Engine [${{ github.ref_name }}]"
-            git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
-            git config --global notes.rewriteRef "refs/notes/*"
+          git config --global user.name "Human-Assisted Processing Engine [${{ github.ref_name }}]"
+          git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
+          git config --global notes.rewriteRef "refs/notes/*"
 
       - name: Dynamically Clean and Deduplicate README
         run: |
           python3 - << 'EOF'
+          import re
+
           with open("README.md", "r", encoding="utf-8") as f:
               content = f.read()
 
-          # 1. Dynamically find the first occurrence of '### Audit:'
-          audit_pos = content.find("### Audit:")
-          if audit_pos == -1:
+          # 1. Dynamically locate the first '### Audit:' marker
+          audit_match = re.search(r'^### Audit:', content, flags=re.MULTILINE)
+          if not audit_match:
               print("No audit entries found; skipping cleanup.")
               exit(0)
 
-          # 2. Extract everything above the first audit as the dynamic header
-          header = content[:audit_pos].strip()
+          audit_pos = audit_match.start()
 
-          # 3. Isolate the rest of the file (the audit history section)
-          audits_section = content[audit_pos:]
+          # 2. Extract and clean the dynamic base header
+          raw_header = content[:audit_pos]
+          header_clean = re.sub(r'###\s*🧮\s*Performance Audit:\s*$', '', raw_header.strip()).strip()
 
-          # 4. Remove all duplicated instances of the dynamic header text from the body
-          cleaned_body = audits_section.replace(header, "").strip()
+          # 3. Build a dynamic noise filter from the lines of the extracted header
+          header_lines = {
+              line.strip() for line in header_clean.splitlines() 
+              if line.strip() and line.strip() != "---"
+          }
 
-          # 5. Split and deduplicate individual audit blocks
-          parts = cleaned_body.split("### Audit:")
+          # 4. Filter the audit body line-by-line against the dynamic header lines
+          body = content[audit_pos:]
+          cleaned_body_lines = []
+          for line in body.splitlines():
+              stripped = line.strip()
+              if stripped in header_lines or stripped == "### 🧮 Performance Audit:":
+                  continue
+              cleaned_body_lines.append(line)
+
+          cleaned_body = "\n".join(cleaned_body_lines)
+
+          # 5. Isolate and deduplicate individual audit blocks
+          raw_audits = re.split(r'^### Audit:', cleaned_body, flags=re.MULTILINE)
           unique_audits = []
-          for p in parts:
-              p_stripped = p.strip()
-              if p_stripped:
-                  # Reconstruct the audit entry tag cleanly
-                  entry = "### Audit:\n" + p_stripped if not p_stripped.startswith("### Audit:") else p_stripped
-                  if entry not in unique_audits:
-                      unique_audits.append(entry)
 
-          # 6. Rebuild the README cleanly: Dynamic Header + Standardized Section Header + Unique Audits
-          final_content = header + "\n\n### 🧮 Performance Audit:\n\n" + "\n\n".join(unique_audits) + "\n"
+          for item in raw_audits:
+              block = item.strip()
+              if not block:
+                  continue
+              # Strip lingering boundary horizontal rules
+              block = re.sub(r'^(---\s*)+', '', block).strip()
+              block = re.sub(r'(---\s*)+$', '', block).strip()
+              
+              entry = f"### Audit:\n{block}\n---"
+              if entry not in unique_audits:
+                  unique_audits.append(entry)
+
+          # 6. Rebuild README cleanly: Dynamic Header + Standard Audit Header + Unique Audits
+          final_readme = f"{header_clean}\n\n---\n\n### 🧮 Performance Audit:\n\n" + "\n\n".join(unique_audits) + "\n"
 
           with open("README.md", "w", encoding="utf-8") as f:
-              f.write(final_content)
+              f.write(final_readme)
           EOF
 
       - name: Commit and Push Cleaned README
