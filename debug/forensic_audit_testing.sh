@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo "================================================================="
-echo "🛠️ EXECUTING ENHANCED FORENSIC REPAIR & MULTI-PASS RUFF LINT FIX"
+echo "🛠️ EXECUTING CORRECTED FORENSIC REPAIR & MULTI-PASS RUFF LINT FIX"
 echo "================================================================="
 
 # 1. Fix EXE001: Grant execution permissions to script files with shebangs
@@ -74,45 +74,29 @@ if "check=False" not in content:
         f.write(content)
 '
 
-# 7. Fix SIM103: Robustly update existence_router in test_unified_orchestrator.py using regex
+# 7. Fix SIM103: Cleanly update existence_router in test_unified_orchestrator.py
 python3 -c '
 path = "tests/pipeline/test_unified_orchestrator.py"
 with open(path, "r") as f:
-    content = f.read()
+    lines = f.readlines()
 
-import re
-pattern = r"(def existence_router\(path_obj=None, \*args, \*\*kwargs\):\s*path_str = str\(path_obj\))\s*if \"sim-engine\" in path_str:\s*return False.*?\s*return True.*"
-replacement = r"\1\n              return \"sim-engine\" not in path_str"
+new_lines = []
+skip = 0
+for line in lines:
+    if "def existence_router" in line:
+        new_lines.append(line)
+        new_lines.append("          path_str = str(path_obj)\n")
+        new_lines.append("          return \"sim-engine\" not in path_str\n")
+        skip = 5  # Skip old implementation lines
+        continue
+    if skip > 0:
+        skip -= 1
+        continue
+    new_lines.append(line)
 
-# Generic fallback pattern if comments vary
-pattern_alt = r"def existence_router\(path_obj=None, \*args, \*\*kwargs\):\s*path_str = str\(path_obj\)\s*if \"sim-engine\" in path_str:\s*return False\s*else:\s*return True"
-
-if "\"sim-engine\" not in path_str" not in content:
-    new_content, count = re.subn(r"def existence_router\(.*?\):\s*path_str = str\(path_obj\)\s*if \"sim-engine\" in path_str:\s*return False[^\n]*\s*return True[^\n]*", lambda m: m.group(0).split("if")[0] + '  return "sim-engine" not in path_str', content, flags=re.DOTALL)
-    if count > 0:
-        with open(path, "w") as f:
-            f.write(new_content)
-        print("Successfully patched existence_router (SIM103)")
-    else:
-        # Direct line-by-line replacement approach
-        lines = content.splitlines()
-        new_lines = []
-        skip = False
-        for i, line in enumerate(lines):
-            if "def existence_router" in line:
-                new_lines.append(line)
-                new_lines.append("          path_str = str(path_obj)")
-                new_lines.append("          return \"sim-engine\" not in path_str")
-                skip = True
-                continue
-            if skip:
-                if "return True" in line or "return False" in line:
-                    skip = False
-                continue
-            new_lines.append(line)
-        with open(path, "w") as f:
-            f.write("\n".join(new_lines) + "\n")
-        print("Patched existence_router via line parser.")
+with open(path, "w") as f:
+    f.writelines(new_lines)
+print("Successfully updated existence_router (SIM103)")
 '
 
 echo "================================================================="
