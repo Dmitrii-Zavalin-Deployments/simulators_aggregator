@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # src/pipeline/initialize_workspace.py
 
-import os
-import sys
-import json
-import shutil
-import logging
 import argparse
+import json
+import logging
+import os
+import shutil
+import sys
 from pathlib import Path
 
 # Heavy core imports are now perfectly safe
@@ -28,8 +28,8 @@ def fetch_inputs_from_dropbox(target_dir: Path):
     logger.info("Verifying integrity and presence of required pipeline remote data assets...")
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    from src.io.dropbox_utils import TokenManager
     from src.io.download_from_dropbox import CloudIngestor
+    from src.io.dropbox_utils import TokenManager
     
     app_key = os.environ.get("DROPBOX_APP_KEY")
     app_secret = os.environ.get("DROPBOX_APP_SECRET")
@@ -37,7 +37,7 @@ def fetch_inputs_from_dropbox(target_dir: Path):
     dropbox_folder = os.environ.get("DROPBOX_FOLDER", "simulators").strip("/")
     
     if not all([app_key, app_secret, refresh_token]):
-        raise EnvironmentError("❌ CRITICAL: Missing required Dropbox credentials.")
+        raise OSError("❌ CRITICAL: Missing required Dropbox credentials.")
     
     tm = TokenManager(app_key, app_secret)
     ingestor = CloudIngestor(tm, refresh_token, Path("dropbox_download.log"))

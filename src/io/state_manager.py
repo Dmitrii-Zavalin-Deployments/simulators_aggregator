@@ -1,18 +1,21 @@
+import argparse
 import os
 import sys
-import argparse
+
 import dropbox
+
 from src.io.dropbox_utils import TokenManager
+
 
 def _get_required_env(key: str) -> str:
     """Helper to enforce No-Default policy."""
     val = os.environ.get(key)
     if val is None:
-        raise EnvironmentError(f"Missing required environment variable: {key}")
+        raise OSError(f"Missing required environment variable: {key}")
     
     val_stripped = val.strip()
     if not val_stripped:
-        raise EnvironmentError(f"Environment variable '{key}' is empty or whitespace.")
+        raise OSError(f"Environment variable '{key}' is empty or whitespace.")
     
     return val_stripped
 
