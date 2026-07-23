@@ -699,23 +699,28 @@ jobs:
           git stash pop || echo "📋 Workspace pristine or no stash required."
 
           # 3️⃣ Inject entry at the top of the file directly under the header
-          HEADER="# 🛰️ Simulators Aggregator Performance Audit"
-          TUTORIAL="### 📚 Resources & Documentation
+          HEADER=$(cat <<'EOF'
+          # Simulators Aggregator
+          Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
+
+          ### 📚 Resources & Documentation
           - **Tutorial/Book:** ***currently in development***
-          ---"
+
+          ### 🧮 Performance Audit:
+          ---
+          EOF
+          )
           
           if [ -f "README.md" ]; then
               # Extract everything after the first horizontal rule to preserve the body
-              sed '1,/---/d' README.md > old_body.tmp
+              sed -n '/### Audit:/,$p' README.md > old_body.tmp
               echo "$HEADER" > README.md
-              echo "$TUTORIAL" >> README.md
               echo "$NEW_ENTRY" >> README.md
               cat old_body.tmp >> README.md
               rm old_body.tmp
           else
               # Initialize new README
               echo "$HEADER" > README.md
-              echo "$TUTORIAL" >> README.md
               echo "$NEW_ENTRY" >> README.md
           fi
 
