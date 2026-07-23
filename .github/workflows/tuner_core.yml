@@ -756,7 +756,7 @@ jobs:
 
           echo "📊 Commencing performance audit ledger generation for task: $TASK_NAME..."
 
-          # 1️⃣ Collect environment performance metrics
+          # Collect environment performance metrics
           RUN_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
           STATUS="${{ job.status }}"
           CURRENT_BRANCH=${GITHUB_REF##*/}
@@ -765,7 +765,7 @@ jobs:
           CPU_LOAD="${TUNING_ACTIVE_PEAK_CPU:-$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4 "%"}')}"
           MEM_USAGE="${TUNING_ACTIVE_PEAK_MEM:-$(free -m | awk '/Mem:/ { print $3 "/" $2 "MB" }')}"
 
-          # 2️⃣ Build the Markdown entry with the accurate Task and Runtime metadata
+          # Build the Markdown entry with the accurate Task and Runtime metadata
           # Construct the URL for the current run
           RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
@@ -778,7 +778,6 @@ jobs:
           - **Modules Runtime:** Used ${SIM_ELAPSED} of ${SIM_ALLOWED} seconds (${SIM_STATE_LABEL})
           - **CPU Load:** \`$CPU_LOAD\`
           - **Memory Usage:** \`$MEM_USAGE\`
-          ---
           EOF
           )
 
@@ -794,7 +793,7 @@ jobs:
           echo "📤 Restoring workspace modifications post-baseline sync..."
           git stash pop || echo "📋 Workspace pristine or no stash required."
 
-          # 3️⃣ Inject entry at the top of the file directly under the header
+          # Inject entry at the top of the file directly under the header
           HEADER=$(cat <<'EOF'
           # Simulators Aggregator
           Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
@@ -832,13 +831,8 @@ jobs:
           # 📤 RESTORE PHASE 2: Restore modifications cleanly over the updated upstream base
           echo "📤 Restoring isolated workspace modifications..."
           git stash pop || echo "📋 Workspace modifications restored safely."
-          
-          # Clean up any potential lingering conflict markers just in case
-          sed -i '/<<<<<<< Updated upstream/d' README.md
-          sed -i '/=======/d' README.md
-          sed -i '/>>>>>>> Stashed changes/d' README.md
 
-          # 5️⃣ ISOLATED COMMIT & PUSH
+          # ISOLATED COMMIT & PUSH
           # Explicitly target only the public ledger for the final commit
           git add README.md dormant.flag debug/forensic_audit_production.sh
 
