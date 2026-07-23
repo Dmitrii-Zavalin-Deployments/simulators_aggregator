@@ -759,7 +759,6 @@ jobs:
           - **Modules Runtime:** Used ${SIM_ELAPSED} of ${SIM_ALLOWED} seconds (${SIM_STATE_LABEL})
           - **CPU Load:** \`$CPU_LOAD\`
           - **Memory Usage:** \`$MEM_USAGE\`
-          ---
           EOF
           )
 
