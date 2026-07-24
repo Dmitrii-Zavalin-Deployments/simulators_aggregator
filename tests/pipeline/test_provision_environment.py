@@ -97,9 +97,7 @@ class TestProvisionEnvironment(unittest.TestCase):
         # audit for the presence of the '.git' directory. Absent this 
         # directory, the repository is deemed incomplete/unverified.
         def exists_side_effect(path_obj=None, *args, **kwargs):
-            if "task.json" in str(path_obj):
-                return True
-            return False
+            return "task.json" in str(path_obj)
         mock_exists.side_effect = exists_side_effect
         
         mock_json_load.return_value = self.valid_task_data

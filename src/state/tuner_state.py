@@ -8,16 +8,11 @@ class TunerState:
     Enforces a strict Zero-Default Policy with structural initialization.
     """
     __slots__ = [
-        # --- Unified Fields (Input Schema & Output Task Schema) ---
+        'failed_runs_archive',      # Target folder name for failed execution results
         'pipeline_id',              # Identifier for the target YAML/JSON in Library
         'steps',                    # Sequential pipeline step routing mapping
-        
-        # --- Provenance & Environment Traceability (The BOM) ---
-        'task_details',             # Immutable manifest of repo/setup state (tracking everything)
-        
-        # --- Output Schema Deliverables ---
         'successful_runs_archive',  # Target folder name for successful execution results
-        'failed_runs_archive',      # Target folder name for failed execution results
+        'task_details',             # Immutable manifest of repo/setup state (tracking everything)
     ]
 
     def __init__(

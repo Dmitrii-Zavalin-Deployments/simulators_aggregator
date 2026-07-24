@@ -60,7 +60,7 @@ def main():
     with open(combinations_path, "r") as f:
         try:
             combinations = json.load(f)
-        except Exception as e:
+        except json.JSONDecodeError as e:
             logger.error(f"❌ CRITICAL: Failed to parse JSON matrix from {combinations_path}. Error: {e}")
             logger.error(f"EXITING AT LINE: {__import__('inspect').currentframe().f_lineno}")
             sys.exit(1)
@@ -97,7 +97,7 @@ def main():
     with open(state_path, "r") as f:
         try:
             state_data = json.load(f)
-        except Exception as e:
+        except json.JSONDecodeError as e:
             logger.error(f"❌ CRITICAL: Failed to parse state JSON structure. Error: {e}")
             logger.error(f"EXITING AT LINE: {__import__('inspect').currentframe().f_lineno}")
             sys.exit(1)
@@ -148,7 +148,7 @@ def main():
     
     try:
         tasks = sorted(tasks, key=lambda x: int(x["order"]))
-    except Exception as e:
+    except (KeyError, ValueError, TypeError) as e:
         logger.error(f"⚠️ Failed to sort task data array items by order parameter value. Error: {e}")
         logger.error(f"EXITING AT LINE: {__import__('inspect').currentframe().f_lineno}")
         sys.exit(1)
@@ -229,7 +229,8 @@ def main():
                 cwd=str(repo_dir),
                 stdout=log_out,
                 stderr=subprocess.STDOUT,
-                text=True
+                text=True,
+                check=False
             )
 
         logger.info(f"  📉 Execution phase for task finished tracking. Process exit status return code: {result.returncode}")

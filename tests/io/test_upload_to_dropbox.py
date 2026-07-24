@@ -37,9 +37,9 @@ def test_cloud_uploader_success(mock_dbx_class, tmp_path):
     dirty_folder_input = "//simulators//"
     
     # We mock the file system interaction to verify the upload operation.
-    with patch.object(Path, "exists", return_value=True):
-        with patch("builtins.open", mock_open(read_data=binary_data)):
-            uploader.upload(local_file, dirty_folder_input)
+    with patch.object(Path, "exists", return_value=True), \
+        patch("builtins.open", mock_open(read_data=binary_data)):
+        uploader.upload(local_file, dirty_folder_input)
             
     # Forensic Audit:
     # We verify the Dropbox client interaction contract:

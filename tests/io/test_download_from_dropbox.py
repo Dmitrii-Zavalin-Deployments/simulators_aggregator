@@ -166,19 +166,19 @@ def test_main_success_flow(monkeypatch):
     monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "test_refresh")
 
     # 2. Patch dependencies
-    with patch("src.io.download_from_dropbox.CloudIngestor") as MockIngestor:
-        with patch("src.io.download_from_dropbox.argparse.ArgumentParser.parse_args") as mock_args:
-            # Mock the parsed arguments
-            mock_args.return_value = MagicMock(folder="my_folder", filename="my_file.txt")
-            
-            # 3. Execute main
-            main()
-            
-            # 4. Assertions
-            MockIngestor.return_value.download_file.assert_called_once()
-            # Check if remote path was formatted correctly (based on line 112)
-            args, _ = MockIngestor.return_value.download_file.call_args
-            assert args[0] == "/my_folder/my_file.txt"
+    with patch("src.io.download_from_dropbox.CloudIngestor") as MockIngestor, \
+        patch("src.io.download_from_dropbox.argparse.ArgumentParser.parse_args") as mock_args:
+        # Mock the parsed arguments
+        mock_args.return_value = MagicMock(folder="my_folder", filename="my_file.txt")
+        
+        # 3. Execute main
+        main()
+        
+        # 4. Assertions
+        MockIngestor.return_value.download_file.assert_called_once()
+        # Check if remote path was formatted correctly (based on line 112)
+        args, _ = MockIngestor.return_value.download_file.call_args
+        assert args[0] == "/my_folder/my_file.txt"
 
 def test_sync_full_coverage(mock_ingestor):
     """Verify folder creation and filtering logic."""
