@@ -9,7 +9,7 @@ on:
 
 jobs:
   hourly_guard:
-    name: "🕒"
+    name: "🕒 Hourly Guard"
     if: "!contains(github.event.head_commit.message, 'Merge branch') && !contains(github.event.head_commit.message, 'Merge pull request')"
     runs-on: ubuntu-latest
     outputs:
@@ -54,7 +54,7 @@ jobs:
           fi
   
   readme_cleaner:
-    name: "🧹"
+    name: "🧹 Readme cleaner"
     if: contains(github.event.head_commit.message, 'Merge pull request')
     runs-on: ubuntu-latest
     steps:
@@ -131,7 +131,7 @@ jobs:
           fi
 
   gatekeeper:
-      name: "🚦"
+      name: "🚦 Semaphore"
       needs: hourly_guard
       if: needs.hourly_guard.outputs.should_run == 'yes'
       runs-on: ubuntu-latest
@@ -192,7 +192,7 @@ jobs:
             fi
 
   pre_flight_tests:
-    name: "📋"
+    name: "📋 Pre-Flight Tests"
     needs: gatekeeper
     if: needs.gatekeeper.outputs.status == 'active'
     runs-on: ubuntu-latest
@@ -353,7 +353,7 @@ jobs:
           fi
 
   production_run:
-    name: "🛠️"
+    name: "🛠️ Assemble & Tuning"
     needs: pre_flight_tests
     # needs: gatekeeper
     # if: needs.gatekeeper.outputs.status == 'active'
