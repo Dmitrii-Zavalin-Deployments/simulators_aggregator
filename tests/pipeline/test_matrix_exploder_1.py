@@ -59,12 +59,12 @@ def test_main_file_not_found(tmp_path, caplog):
     output_path = tmp_path / "out.json"
     
     with caplog.at_level(logging.ERROR), \
-    patch("sys.argv", ["script", "--config-path", str(config_path), "--output-path", str(output_path)]):
+        patch("sys.argv", ["script", "--config-path", str(config_path), "--output-path", str(output_path)]):
     # We expect the system to halt execution immediately.
-    with pytest.raises(SystemExit) as exc:
-    matrix_exploder.main()
+        with pytest.raises(SystemExit) as exc:
+            matrix_exploder.main()
     assert exc.value.code == 1
-    
+
     # We verify the user is notified of the missing dependency.
     assert "❌ Configuration file not found" in caplog.text
 
@@ -75,11 +75,11 @@ def test_main_invalid_json(tmp_path, caplog):
     output_path = tmp_path / "out.json"
     
     with caplog.at_level(logging.ERROR), \
-    patch("sys.argv", ["script", "--config-path", str(config_path), "--output-path", str(output_path)]):
-    with pytest.raises(SystemExit) as exc:
-    matrix_exploder.main()
+        patch("sys.argv", ["script", "--config-path", str(config_path), "--output-path", str(output_path)]):
+        with pytest.raises(SystemExit) as exc:
+            matrix_exploder.main()
     assert exc.value.code == 1
-    
+
     # We ensure the decoder failure is explicitly reported.
     assert "❌ Failed to parse JSON" in caplog.text
 
@@ -102,9 +102,9 @@ def test_main_success_path(tmp_path, caplog):
     config_path.write_text(json.dumps(config_data))
     
     with caplog.at_level(logging.INFO), \
-    patch("sys.argv", ["script", "--config-path", str(config_path), "--output-path", str(output_path)]):
-    matrix_exploder.main()
-    
+        patch("sys.argv", ["script", "--config-path", str(config_path), "--output-path", str(output_path)]):
+            matrix_exploder.main()
+
     # We confirm execution success via logs and filesystem persistence.
     assert "✅ Success: Generated 4 permutations" in caplog.text
     assert output_path.exists()

@@ -24,11 +24,11 @@ def test_main_dormant_state(tmp_path, caplog):
     # We assert that the application terminates, acknowledging the missing 
     # configuration file as a termination signal.
     with caplog.at_level(logging.INFO), \
-    patch("sys.argv", ["script", "--state-file", str(state_file), "--exit-code", "0", "--log-file", str(log_file)]):
-    with pytest.raises(SystemExit) as exc:
-    record_telemetry.main()
+        patch("sys.argv", ["script", "--state-file", str(state_file), "--exit-code", "0", "--log-file", str(log_file)]):
+        with pytest.raises(SystemExit) as exc:
+            record_telemetry.main()
     assert exc.value.code == 1
-    
+
     # Verify the specific notice was logged to the console for auditability.
     assert "Notice: Temporary execution configuration file not found" in caplog.text
 
@@ -56,11 +56,11 @@ def test_main_success_path(tmp_path, caplog):
     
     # Execute the main orchestrator to finalize the state.
     with caplog.at_level(logging.INFO), \
-    patch("sys.argv", ["script", "--state-file", str(state_file), "--exit-code", "0", "--log-file", str(log_file)]):
-    with pytest.raises(SystemExit) as exc:
-    record_telemetry.main()
+        patch("sys.argv", ["script", "--state-file", str(state_file), "--exit-code", "0", "--log-file", str(log_file)]):
+        with pytest.raises(SystemExit) as exc:
+            record_telemetry.main()
     assert exc.value.code == 0
-            
+
     # Verification of state:
     # 1. A new run record must be created within the 'successful_runs_archive'.
     runs_dir = base_dir / "successful_runs_archive"
@@ -94,11 +94,11 @@ def test_main_failure_path(tmp_path, caplog):
     
     # Execution: Trigger telemetry collection with a simulated failure.
     with caplog.at_level(logging.INFO), \
-    patch("sys.argv", ["script", "--state-file", str(state_file), "--exit-code", "1", "--log-file", str(log_file)]):
-    with pytest.raises(SystemExit) as exc:
-    record_telemetry.main()
+        patch("sys.argv", ["script", "--state-file", str(state_file), "--exit-code", "1", "--log-file", str(log_file)]):
+        with pytest.raises(SystemExit) as exc:
+            record_telemetry.main()
     assert exc.value.code == 1
-    
+
     # Verification: Validate that the telemetry record correctly ingested the error.
     runs_dir = base_dir / "failed_runs_archive"
     telemetry_file = next(runs_dir.glob("run_*/telemetry_results.json"))
@@ -131,10 +131,10 @@ def test_main_failure_missing_log_file(tmp_path, caplog):
     
     # Execute the telemetry routine.
     with caplog.at_level(logging.ERROR), \
-    patch("sys.argv", ["script", "--state-file", str(state_file), "--exit-code", "1", "--log-file", str(missing_log)]):
-    with pytest.raises(SystemExit) as exc:
-    record_telemetry.main()
-        
+        patch("sys.argv", ["script", "--state-file", str(state_file), "--exit-code", "1", "--log-file", str(missing_log)]):
+        with pytest.raises(SystemExit) as exc:
+            record_telemetry.main()
+
     # The system must escalate out with exit code 1 due to the missing evidence.
     assert exc.value.code == 1
     
