@@ -63,15 +63,6 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 ### Audit: 2026-07-23 18:00:12 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `pre_navier_stokes_solver1_b77ddd5`
----
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
-
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 ### Audit: 2026-07-23 19:08:12 UTC
 - **Pipeline:** `pre_navier_stokes_solver4_7cc8d5f.json`
 - **Branch:** `pre_navier_stokes_solver4_7cc8d5f`
@@ -94,15 +85,6 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 ### Audit: 2026-07-23 18:00:18 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `pre_navier_stokes_solver2_56eeabe`
----
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
-
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 ### Audit: 2026-07-23 19:05:55 UTC
 - **Pipeline:** `pre_navier_stokes_solver9_7a81f3d.json`
 - **Branch:** `pre_navier_stokes_solver9_7a81f3d`
@@ -155,15 +137,6 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 ### Audit: 2026-07-23 18:00:29 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `pre_navier_stokes_solver4_7cc8d5f`
----
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
-
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 ### Audit: 2026-07-23 18:05:33 UTC
 - **Pipeline:** `pre_navier_stokes_solver9_7a81f3d.json`
 - **Branch:** `pre_navier_stokes_solver9_7a81f3d`
@@ -197,15 +170,6 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 ### Audit: 2026-07-23 18:00:40 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `pre_navier_stokes_solver6_7dd6310`
----
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
-
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 ### Audit: 2026-07-23 19:05:17 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_3616c82.json`
 - **Branch:** `pre_navier_stokes_solver10_3616c82`
@@ -217,15 +181,6 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 ### Audit: 2026-07-23 19:00:06 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `pre_navier_stokes_solver10_3616c82`
----
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
-
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 ### Audit: 2026-07-23 18:05:32 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_3616c82.json`
 - **Branch:** `pre_navier_stokes_solver10_3616c82`
@@ -237,15 +192,6 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 ### Audit: 2026-07-23 18:00:06 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `pre_navier_stokes_solver10_3616c82`
----
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
-
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 ### Audit: 2026-07-23 17:28:31 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_3616c82.json`
 - **Branch:** `pre_navier_stokes_solver10_3616c82`
