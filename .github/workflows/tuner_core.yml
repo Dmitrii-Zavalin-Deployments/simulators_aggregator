@@ -776,7 +776,7 @@ jobs:
 
           # Inject entry at the top of the file directly under the header
           HEADER=$(cat <<'EOF'
-          # Simulators Aggregator
+          # 🛰️ Simulators Aggregator
           Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
 
           ### 📚 Resources & Documentation
