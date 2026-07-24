@@ -199,8 +199,11 @@ class TestProvisionEnvironment(unittest.TestCase):
 
         main()
         
-        # Verify Git orchestration parameters
-        mock_sub_run.assert_any_call(["git", "clone", "--depth", "1", "--branch", "v1.0.0", "https://github.com/org/repo.git", "repositories/payload_library"])
+        # Verify Git orchestration parameters (including check=False matching production signature)
+        mock_sub_run.assert_any_call(
+            ["git", "clone", "--depth", "1", "--branch", "v1.0.0", "https://github.com/org/repo.git", "repositories/payload_library"],
+            check=False
+        )
         # Verify script execution
         mock_popen.assert_called_once()
 
