@@ -74,10 +74,12 @@ def test_main_invalid_json(tmp_path, caplog):
     config_path.write_text("{ incomplete json")
     output_path = tmp_path / "out.json"
     
-    with caplog.at_level(logging.ERROR), \
-        patch("sys.argv", ["script", "--config-path", str(config_path), "--output-path", str(output_path)]):
-        with pytest.raises(SystemExit) as exc:
-            matrix_exploder.main()
+    with (
+        with caplog.at_level(logging.ERROR),
+        patch("sys.argv", ["script", "--config-path", str(config_path), "--output-path", str(output_path)]),
+        with pytest.raises(SystemExit) as exc:,
+    ):
+        matrix_exploder.main()
     assert exc.value.code == 1
 
     # We ensure the decoder failure is explicitly reported.
