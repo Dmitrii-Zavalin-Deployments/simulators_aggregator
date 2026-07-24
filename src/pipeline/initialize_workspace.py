@@ -58,7 +58,7 @@ def main():
         task_data = json.load(f)
         
     search_pattern = f"{task_data['pipeline_id']}*"
-    manifest_file = list(repo_path.rglob(search_pattern))[0]
+    manifest_file = next(iter(repo_path.rglob(search_pattern)))
     
     with open(manifest_file, 'r') as f:
         manifest_data = json.load(f)
