@@ -1,63 +1,202 @@
-# 🛰️ Simulators Aggregator Performance Audit
+# 🛰️ Simulators Aggregator
 
-### Audit: 2026-07-24 13:27:28 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pre_navier_stokes_solver10_3616c82`
+Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
+
+### 📚 Resources & Documentation
+- **Tutorial/Book:** ***currently in development***
+
 ---
 
-### Audit: 2026-07-24 13:00:06 UTC
+### 🧮 Performance Audit:
+### Audit: 2026-07-23 18:05:55 UTC
+- **Pipeline:** `pre_navier_stokes_solver7_89fa8d9.json`
+- **Branch:** `pre_navier_stokes_solver7_89fa8d9`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30031881833)
+- **Modules Runtime:** Used 128 of 450 seconds (success)
+- **CPU Load:** `52.4%`
+- **Memory Usage:** `749/15989MB`
+### Audit: 2026-07-23 18:00:46 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pre_navier_stokes_solver10_3616c82`
+- **Branch:** `pre_navier_stokes_solver7_89fa8d9`
+### Audit: 2026-07-23 18:08:23 UTC
+- **Pipeline:** `pre_navier_stokes_solver5_4215a91.json`
+- **Branch:** `pre_navier_stokes_solver5_4215a91`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30031864383)
+- **Modules Runtime:** Used 267 of 450 seconds (success)
+- **CPU Load:** `64.3%`
+- **Memory Usage:** `1864/15992MB`
+### Audit: 2026-07-23 18:00:34 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `pre_navier_stokes_solver5_4215a91`
+### Audit: 2026-07-23 18:07:48 UTC
+- **Pipeline:** `pre_navier_stokes_solver3_924da29.json`
+- **Branch:** `pre_navier_stokes_solver3_924da29`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30031847802)
+- **Modules Runtime:** Used 260 of 450 seconds (success)
+- **CPU Load:** `60.9%`
+- **Memory Usage:** `1863/15989MB`
+### Audit: 2026-07-23 18:00:23 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `pre_navier_stokes_solver3_924da29`
+### Audit: 2026-07-23 19:05:32 UTC
+- **Pipeline:** `pre_navier_stokes_solver2_56eeabe.json`
+- **Branch:** `pre_navier_stokes_solver2_56eeabe`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30036166974)
+- **Modules Runtime:** Used 129 of 450 seconds (success)
+- **CPU Load:** `38.1%`
+- **Memory Usage:** `749/15989MB`
+### Audit: 2026-07-23 19:00:17 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `pre_navier_stokes_solver2_56eeabe`
+### Audit: 2026-07-23 18:05:57 UTC
+- **Pipeline:** `pre_navier_stokes_solver1_b77ddd5.json`
+- **Branch:** `pre_navier_stokes_solver1_b77ddd5`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30031833457)
+- **Modules Runtime:** Used 168 of 450 seconds (success)
+- **CPU Load:** `53.5%`
+- **Memory Usage:** `757/15989MB`
+### Audit: 2026-07-23 18:00:12 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `pre_navier_stokes_solver1_b77ddd5`
+---
+Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
+
+### 📚 Resources & Documentation
+- **Tutorial/Book:** ***currently in development***
+
 ---
 
-### Audit: 2026-07-24 12:00:06 UTC
+### 🧮 Performance Audit:
+### Audit: 2026-07-23 19:08:12 UTC
+- **Pipeline:** `pre_navier_stokes_solver4_7cc8d5f.json`
+- **Branch:** `pre_navier_stokes_solver4_7cc8d5f`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30036181632)
+- **Modules Runtime:** Used 267 of 450 seconds (success)
+- **CPU Load:** `58.5%`
+- **Memory Usage:** `1862/15989MB`
+### Audit: 2026-07-23 19:00:28 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pre_navier_stokes_solver10_3616c82`
+- **Branch:** `pre_navier_stokes_solver4_7cc8d5f`
+### Audit: 2026-07-23 18:05:12 UTC
+- **Pipeline:** `pre_navier_stokes_solver2_56eeabe.json`
+- **Branch:** `pre_navier_stokes_solver2_56eeabe`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30031842371)
+- **Modules Runtime:** Used 122 of 450 seconds (success)
+- **CPU Load:** `60.5%`
+- **Memory Usage:** `749/15989MB`
+### Audit: 2026-07-23 18:00:18 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `pre_navier_stokes_solver2_56eeabe`
+---
+Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
+
+### 📚 Resources & Documentation
+- **Tutorial/Book:** ***currently in development***
+
 ---
 
-### Audit: 2026-07-24 11:00:05 UTC
+### 🧮 Performance Audit:
+### Audit: 2026-07-23 19:05:55 UTC
+- **Pipeline:** `pre_navier_stokes_solver9_7a81f3d.json`
+- **Branch:** `pre_navier_stokes_solver9_7a81f3d`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30036217429)
+- **Modules Runtime:** Used 123 of 450 seconds (success)
+- **CPU Load:** `50%`
+- **Memory Usage:** `746/15989MB`
+### Audit: 2026-07-23 19:00:56 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pre_navier_stokes_solver10_3616c82`
+- **Branch:** `pre_navier_stokes_solver9_7a81f3d`
+### Audit: 2026-07-23 19:12:03 UTC
+- **Pipeline:** `pre_navier_stokes_solver8_e9ee45e.json`
+- **Branch:** `pre_navier_stokes_solver8_e9ee45e`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30036210628)
+- **Modules Runtime:** Used 450 of 450 seconds (timeout)
+- **CPU Load:** `61.4%`
+- **Memory Usage:** `83/15989MB`
+### Audit: 2026-07-23 19:00:50 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `pre_navier_stokes_solver8_e9ee45e`
+### Audit: 2026-07-23 19:05:48 UTC
+- **Pipeline:** `pre_navier_stokes_solver6_7dd6310.json`
+- **Branch:** `pre_navier_stokes_solver6_7dd6310`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30036196107)
+- **Modules Runtime:** Used 117 of 450 seconds (success)
+- **CPU Load:** `34.9%`
+- **Memory Usage:** `749/15989MB`
+### Audit: 2026-07-23 19:00:39 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `pre_navier_stokes_solver6_7dd6310`
+### Audit: 2026-07-23 17:27:38 UTC
+- **Pipeline:** `pre_navier_stokes_solver5_4215a91.json`
+- **Branch:** `pre_navier_stokes_solver5_4215a91`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30029285165)
+- **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
+- **CPU Load:** `4.6%`
+- **Memory Usage:** `1224/15993MB`
+### Audit: 2026-07-23 18:07:57 UTC
+- **Pipeline:** `pre_navier_stokes_solver4_7cc8d5f.json`
+- **Branch:** `pre_navier_stokes_solver4_7cc8d5f`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30031855684)
+- **Modules Runtime:** Used 269 of 450 seconds (success)
+- **CPU Load:** `63.8%`
+- **Memory Usage:** `1862/15988MB`
+### Audit: 2026-07-23 18:00:29 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `pre_navier_stokes_solver4_7cc8d5f`
+---
+Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
+
+### 📚 Resources & Documentation
+- **Tutorial/Book:** ***currently in development***
+
 ---
 
-### Audit: 2026-07-24 09:00:05 UTC
+### 🧮 Performance Audit:
+### Audit: 2026-07-23 18:05:33 UTC
+- **Pipeline:** `pre_navier_stokes_solver9_7a81f3d.json`
+- **Branch:** `pre_navier_stokes_solver9_7a81f3d`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30031892709)
+- **Modules Runtime:** Used 87 of 450 seconds (success)
+- **CPU Load:** `90.5%`
+- **Memory Usage:** `754/15988MB`
+### Audit: 2026-07-23 18:00:57 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pre_navier_stokes_solver10_3616c82`
----
-
-### Audit: 2026-07-24 08:00:04 UTC
+- **Branch:** `pre_navier_stokes_solver9_7a81f3d`
+### Audit: 2026-07-23 18:12:10 UTC
+- **Pipeline:** `pre_navier_stokes_solver8_e9ee45e.json`
+- **Branch:** `pre_navier_stokes_solver8_e9ee45e`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30031889618)
+- **Modules Runtime:** Used 435 of 450 seconds (success)
+- **CPU Load:** `60%`
+- **Memory Usage:** `1863/15989MB`
+### Audit: 2026-07-23 18:00:51 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pre_navier_stokes_solver10_3616c82`
----
-
-### Audit: 2026-07-24 07:00:04 UTC
+- **Branch:** `pre_navier_stokes_solver8_e9ee45e`
+### Audit: 2026-07-23 18:06:30 UTC
+- **Pipeline:** `pre_navier_stokes_solver6_7dd6310.json`
+- **Branch:** `pre_navier_stokes_solver6_7dd6310`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30031873106)
+- **Modules Runtime:** Used 130 of 450 seconds (success)
+- **CPU Load:** `37.5%`
+- **Memory Usage:** `749/15989MB`
+### Audit: 2026-07-23 18:00:40 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pre_navier_stokes_solver10_3616c82`
----
-
-### Audit: 2026-07-24 06:00:07 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pre_navier_stokes_solver10_3616c82`
----
-
-### Audit: 2026-07-24 05:00:05 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pre_navier_stokes_solver10_3616c82`
----
-
-### Audit: 2026-07-23 22:00:06 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pre_navier_stokes_solver10_3616c82`
----
-
-### Audit: 2026-07-23 21:00:08 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pre_navier_stokes_solver10_3616c82`
----
-
-### Audit: 2026-07-23 20:00:08 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pre_navier_stokes_solver10_3616c82`
+- **Branch:** `pre_navier_stokes_solver6_7dd6310`
 ---
 Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
 
@@ -115,6 +254,118 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1176/15993MB`
+### Audit: 2026-07-23 17:27:50 UTC
+- **Pipeline:** `pre_navier_stokes_solver9_7a81f3d.json`
+- **Branch:** `pre_navier_stokes_solver9_7a81f3d`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30029293412)
+- **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
+- **CPU Load:** `0%`
+- **Memory Usage:** `1315/15988MB`
+### Audit: 2026-07-23 17:28:08 UTC
+- **Pipeline:** `pre_navier_stokes_solver8_e9ee45e.json`
+- **Branch:** `pre_navier_stokes_solver8_e9ee45e`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30029282735)
+- **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
+- **CPU Load:** `2.4%`
+- **Memory Usage:** `1175/15989MB`
+### Audit: 2026-07-23 17:28:17 UTC
+- **Pipeline:** `pre_navier_stokes_solver7_89fa8d9.json`
+- **Branch:** `pre_navier_stokes_solver7_89fa8d9`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30029290865)
+- **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
+- **CPU Load:** `0%`
+- **Memory Usage:** `1130/15989MB`
+### Audit: 2026-07-23 17:28:13 UTC
+- **Pipeline:** `pre_navier_stokes_solver6_7dd6310.json`
+- **Branch:** `pre_navier_stokes_solver6_7dd6310`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30029272243)
+- **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
+- **CPU Load:** `4.6%`
+- **Memory Usage:** `1200/15989MB`
+### Audit: 2026-07-23 17:28:12 UTC
+- **Pipeline:** `pre_navier_stokes_solver4_7cc8d5f.json`
+- **Branch:** `pre_navier_stokes_solver4_7cc8d5f`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30029297516)
+- **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
+- **CPU Load:** `0%`
+- **Memory Usage:** `1152/15989MB`
+### Audit: 2026-07-23 17:27:50 UTC
+- **Pipeline:** `pre_navier_stokes_solver3_924da29.json`
+- **Branch:** `pre_navier_stokes_solver3_924da29`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30029280289)
+- **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
+- **CPU Load:** `2.4%`
+- **Memory Usage:** `1150/15989MB`
+### Audit: 2026-07-23 17:27:34 UTC
+- **Pipeline:** `pre_navier_stokes_solver2_56eeabe.json`
+- **Branch:** `pre_navier_stokes_solver2_56eeabe`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30029275109)
+- **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
+- **CPU Load:** `4.6%`
+- **Memory Usage:** `1123/15989MB`
+### Audit: 2026-07-23 17:27:46 UTC
+- **Pipeline:** `pre_navier_stokes_solver1_b77ddd5.json`
+- **Branch:** `pre_navier_stokes_solver1_b77ddd5`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30029277321)
+- **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
+- **CPU Load:** `2.4%`
+- **Memory Usage:** `1195/15993MB`
+### Audit: 2026-07-23 18:40:35 UTC
+- **Pipeline:** `main_branch_pipeline_aedc2bd.json`
+- **Branch:** `main`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30034224081)
+- **Modules Runtime:** Used 11 of 450 seconds (success)
+- **CPU Load:** `70.8%`
+- **Memory Usage:** `329/15989MB`
+### Audit: 2026-07-23 18:36:44 UTC
+- **Pipeline:** `main_branch_pipeline_aedc2bd.json`
+- **Branch:** `main`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30034224081)
+- **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
+- **CPU Load:** `2.4%`
+- **Memory Usage:** `1078/15989MB`
+### Audit: 2026-07-23 18:22:37 UTC
+- **Pipeline:** `main_branch_pipeline_8ccbfbe.json`
+- **Branch:** `main`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30032889628)
+- **Modules Runtime:** Used 6 of 450 seconds (success)
+- **CPU Load:** `34.2%`
+- **Memory Usage:** `321/15989MB`
+### Audit: 2026-07-23 18:18:09 UTC
+- **Pipeline:** `main_branch_pipeline_8ccbfbe.json`
+- **Branch:** `main`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30032889628)
+- **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
+- **CPU Load:** `2.4%`
+- **Memory Usage:** `1133/15989MB`
+### Audit: 2026-07-23 17:39:21 UTC
+- **Pipeline:** `main_branch_pipeline_42e220e.json`
+- **Branch:** `main`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30029708434)
+- **Modules Runtime:** Used 143 of 450 seconds (success)
+- **CPU Load:** `32.5%`
+- **Memory Usage:** `758/15988MB`
+### Audit: 2026-07-23 17:33:44 UTC
+- **Pipeline:** `main_branch_pipeline_42e220e.json`
+- **Branch:** `main`
+- **Status:** `success`
+- **Run:** [Detailed Execution Logs](https://github.com/Dmitrii-Zavalin-Deployments/simulators_aggregator/actions/runs/30029708434)
+- **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
+- **CPU Load:** `0%`
+- **Memory Usage:** `1140/15989MB`
 ### Audit: 2026-07-23 15:12:01 UTC
 - **Pipeline:** `main_branch_pipeline_28426da.json`
 - **Branch:** `main`
