@@ -101,7 +101,7 @@ def test_main_failure_path(tmp_path, caplog):
     
     # Verification: Validate that the telemetry record correctly ingested the error.
     runs_dir = base_dir / "failed_runs_archive"
-    telemetry_file = list(runs_dir.glob("run_*/telemetry_results.json"))[0]
+    telemetry_file = next(runs_dir.glob("run_*/telemetry_results.json"))
     
     with open(telemetry_file, "r") as f:
         data = json.load(f)

@@ -400,9 +400,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         # Safeguard path checking regardless of Path object instantiation
         def existence_router(path_obj=None, *args, **kwargs):
             path_str = str(path_obj)
-            if "sim-engine" in path_str:
-                return False  # Force missing repository to trigger clone step
-            return True       # Keep core setup blueprints active
+            return "sim-engine" not in path_str
             
         mock_path_exists.side_effect = existence_router
         mock_exists.side_effect = existence_router
