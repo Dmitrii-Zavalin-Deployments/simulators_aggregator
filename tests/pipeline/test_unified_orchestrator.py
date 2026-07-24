@@ -57,7 +57,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
             # Support direct iteration over json loading if needed
             if path_str.endswith(".json"):
                 mock_file.read.return_value = content
-        
+
         elif "w" in mode or "a" in mode:
             def write_side_effect(written_data):
                 self.file_vault[path_str] = written_data
@@ -160,7 +160,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         mock_path_exists.return_value = True
         
         mock_open_func.side_effect = self.dynamic_open_router
-        mock_json_load.side_effect = Exception("JSON Decode Crash")
+        mock_json_load.side_effect = json.JSONDecodeError("JSON Decode Crash", "", 0)
 
         with self.assertRaises(SystemExit) as cm:
             main()
@@ -199,7 +199,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         mock_open_func.side_effect = self.dynamic_open_router
         
         # 1st call loads configurations, 2nd call throws while loading state mapping file
-        mock_json_load.side_effect = [self.valid_combinations, Exception("State Parse Error")]
+        mock_json_load.side_effect = [self.valid_combinations, json.JSONDecodeError("State Parse Error", "", 0)]
 
         with self.assertRaises(SystemExit) as cm:
             main()
@@ -425,7 +425,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
         
         # Validate target mapping address updates handled translation layer protocols
         self.assertIn("https://github.com/org/sim-engine.git", str(clone_calls[0]))
-    
+
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
     @patch("src.pipeline.unified_orchestrator.os.path.exists")
     @patch("src.pipeline.unified_orchestrator.os.remove")
@@ -452,7 +452,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
             main()
             
         self.assertEqual(cm.exception.code, 1)
-    
+
     @patch("src.pipeline.unified_orchestrator.argparse.ArgumentParser.parse_args")
     @patch("src.pipeline.unified_orchestrator.os.path.exists")
     @patch("src.pipeline.unified_orchestrator.os.remove")
@@ -477,6 +477,7 @@ class TestUnifiedOrchestrator(unittest.TestCase):
             main()
             
         self.assertEqual(cm.exception.code, 1)
+
 
 if __name__ == "__main__":
     unittest.main()
