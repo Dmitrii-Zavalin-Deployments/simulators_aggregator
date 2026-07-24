@@ -1,4 +1,9 @@
-# Simulators Aggregator
+# 🛰️ Simulators Aggregator Performance Audit
+
+### Audit: 2026-07-24 13:28:33 UTC
+- **Pipeline:** `"trigger the tuning job from the localhost"`
+- **Branch:** `staging_pre_navier_stokes_solver`
+---
 Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
 
 ### 📚 Resources & Documentation
