@@ -1,12 +1,3 @@
-#!/usr/bin/env python3
-"""
-Archivist I/O: Cloud Upload Module.
-
-Compliance:
-- Rule 0 (Law of Performance): Uses __slots__ for memory efficiency.
-- Rule 5 (Deterministic Init): Relies on injected TokenManager.
-- Rule 8 (API Minimalism): Unified interface for upload transactions.
-"""
 import argparse
 import logging
 import os

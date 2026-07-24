@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# src/pipeline/provision_environment.py
-
 import json
 import logging
 import subprocess

@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# src/pipeline/initialize_workspace.py
-
 import argparse
 import json
 import logging
