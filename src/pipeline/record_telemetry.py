@@ -81,7 +81,7 @@ def main():
 
     # 5. Write output
     target_archive = "successful_runs_archive" if status == "success" else "failed_runs_archive"
-    timestamp = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S")
     run_context_dir = os.path.join(base_dir, target_archive, f"run_{timestamp}")
     
     logger.info(f"📂 Allocating physical destination workspace: {run_context_dir}")

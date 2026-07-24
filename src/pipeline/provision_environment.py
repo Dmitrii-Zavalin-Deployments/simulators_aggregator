@@ -46,7 +46,7 @@ def main():
     repo_path.parent.mkdir(parents=True, exist_ok=True)
     
     clone_cmd = ["git", "clone", "--depth", "1", "--branch", version_tag, repo_url, str(repo_path)]
-    result = subprocess.run(clone_cmd)
+    result = subprocess.run(clone_cmd, check=False)
     if result.returncode != 0 or not (repo_path / ".git").exists():
         logger.error("❌ CRITICAL: Payload repository clone failed.")
         sys.exit(1)
