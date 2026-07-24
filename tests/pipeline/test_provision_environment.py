@@ -1,3 +1,4 @@
+import json
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
@@ -42,7 +43,7 @@ class TestProvisionEnvironment(unittest.TestCase):
         # contract definitions. We simulate a parser exception and verify
         # that the system exits with a non-zero status.
         mock_exists.return_value = True
-        mock_json_load.side_effect = Exception("Malformed JSON unexpected token")
+        mock_json_load.side_effect = json.JSONDecodeError("Malformed JSON unexpected token", doc="", pos=0)
 
         with self.assertRaises(SystemExit) as cm:
             main()

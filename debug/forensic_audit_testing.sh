@@ -1,60 +1,29 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "=== 1. Diagnostic: Locating with-blocks and indentation in test files ==="
-grep -n -C 5 "with caplog.at_level" tests/pipeline/test_matrix_exploder_1.py tests/pipeline/test_record_telemetry.py || true
+echo "=== 1. Diagnostic: Locating test cases and root-cause functions ==="
+grep -n -C 8 "test_main_complete_success_flow" tests/pipeline/test_provision_environment.py || true
+grep -n -C 5 "test_main_corrupt_json_format" tests/pipeline/test_provision_environment.py || true
+grep -n -C 5 "subprocess.run" src/pipeline/provision_environment.py || true
+grep -n -C 5 "json.load" src/pipeline/provision_environment.py || true
 
 echo "=== 2. Smoking-gun source audit using cat -n ==="
-echo "--- tests/pipeline/test_matrix_exploder_1.py (lines 55 to 85) ---"
-sed -n '55,85p' tests/pipeline/test_matrix_exploder_1.py | cat -n
+if [ -f "src/pipeline/provision_environment.py" ]; then
+    echo "--- src/pipeline/provision_environment.py ---"
+    cat -n src/pipeline/provision_environment.py
+fi
 
-echo "--- tests/pipeline/test_record_telemetry.py (lines 20 to 40) ---"
-sed -n '20,40p' tests/pipeline/test_record_telemetry.py | cat -n
+if [ -f "tests/pipeline/test_provision_environment.py" ]; then
+    echo "--- tests/pipeline/test_provision_environment.py ---"
+    cat -n tests/pipeline/test_provision_environment.py
+fi
 
-echo "=== 3. Executing Automated Indent Repair ==="
-python3 -c '
-import re
+echo "=== 3. Automated Repair Injections (commented with # as requested) ==="
+# Repair 1: Catch generic Exception alongside JSONDecodeError and OSError during task.json parsing
+# sed -i 's/except (json.JSONDecodeError, OSError) as e:/except (json.JSONDecodeError, OSError, Exception) as e:/g' src/pipeline/provision_environment.py
 
-files = [
-    "tests/pipeline/test_matrix_exploder_1.py",
-    "tests/pipeline/test_record_telemetry.py"
-]
+# Repair 2: Prevent unwanted repo deletion / ensure correct mock path returns in test_main_complete_success_flow
+# sed -i 's/mock_exists.return_value = True/mock_exists.side_effect = lambda path: "task.json" in str(path) or ".git" in str(path)/g' tests/pipeline/test_provision_environment.py
 
-for filepath in files:
-    with open(filepath, "r") as f:
-        content = f.read()
-
-    # Target pattern: fix blocks where with statements and their contents lack proper nesting indentation
-    # We ensure lines inside test functions under `with caplog...` blocks are properly indented.
-    lines = content.splitlines(keepends=True)
-    new_lines = []
-    in_target_block = False
-    
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        if "def test_main_" in stripped:
-            in_target_block = True
-            new_lines.append(line)
-            continue
-            
-        if in_target_block:
-            # Fix patch continuation lines or inner with/assert statements under caplog blocks
-            if stripped.startswith("patch(") and line.startswith("    "):
-                new_lines.append("        " + stripped + "\n")
-            elif (stripped.startswith("# We expect") or stripped.startswith("# Verify") or stripped.startswith("# Execute") or stripped.startswith("# The system")) and line.startswith("    "):
-                new_lines.append("    " + line)
-            elif (stripped.startswith("with pytest.raises") or stripped.startswith("matrix_exploder.") or stripped.startswith("record_telemetry.") or stripped.startswith("assert ")) and line.startswith("    "):
-                # If it is directly under a with statement, it needs 8 spaces indentation
-                new_lines.append("        " + stripped + "\n")
-            else:
-                new_lines.append(line)
-        else:
-            new_lines.append(line)
-
-    with open(filepath, "w") as f:
-        f.writelines(lines)
-
-print("Automated repair pass completed.")
-'
-
-echo "=== 4. Verifying Syntax with Ruff ==="
+echo "=== 4. Re-running target test suite for verification ==="
+# pytest tests/pipeline/test_provision_environment.py || true
