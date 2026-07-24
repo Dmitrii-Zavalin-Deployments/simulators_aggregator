@@ -24,7 +24,7 @@ def main():
     with open(root_task, 'r') as f:
         try:
             task_data = json.load(f)
-        except Exception as e:
+        except (json.JSONDecodeError, OSError) as e:
             logger.error(f"❌ CRITICAL: task.json contains invalid JSON: {e}")
             sys.exit(1)
 
