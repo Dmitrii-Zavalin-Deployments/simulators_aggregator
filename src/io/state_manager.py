@@ -32,7 +32,7 @@ def check_file_exists(dbx: dropbox.Dropbox, folder: str, filename: str) -> bool:
     except dropbox.exceptions.ApiError as e:
         if e.error.is_path() and e.error.get_path().is_not_found():
             return False
-        raise e
+        raise
 
 def main():
     # Enforce strict input parameters
@@ -58,7 +58,7 @@ def main():
         else:
             print("state_status=not_found")
             
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         # Route all errors to stderr so they don't pollute the GHA output variable
         print(f"CRITICAL ERROR: {e}", file=sys.stderr)
         sys.exit(1)
