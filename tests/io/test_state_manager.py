@@ -1,6 +1,5 @@
 # tests/io/test_state_manager.py
 
-import logging
 import os
 from unittest.mock import MagicMock, patch
 
