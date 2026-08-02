@@ -58,7 +58,7 @@ def main():
         else:
             print("state_status=not_found")
             
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         # Route all errors to stderr so they don't pollute the GHA output variable
         print(f"CRITICAL ERROR: {e}", file=sys.stderr)
         sys.exit(1)
