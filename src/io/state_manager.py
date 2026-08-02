@@ -1,19 +1,10 @@
 import argparse
-import logging
 import os
 import sys
 
 import dropbox
 
 from src.io.dropbox_utils import TokenManager
-
-# Configure Logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
-    stream=sys.stdout
-)
-logger = logging.getLogger(__name__)
 
 
 def _get_required_env(key: str) -> str:
@@ -44,37 +35,34 @@ def check_file_exists(dbx: dropbox.Dropbox, folder: str, filename: str) -> bool:
         raise
 
 def main():
-    # Route all unhandled errors to the logger
-    def handle_exception(exc_type, exc_value, exc_traceback):
-        if issubclass(exc_type, KeyboardInterrupt):
-            sys.__excepthook__(exc_type, exc_value, exc_traceback)
-            return
-        logger.error(f"CRITICAL ERROR: {exc_value}")
-        sys.exit(1)
-
-    sys.excepthook = handle_exception
-
     # Enforce strict input parameters
     parser = argparse.ArgumentParser(description="Deterministic Dropbox File Existence Checker")
     parser.add_argument("--folder", required=True, help="Target folder in the Dropbox root")
     parser.add_argument("--filename", required=True, help="Target filename to search for")
-    args = parser.parse_args()
+    
+    try:
+        args = parser.parse_args()
 
-    # 1. Enforce No-Default Policy for Credentials
-    app_key = _get_required_env("DROPBOX_APP_KEY")
-    app_secret = _get_required_env("DROPBOX_APP_SECRET")
-    refresh_token = _get_required_env("DROPBOX_REFRESH_TOKEN")
+        # 1. Enforce No-Default Policy for Credentials
+        app_key = _get_required_env("DROPBOX_APP_KEY")
+        app_secret = _get_required_env("DROPBOX_APP_SECRET")
+        refresh_token = _get_required_env("DROPBOX_REFRESH_TOKEN")
 
-    # 2. Authenticate
-    tm = TokenManager(app_key, app_secret)
-    access_token = tm.refresh_access_token(refresh_token)
-    dbx = dropbox.Dropbox(access_token)
+        # 2. Authenticate
+        tm = TokenManager(app_key, app_secret)
+        access_token = tm.refresh_access_token(refresh_token)
+        dbx = dropbox.Dropbox(access_token)
 
-    # 3. Check Existence & Output CI/CD Signal via logger
-    if check_file_exists(dbx, args.folder, args.filename):
-        logger.info("state_status=found")
-    else:
-        logger.info("state_status=not_found")
+        # 3. Check Existence & Output CI/CD Signal to stdout
+        if check_file_exists(dbx, args.folder, args.filename):
+            print("state_status=found")
+        else:
+            print("state_status=not_found")
+
+    except Exception as e:  # noqa: BLE001
+        # Route all errors to stderr so they don't pollute the GHA output variable
+        print(f"CRITICAL ERROR: {e}", file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == "__main__":  # pragma: no cover
     main()
