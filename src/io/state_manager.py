@@ -64,9 +64,9 @@ def main():
 
         # 3. Check Existence & Output CI/CD Signal via logger
         if check_file_exists(dbx, args.folder, args.filename):
-            print("state_status=found")
+            logger.info("state_status=found")
         else:
-            print("state_status=not_found")
+            logger.info("state_status=not_found")
 
     except Exception:
         logger.exception("CRITICAL ERROR")
