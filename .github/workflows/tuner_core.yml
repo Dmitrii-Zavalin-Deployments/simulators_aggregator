@@ -60,11 +60,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Git identity
+      - name: 🤖 Initialize Robot A Identity & Notes
         run: |
-          # 1. 🔧 GLOBAL ROBOT IDENTITY INITIALIZATION
-          git config --global user.name "Human-Assisted Processing Engine [${{ github.ref_name }}]"
-          git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
+          BRANCH_SAFE="${GITHUB_REF_NAME//\//-}"
+          git config --global user.name "Automation Engine A (${BRANCH_SAFE})"
+          git config --global user.email "automation_a+${BRANCH_SAFE}@yourdomain"
           git config --global notes.rewriteRef "refs/notes/*"
 
       - name: Dynamically Clean and Deduplicate README
@@ -113,7 +113,7 @@ jobs:
           git add README.md
 
           if [ -n "$(git status --porcelain README.md)" ]; then
-            git commit -m "🤖 robot: clean and deduplicate README header [skip ci]"
+            git commit -m "🤖 robot a: clean and deduplicate README header [skip ci]"
             TARGET_COMMIT=$(git rev-parse HEAD)
 
             # Fetch remote notes
@@ -140,13 +140,15 @@ jobs:
       steps:
         - name: 🗂️ Checkout Repository
           uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
 
         - name: 🔍 Check Dormancy Flag
           id: check
           run: |
-            # 1. 🔧 GLOBAL ROBOT IDENTITY INITIALIZATION
-            git config --global user.name "Human-Assisted Processing Engine [${{ github.ref_name }}]"
-            git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
+            BRANCH_SAFE="${GITHUB_REF_NAME//\//-}"
+            git config --global user.name "Automation Engine B (${BRANCH_SAFE})"
+            git config --global user.email "automation_b+${BRANCH_SAFE}@yourdomain"
             git config --global notes.rewriteRef "refs/notes/*"
 
             FLAG_PATH="dormant.flag"
@@ -171,7 +173,7 @@ jobs:
               # Only commit and push if the flag content actually changed
               if [ -n "$(git status --porcelain)" ]; then
                 echo "🌅 WAKING ENGINE: State changed to ACTIVE. Syncing..."
-                git commit -m "🤖 robot: reset dormant flag to active [Engine]"
+                git commit -m "🤖 robot b: reset dormant flag to active [Engine]"
                 
                 # 1. Fetch remote notes
                 git fetch origin refs/notes/commits:refs/notes/commits || true
@@ -207,11 +209,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 🔧 GLOBAL ROBOT IDENTITY + NOTES INITIALIZATION (Branch-Isolated)
-      - name: 🤖 Initialize Robot Identity & Notes
+      - name: 🤖 Initialize Robot C Identity & Notes
         run: |
-          git config --global user.name "Human-Assisted Processing Engine [${{ github.ref_name }}]"
-          git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
+          BRANCH_SAFE="${GITHUB_REF_NAME//\//-}"
+          git config --global user.name "Automation Engine C (${BRANCH_SAFE})"
+          git config --global user.email "automation_c+${BRANCH_SAFE}@yourdomain"
           git config --global notes.rewriteRef "refs/notes/*"
 
       - name: 🐍 Setup Python 3.11
@@ -267,7 +269,7 @@ jobs:
             git add . 
             # We use git commit -m ... || true to prevent the script from failing 
             # if git somehow finds nothing to commit after the add
-            git commit -m "🤖 robot: auto-clean hygiene update [Engine]" || echo "No changes to commit"
+            git commit -m "🤖 robot c: auto-clean hygiene update [Engine]" || echo "No changes to commit"
             
             TARGET_COMMIT=$(git rev-parse HEAD)
 
@@ -334,7 +336,7 @@ jobs:
         run: |
           git add debug/forensic_audit_testing.sh
           if [ -n "$(git status --porcelain debug/forensic_audit_testing.sh)" ]; then
-            git commit -m "🤖 robot: forensic reset [PASS]"
+            git commit -m "🤖 robot c: forensic reset [PASS]"
             TARGET_COMMIT=$(git rev-parse HEAD)
 
             # 1️⃣ Fetch remote notes FIRST
@@ -374,11 +376,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 🔧 GLOBAL ROBOT IDENTITY + NOTES INITIALIZATION (Branch-Isolated)
-      - name: 🤖 Initialize Robot Identity & Notes
+      - name: 🤖 Initialize Robot D Identity & Notes
         run: |
-          git config --global user.name "Human-Assisted Processing Engine [${{ github.ref_name }}]"
-          git config --global user.email "automation-${{ github.ref_name }}@zavalin.com"
+          BRANCH_SAFE="${GITHUB_REF_NAME//\//-}"
+          git config --global user.name "Automation Engine D (${BRANCH_SAFE})"
+          git config --global user.email "automation_d+${BRANCH_SAFE}@yourdomain"
           git config --global notes.rewriteRef "refs/notes/*"
 
       # Setup Python (General base)
@@ -818,7 +820,7 @@ jobs:
           git add README.md dormant.flag debug/forensic_audit_production.sh
 
           if [ -n "$(git status --porcelain README.md)" ]; then
-            git commit -m "🤖 robot: audit ledger update [$STATUS] [skip ci]"
+            git commit -m "🤖 robot d: audit ledger update [$STATUS] [skip ci]"
             TARGET_COMMIT=$(git rev-parse HEAD)
 
             # Sync and attach metadata notes
@@ -887,3 +889,40 @@ jobs:
           fi
 
           echo -e "\n✅ --- INTEGRITY AUDIT COMPLETE ---"
+
+      - name: 🛠️ Retroactive Git Notes Corrector (All Automation Engines)
+        if: always()
+        run: |
+          echo "--- Starting Retroactive Git Notes Audit (All History) ---"
+          
+          git fetch origin refs/notes/commits:refs/notes/commits || true
+
+          COMMIT_HASHES=$(git log --format="%H %an" | grep -E "Automation Engine" | awk '{print $1}')
+          ACTIVE_ENGINES=$(git log --format="%an" | grep -E "Automation Engine" | sort -u | tr '\n' ', ' | sed 's/,$//')
+
+          if [ -z "$COMMIT_HASHES" ]; then
+            echo "No automation engine commits found in history."
+          else
+            TOTAL_COMMITS=0
+            ADDED_NOTES=0
+
+            for COMMIT in $COMMIT_HASHES; do
+              TOTAL_COMMITS=$((TOTAL_COMMITS + 1))
+              
+              if ! git notes show "$COMMIT" >/dev/null 2>&1; then
+                echo "⚠️ Missing note detected for commit: $COMMIT. Adding note..."
+                git notes add -f -m "robot: true" "$COMMIT"
+                ADDED_NOTES=$((ADDED_NOTES + 1))
+              fi
+            done
+
+            echo "--------------------------------------------------"
+            echo "📊 Git Notes Audit Summary:"
+            echo "   - Active Automation Engines:       [ ${ACTIVE_ENGINES:-None} ]"
+            echo "   - Total Automation Commits Scanned: $TOTAL_COMMITS"
+            echo "   - Missing Notes Fixed & Added:      $ADDED_NOTES"
+            echo "--------------------------------------------------"
+
+            echo "Pushing updated notes to remote..."
+            git push --force origin refs/notes/commits || echo "Notes push skipped or protected."
+          fi
