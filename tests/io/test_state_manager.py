@@ -154,7 +154,9 @@ def test_main_unexpected_exception(mock_tm, monkeypatch, capsys):
         
         # We ensure standard error buffers captured the full stack trace diagnostic logs.
         captured = capsys.readouterr()
-        assert "CRITICAL ERROR: Auth Exploded" in captured.err
+        # logger.exception outputs the log message and the traceback containing the exception message
+        assert "CRITICAL ERROR" in captured.err
+        assert "Auth Exploded" in captured.err
 
 
 @patch("src.io.state_manager.TokenManager")
