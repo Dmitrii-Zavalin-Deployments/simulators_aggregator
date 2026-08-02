@@ -1,5 +1,6 @@
 # tests/io/test_state_manager.py
 
+import logging
 import os
 from unittest.mock import MagicMock, patch
 
@@ -163,6 +164,7 @@ def test_main_unexpected_exception(mock_tm, monkeypatch, caplog):
 @patch("src.io.state_manager.dropbox.Dropbox")
 @patch("src.io.state_manager.check_file_exists")
 def test_main_success_found(mock_check, mock_dbx, mock_tm, monkeypatch, caplog):
+    caplog.set_level(logging.INFO)
     """Verify runtime signal production paths when target files exist."""
     # We assign credentials to fulfill security constraints.
     monkeypatch.setenv("DROPBOX_APP_KEY", "key_value")
@@ -186,6 +188,7 @@ def test_main_success_found(mock_check, mock_dbx, mock_tm, monkeypatch, caplog):
 @patch("src.io.state_manager.dropbox.Dropbox")
 @patch("src.io.state_manager.check_file_exists")
 def test_main_success_not_found(mock_check, mock_dbx, mock_tm, monkeypatch, caplog):
+    caplog.set_level(logging.INFO)
     """Verify runtime signal production paths when target files are missing."""
     # We assign credentials to fulfill security constraints.
     monkeypatch.setenv("DROPBOX_APP_KEY", "key_value")
