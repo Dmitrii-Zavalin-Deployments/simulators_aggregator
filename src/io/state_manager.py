@@ -1,10 +1,19 @@
 import argparse
+import logging
 import os
 import sys
 
 import dropbox
 
 from src.io.dropbox_utils import TokenManager
+
+# Configure Logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+    stream=sys.stdout
+)
+logger = logging.getLogger(__name__)
 
 
 def _get_required_env(key: str) -> str:
@@ -53,15 +62,14 @@ def main():
         access_token = tm.refresh_access_token(refresh_token)
         dbx = dropbox.Dropbox(access_token)
 
-        # 3. Check Existence & Output CI/CD Signal to stdout
+        # 3. Check Existence & Output CI/CD Signal via logger
         if check_file_exists(dbx, args.folder, args.filename):
-            print("state_status=found")
+            logger.info("state_status=found")
         else:
-            print("state_status=not_found")
+            logger.info("state_status=not_found")
 
-    except Exception as e:  # noqa: BLE001
-        # Route all errors to stderr so they don't pollute the GHA output variable
-        print(f"CRITICAL ERROR: {e}", file=sys.stderr)
+    except Exception:
+        logger.exception("CRITICAL ERROR")
         sys.exit(1)
 
 if __name__ == "__main__":  # pragma: no cover
