@@ -90,7 +90,7 @@ def main():
         
         uploader.upload(local_path, args.folder)
         
-    except Exception as e:
+    except Exception:
         logger.exception("CRITICAL: Cloud upload pipeline transaction failed")
         sys.exit(1)
 

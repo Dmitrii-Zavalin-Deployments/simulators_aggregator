@@ -116,7 +116,7 @@ def main():
         local_dir = Path("data/testing-input-output")
         ingestor.download_file(remote_path, local_dir / args.filename)
         
-    except Exception as e:
+    except Exception:
         # Now, when the test mocks an exception, it lands here!
         logging.getLogger("CloudIngestor").exception("CRITICAL ERROR")
         sys.exit(1)
