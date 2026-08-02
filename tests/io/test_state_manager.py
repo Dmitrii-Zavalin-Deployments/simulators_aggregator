@@ -117,7 +117,7 @@ def test_check_file_exists_other_error(mock_dbx):
 # ==============================================================================
 
 @patch("src.io.state_manager.TokenManager")
-def test_main_missing_env(mock_tm, monkeypatch, capsys):
+def test_main_missing_env(mock_tm, monkeypatch, caplog):
     """Verify failure paths when environment keys are completely missing."""
     # We wipe the current tracking app key to break initialization logic.
     monkeypatch.delenv("DROPBOX_APP_KEY", raising=False)
@@ -130,12 +130,12 @@ def test_main_missing_env(mock_tm, monkeypatch, capsys):
         assert exit_context.value.code == 1
         
         # We process the current screen buffer streams to ensure standard errors were recorded.
-        captured = capsys.readouterr()
-        assert "CRITICAL ERROR" in captured.err
+        l_text = caplog.text
+        assert "CRITICAL ERROR" in l_text
 
 
 @patch("src.io.state_manager.TokenManager")
-def test_main_unexpected_exception(mock_tm, monkeypatch, capsys):
+def test_main_unexpected_exception(mock_tm, monkeypatch, caplog):
     """Verify error containment and safe terminations during execution."""
     # We fill out the base initialization elements to satisfy credential processing checks.
     monkeypatch.setenv("DROPBOX_APP_KEY", "k")
@@ -153,16 +153,16 @@ def test_main_unexpected_exception(mock_tm, monkeypatch, capsys):
         assert exit_context.value.code == 1
         
         # We ensure standard error buffers captured the full stack trace diagnostic logs.
-        captured = capsys.readouterr()
+        l_text = caplog.text
         # logger.exception outputs the log message and the traceback containing the exception message
-        assert "CRITICAL ERROR" in captured.err
-        assert "Auth Exploded" in captured.err
+        assert "CRITICAL ERROR" in l_text
+        assert "Auth Exploded" in l_text
 
 
 @patch("src.io.state_manager.TokenManager")
 @patch("src.io.state_manager.dropbox.Dropbox")
 @patch("src.io.state_manager.check_file_exists")
-def test_main_success_found(mock_check, mock_dbx, mock_tm, monkeypatch, capsys):
+def test_main_success_found(mock_check, mock_dbx, mock_tm, monkeypatch, caplog):
     """Verify runtime signal production paths when target files exist."""
     # We assign credentials to fulfill security constraints.
     monkeypatch.setenv("DROPBOX_APP_KEY", "key_value")
@@ -178,14 +178,14 @@ def test_main_success_found(mock_check, mock_dbx, mock_tm, monkeypatch, capsys):
         main()
         
         # We read the program output stream to confirm our positive target signal was logged.
-        captured = capsys.readouterr()
-        assert "state_status=found" in captured.out
+        l_text = caplog.text
+        assert "state_status=found" in l_text
 
 
 @patch("src.io.state_manager.TokenManager")
 @patch("src.io.state_manager.dropbox.Dropbox")
 @patch("src.io.state_manager.check_file_exists")
-def test_main_success_not_found(mock_check, mock_dbx, mock_tm, monkeypatch, capsys):
+def test_main_success_not_found(mock_check, mock_dbx, mock_tm, monkeypatch, caplog):
     """Verify runtime signal production paths when target files are missing."""
     # We assign credentials to fulfill security constraints.
     monkeypatch.setenv("DROPBOX_APP_KEY", "key_value")
@@ -201,5 +201,5 @@ def test_main_success_not_found(mock_check, mock_dbx, mock_tm, monkeypatch, caps
         main()
         
         # We read the program output stream to confirm our negative target signal was logged.
-        captured = capsys.readouterr()
-        assert "state_status=not_found" in captured.out
+        l_text = caplog.text
+        assert "state_status=not_found" in l_text
