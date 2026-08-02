@@ -163,8 +163,8 @@ def test_main_unexpected_exception(mock_tm, monkeypatch, caplog):
 @patch("src.io.state_manager.TokenManager")
 @patch("src.io.state_manager.dropbox.Dropbox")
 @patch("src.io.state_manager.check_file_exists")
-def test_main_success_found(mock_check, mock_dbx, mock_tm, monkeypatch, caplog):
-    caplog.set_level(logging.INFO)
+def test_main_success_found(mock_check, mock_dbx, mock_tm, monkeypatch, capsys):
+    # caplog.set_level(logging.INFO)
     """Verify runtime signal production paths when target files exist."""
     # We assign credentials to fulfill security constraints.
     monkeypatch.setenv("DROPBOX_APP_KEY", "key_value")
@@ -180,15 +180,15 @@ def test_main_success_found(mock_check, mock_dbx, mock_tm, monkeypatch, caplog):
         main()
         
         # We read the program output stream to confirm our positive target signal was logged.
-        l_text = caplog.text
+        l_text = capsys.readouterr().out
         assert "state_status=found" in l_text
 
 
 @patch("src.io.state_manager.TokenManager")
 @patch("src.io.state_manager.dropbox.Dropbox")
 @patch("src.io.state_manager.check_file_exists")
-def test_main_success_not_found(mock_check, mock_dbx, mock_tm, monkeypatch, caplog):
-    caplog.set_level(logging.INFO)
+def test_main_success_not_found(mock_check, mock_dbx, mock_tm, monkeypatch, capsys):
+    # caplog.set_level(logging.INFO)
     """Verify runtime signal production paths when target files are missing."""
     # We assign credentials to fulfill security constraints.
     monkeypatch.setenv("DROPBOX_APP_KEY", "key_value")
@@ -204,5 +204,5 @@ def test_main_success_not_found(mock_check, mock_dbx, mock_tm, monkeypatch, capl
         main()
         
         # We read the program output stream to confirm our negative target signal was logged.
-        l_text = caplog.text
+        l_text = capsys.readouterr().out
         assert "state_status=not_found" in l_text
