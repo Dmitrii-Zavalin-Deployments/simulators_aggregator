@@ -11,7 +11,7 @@ from src.io.dropbox_utils import TokenManager
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
-    stream=sys.stdout
+    stream=sys.stderr
 )
 logger = logging.getLogger(__name__)
 
@@ -64,9 +64,9 @@ def main():
 
         # 3. Check Existence & Output CI/CD Signal via logger
         if check_file_exists(dbx, args.folder, args.filename):
-            logger.info("state_status=found")
+            print("state_status=found")
         else:
-            logger.info("state_status=not_found")
+            print("state_status=not_found")
 
     except Exception:
         logger.exception("CRITICAL ERROR")
