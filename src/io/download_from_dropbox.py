@@ -118,7 +118,7 @@ def main():
         
     except Exception as e:
         # Now, when the test mocks an exception, it lands here!
-        logging.getLogger("CloudIngestor").exception(f"CRITICAL ERROR: {e}")
+        logging.getLogger("CloudIngestor").exception("CRITICAL ERROR")
         sys.exit(1)
 
 if __name__ == "__main__":  # pragma: no cover
