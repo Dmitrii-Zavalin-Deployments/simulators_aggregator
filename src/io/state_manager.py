@@ -62,11 +62,11 @@ def main():
         access_token = tm.refresh_access_token(refresh_token)
         dbx = dropbox.Dropbox(access_token)
 
-        # 3. Check Existence & Output CI/CD Signal via logger
+        # 3. Check Existence & Output CI/CD Signal
         if check_file_exists(dbx, args.folder, args.filename):
-            logger.info("state_status=found")
+            print("state_status=found")
         else:
-            logger.info("state_status=not_found")
+            print("state_status=not_found")
 
     except Exception:
         logger.exception("CRITICAL ERROR")
