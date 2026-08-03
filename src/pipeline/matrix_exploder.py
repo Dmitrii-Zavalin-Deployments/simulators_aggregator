@@ -13,28 +13,32 @@ logging.basicConfig(
 )
 logger = logging.getLogger("MatrixExploder")
 
-def explode_dict(target_dict):
-    """Recursively computes the Cartesian product of a dictionary containing lists."""
-    if not isinstance(target_dict, dict):
-        return [target_dict]
-        
-    keys, values = [], []
-    for k, v in target_dict.items():
-        keys.append(k)
-        if isinstance(v, dict):
-            values.append(explode_dict(v))
-        elif isinstance(v, list):
-            values.append(v)
+def explode_value(val):
+    """Recursively computes all concrete single-value permutations of any nested JSON structure."""
+    if isinstance(val, dict):
+        keys = list(val.keys())
+        choices = [explode_value(v) for v in val.values()]
+        permutations = []
+        for combo in itertools.product(*choices):
+            permutations.append(dict(zip(keys, combo)))
+        return permutations
+
+    elif isinstance(val, list):
+        if not val:
+            return [[]]
+        # If the list contains nested structures (dicts or lists), expand them recursively
+        if any(isinstance(x, (dict, list)) for x in val):
+            element_choices = [explode_value(x) for x in val]
+            permutations = []
+            for combo in itertools.product(*element_choices):
+                permutations.append(list(combo))
+            return permutations
         else:
-            values.append([v])
-            
-    permutations = []
-    for combination in itertools.product(*values):
-        perm_dict = {}
-        for k, v in zip(keys, combination):
-            perm_dict[k] = v
-        permutations.append(perm_dict)
-    return permutations
+            # Simple list of scalar range options (e.g., [0.1, 0.2] or ["x_min"])
+            return val
+    else:
+        # Scalar value (int, float, str, bool, None)
+        return [val]
 
 def main():
     parser = argparse.ArgumentParser(description="Explode array configurations into flat single-value permutations.")
@@ -56,19 +60,8 @@ def main():
         logger.error(f"❌ Failed to parse JSON: {e}")
         sys.exit(1)
 
-    keys, values = [], []
-    for k, v in raw_config.items():
-        keys.append(k)
-        if k == "boundary_map" and isinstance(v, dict):
-            values.append(explode_dict(v))
-        elif isinstance(v, list):
-            values.append(v)
-        else:
-            values.append([v])
-
-    flat_combinations = []
-    for comb in itertools.product(*values):
-        flat_combinations.append(dict(zip(keys, comb)))
+    # Explode raw configuration dictionary recursively
+    flat_combinations = explode_value(raw_config)
 
     os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
     with open(args.output_path, "w") as f:
