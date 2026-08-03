@@ -1,9 +1,11 @@
-import unittest
 import json
 import os
 import tempfile
+import unittest
 from unittest.mock import patch
+
 from src.pipeline.matrix_exploder import explode_dict, explode_value, main
+
 
 class TestMatrixExploder(unittest.TestCase):
 
