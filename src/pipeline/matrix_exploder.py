@@ -40,6 +40,9 @@ def explode_value(val):
         # Scalar value (int, float, str, bool, None)
         return [val]
 
+# Backward compatibility alias for unit tests expecting explode_dict
+explode_dict = explode_value
+
 def main():
     parser = argparse.ArgumentParser(description="Explode array configurations into flat single-value permutations.")
     parser.add_argument("--config-path", required=True, help="Path to input JSON with range arrays")
