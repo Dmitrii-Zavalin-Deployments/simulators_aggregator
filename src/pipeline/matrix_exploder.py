@@ -40,8 +40,11 @@ def explode_value(val):
         # Scalar value (int, float, str, bool, None)
         return [val]
 
-# Backward compatibility alias for unit tests expecting explode_dict
-explode_dict = explode_value
+def explode_dict(target_dict):
+    """Legacy compatibility wrapper ensuring non-dictionary inputs are wrapped in a list."""
+    if not isinstance(target_dict, dict):
+        return [target_dict]
+    return explode_value(target_dict)
 
 def main():
     parser = argparse.ArgumentParser(description="Explode array configurations into flat single-value permutations.")
