@@ -834,6 +834,12 @@ jobs:
             echo "📋 Notice: No ledger modifications detected. Skipping commit loop."
           fi
 
+      - name: 📂 Recursive Listing of /home/runner/work/simulators_aggregator
+        shell: bash -el {0}
+        run: |
+          echo "🔍 --- RECURSIVE LISTING OF WORKSPACE: /home/runner/work/simulators_aggregator ---"
+          ls -R /home/runner/work/simulators_aggregator
+
       - name: 🛡️ Pre-Dissolving Integrity Audit
         if: steps.execute_pipeline.outputs.status != 'TIMEOUT'
         shell: bash -el {0}
