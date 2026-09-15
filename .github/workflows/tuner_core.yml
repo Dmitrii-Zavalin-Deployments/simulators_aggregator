@@ -844,6 +844,7 @@ jobs:
           fi
 
       - name: 📂 Recursive Listing of /home/runner/work/simulators_aggregator
+        if: always()
         shell: bash -el {0}
         run: |
           echo "🔍 --- RECURSIVE LISTING OF WORKSPACE: /home/runner/work/simulators_aggregator ---"
