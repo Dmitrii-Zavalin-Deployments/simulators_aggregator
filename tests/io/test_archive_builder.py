@@ -7,9 +7,9 @@ and hard 2GB ceiling breach protection before cloud ingress.
 """
 
 import json
-from pathlib import Path
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from src.io.archive_builder import ArchiveBuilder, main
 
