@@ -18,7 +18,7 @@ class CloudUploader:
     """
     __slots__ = ['dbx', 'logger']
     
-    CHUNK_SIZE = 8 * 1024 * 1024  # 8 MB chunks
+    CHUNK_SIZE = 125 * 1024 * 1024  # 125 MB chunks
     SINGLE_UPLOAD_LIMIT = 150 * 1024 * 1024  # 150 MB limit
 
     def __init__(self, token_manager: TokenManager, refresh_token: str, log_path: Path):
