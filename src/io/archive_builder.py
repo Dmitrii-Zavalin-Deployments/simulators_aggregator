@@ -4,7 +4,6 @@ import logging
 import sys
 import zipfile
 from pathlib import Path
-from typing import List, Tuple
 
 
 class ArchiveBuilder:
@@ -18,7 +17,7 @@ class ArchiveBuilder:
         self.config_path = config_path
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    def _load_criteria(self) -> Tuple[int, List[str]]:
+    def _load_criteria(self) -> tuple[int, list[str]]:
         """Loads max size in bytes and allowed extensions from config.json."""
         if not self.config_path.exists():
             self.logger.warning(f"Config not found at {self.config_path}. Using default 2GB limit.")
@@ -47,7 +46,7 @@ class ArchiveBuilder:
 
         self.logger.info(f"🔍 Inspecting staging directory: {source_dir}")
         
-        file_records: List[Tuple[Path, int]] = []
+        file_records: list[tuple[Path, int]] = []
         total_raw_size = 0
 
         for item in source_dir.glob("**/*"):
