@@ -4,6 +4,7 @@ import logging
 import sys
 import zipfile
 from pathlib import Path
+from typing import List, Tuple
 
 
 class ArchiveBuilder:
@@ -17,7 +18,7 @@ class ArchiveBuilder:
         self.config_path = config_path
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    def _load_criteria(self) -> tuple[int, list[str]]:
+    def _load_criteria(self) -> Tuple[int, List[str]]:
         """Loads max size in bytes and allowed extensions from config.json."""
         if not self.config_path.exists():
             self.logger.warning(f"Config not found at {self.config_path}. Using default 2GB limit.")
@@ -30,7 +31,7 @@ class ArchiveBuilder:
             max_size_mb = criteria.get("max_size_mb", 2048)
             extensions = criteria.get("allowed_extensions", [".h5", ".json", ".yaml", ".csv", ".txt"])
             return max_size_mb * 1024 * 1024, [ext.lower() for ext in extensions]
-        except Exception as e:
+        except (json.JSONDecodeError, KeyError, TypeError, OSError) as e:
             self.logger.error(f"Failed to parse config criteria: {e}. Falling back to defaults.")
             return 2048 * 1024 * 1024, [".h5", ".json", ".yaml", ".csv", ".txt"]
 
@@ -46,7 +47,7 @@ class ArchiveBuilder:
 
         self.logger.info(f"🔍 Inspecting staging directory: {source_dir}")
         
-        file_records: list[tuple[Path, int]] = []
+        file_records: List[Tuple[Path, int]] = []
         total_raw_size = 0
 
         for item in source_dir.glob("**/*"):
@@ -102,8 +103,8 @@ def main():
     try:
         builder = ArchiveBuilder(config_path=Path(args.config))
         builder.inspect_and_build(Path(args.source), Path(args.output))
-    except Exception as e:
-        logger.exception(f"CRITICAL: Archive packaging failed: {e}")
+    except Exception:
+        logger.exception("CRITICAL: Archive packaging failed")
         sys.exit(1)
 
 
