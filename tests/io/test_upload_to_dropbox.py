@@ -6,6 +6,7 @@ Narrative verification ensuring zero-debt execution, strict path normalization,
 and payload-size-conditioned execution routing (single-shot <= 150MB vs chunked sessions > 150MB).
 """
 
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import dropbox
@@ -50,7 +51,7 @@ def test_cloud_uploader_single_upload_success(tmp_path):
 
         # Verify payload byte integrity and path mapping
         assert args[0] == binary_data
-        assert args == expected_remote_path
+        assert args[1] == expected_remote_path
         assert kwargs['mode'] == dropbox.files.WriteMode.overwrite
 
 
@@ -73,20 +74,22 @@ def test_cloud_uploader_chunked_session_dispatch_for_large_payload(tmp_path):
         mock_dbx.files_upload_session_start.return_value = mock_start_res
 
         uploader = CloudUploader(mock_tm, "token", tmp_path / "chunk_test.log")
-        # Temporarily override single upload limit threshold for test isolation
-        uploader.SINGLE_UPLOAD_LIMIT = 10  # 10 bytes threshold
+        
+        # Override class attribute safely via class scope with restoration
+        original_limit = CloudUploader.SINGLE_UPLOAD_LIMIT
+        CloudUploader.SINGLE_UPLOAD_LIMIT = 10  # 10 bytes threshold
+        try:
+            local_file = tmp_path / "large_archive.zip"
+            large_binary_data = b"0123456789012345678904321"
+            local_file.write_bytes(large_binary_data)
 
-        local_file = tmp_path / "large_archive.zip"
-        # Payload size = 25 bytes > 10 bytes threshold (forces chunking path)
-        large_binary_data = b"0123456789012345678904321"
-        local_file.write_bytes(large_binary_data)
+            uploader.upload(local_file, "/archive_vault")
 
-        uploader.upload(local_file, "/archive_vault")
-
-        # Confirm chunked session life-cycle invoked
-        mock_dbx.files_upload_session_start.assert_called_once()
-        assert mock_dbx.files_upload_session_append_v2.call_count >= 1
-        mock_dbx.files_upload_session_finish.assert_called_once()
+            mock_dbx.files_upload_session_start.assert_called_once()
+            assert mock_dbx.files_upload_session_append_v2.call_count >= 1
+            mock_dbx.files_upload_session_finish.assert_called_once()
+        finally:
+            CloudUploader.SINGLE_UPLOAD_LIMIT = original_limit
 
 
 def test_cloud_uploader_file_not_found_fails_fast(tmp_path):
