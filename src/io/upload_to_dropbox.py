@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 import dropbox
-from dropbox.files import WriteMode, UploadSessionCursor, CommitInfo
+from dropbox.files import CommitInfo, UploadSessionCursor, WriteMode
 
 from src.io.dropbox_utils import TokenManager
 
