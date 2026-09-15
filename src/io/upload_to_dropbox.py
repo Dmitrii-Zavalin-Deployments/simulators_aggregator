@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 import dropbox
+from dropbox.files import WriteMode, UploadSessionCursor, CommitInfo
 
 from src.io.dropbox_utils import TokenManager
 
@@ -13,8 +14,12 @@ class CloudUploader:
     """
     Handles secure uploading of simulation artifacts.
     Uses __slots__ to minimize memory footprint.
+    Supports chunked uploads for large archives (>150MB).
     """
     __slots__ = ['dbx', 'logger']
+    
+    CHUNK_SIZE = 8 * 1024 * 1024  # 8 MB chunks
+    SINGLE_UPLOAD_LIMIT = 150 * 1024 * 1024  # 150 MB limit
 
     def __init__(self, token_manager: TokenManager, refresh_token: str, log_path: Path):
         """Deterministic initialization with integrated logging."""
@@ -40,7 +45,7 @@ class CloudUploader:
 
     def upload(self, local_path: Path, dropbox_folder: str):
         """
-        Atomic upload operation with explicit path handling and audit logs.
+        Atomic upload operation with explicit path handling, audit logs, and chunked session support.
         """
         if not local_path.exists():
             self.logger.error(f"Local file not found: {local_path}")
@@ -49,14 +54,34 @@ class CloudUploader:
         folder = f"/{dropbox_folder.strip('/')}"
         dropbox_file_path = f"{folder}/{local_path.name}"
         
-        self.logger.info(f"Initiating upload to: {dropbox_file_path}")
+        file_size = local_path.stat().st_size
+        self.logger.info(f"Initiating upload to: {dropbox_file_path} (Size: {file_size / (1024*1024):.2f} MB)")
         
-        with open(local_path, "rb") as f:
-            self.dbx.files_upload(
-                f.read(), 
-                dropbox_file_path, 
-                mode=dropbox.files.WriteMode.overwrite
-            )
+        if file_size <= self.SINGLE_UPLOAD_LIMIT:
+            with open(local_path, "rb") as f:
+                self.dbx.files_upload(
+                    f.read(), 
+                    dropbox_file_path, 
+                    mode=WriteMode.overwrite
+                )
+        else:
+            self.logger.info("File exceeds 150MB. Using chunked upload session...")
+            with open(local_path, "rb") as f:
+                chunk = f.read(self.CHUNK_SIZE)
+                start_result = self.dbx.files_upload_session_start(chunk)
+                cursor = UploadSessionCursor(session_id=start_result.session_id, offset=f.tell())
+                commit = CommitInfo(path=dropbox_file_path, mode=WriteMode.overwrite)
+                
+                while f.tell() < file_size:
+                    remaining = file_size - f.tell()
+                    if remaining <= self.CHUNK_SIZE:
+                        chunk_data = f.read(remaining)
+                        self.dbx.files_upload_session_finish(chunk_data, cursor, commit)
+                        break
+                    else:
+                        chunk_data = f.read(self.CHUNK_SIZE)
+                        self.dbx.files_upload_session_append_v2(chunk_data, cursor)
+                        cursor.offset = f.tell()
         
         self.logger.info(f"✅ Successfully uploaded: {dropbox_file_path}")
 
