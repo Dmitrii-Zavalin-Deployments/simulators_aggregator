@@ -1,35 +1,43 @@
-#!/bin/bash
-# ==============================================================================
-# src/debug/forensic_audit.sh - Post-Test Failure Forensic Audit & Repair
-# ==============================================================================
+#!/usr/bin/env bash
+set -Eeuo pipefail
 
-set +e
-log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1"; }
-
-log "🔍 --- STARTING POST-TEST FORENSIC AUDIT ---"
-
-log "🔎 1. Searching repository for references to 'navier_stokes_output.zip'..."
-grep -rn "navier_stokes_output.zip" . || log "⚠️ String not found via grep"
-
-log "📜 2. Smoking-gun source audit: Inspecting test file line numbers (tests/io/test_upload_to_dropbox.py)..."
-cat -n tests/io/test_upload_to_dropbox.py | grep -E "navier_stokes_output|stat|exists|upload" -C 3 || cat -n tests/io/test_upload_to_dropbox.py | head -n 60
-
-log "📜 3. Inspecting Uploader implementation path/stat handling (src/io/upload_to_dropbox.py)..."
-cat -n src/io/upload_to_dropbox.py | grep -E "stat|exists|upload" -C 5
-
-log "📂 4. Checking current working directory files..."
+echo "=========================================="
+echo " DIAGNOSTIC: Workspace & File Presence"
+echo "=========================================="
+pwd
 ls -la
+find . -maxdepth 3 -type f \(-name "*.zip" -o -name "*navier*"\) 2>/dev/null || true
 
-# ==============================================================================
-# 🛠️ AUTOMATED REPAIR INJECTIONS (Commented out for safety validation)
-# Root Cause: Path.exists() is mocked to True, but local_path.stat().st_size hits the real filesystem for 'navier_stokes_output.zip'.
-# Uncomment the appropriate # sed line below to patch stat mocking or create physical fixture/file.
-# ==============================================================================
+echo "=========================================="
+echo " DIAGNOSTIC: Cross-references in Codebase"
+echo "=========================================="
+grep -rn "navier_stokes_output.zip" tests/ src/ 2>/dev/null || true
 
-# Option A: Create physical touch file so real .stat() succeeds during unit test mock
-# touch navier_stokes_output.zip
+echo "=========================================="
+echo " SMOKING-GUN AUDIT: Test Definition"
+echo "=========================================="
+TEST_FILE=$(grep -rn "def test_cloud_uploader_success" tests/ 2>/dev/null | cut -d: -f1 | head -n 1)
+if [[ -n "$TEST_FILE" ]]; then
+    echo "Auditing test file: $TEST_FILE"
+    cat -n "\(Test_File" 2>/dev/null || cat -n "\)TEST_FILE"
+else
+    echo "Test definition not found via grep."
+fi
 
-# Option B: Patch Path.stat in test_upload_to_dropbox.py to match mock contract
-# sed -i '/patch\.object(Path, "exists"/a \        patch\.object(Path, "stat", return_value=type("obj", (), {"st_size": 26}))\\,' tests/io/test_upload_to_dropbox.py
+echo "=========================================="
+echo " SMOKING-GUN AUDIT: Uploader Implementation"
+echo "=========================================="
+SRC_FILE=$(grep -rn "class " src/ 2>/dev/null | grep -iE "uploader|dropbox" | cut -d: -f1 | head -n 1)
+if [[ -n "$SRC_FILE" ]]; then
+    echo "Auditing source file: $SRC_FILE"
+    cat -n "$SRC_FILE"
+else
+    ls -la src/io/ 2>/dev/null || ls -la src/ 2>/dev/null
+fi
 
-log "✅ --- POST-TEST FORENSIC AUDIT COMPLETE ---"
+echo "=========================================="
+echo " AUTOMATED REPAIR CANDIDATES (COMMENTED)"
+echo "=========================================="
+# sed -i '/def test_cloud_uploader_success/a \    import pathlib; pathlib.Path("navier_stokes_output.zip").write_bytes(b"PK\\x03\\x04test")' tests/io/test_upload_to_dropbox.py
+# sed -i 's|"navier_stokes_output.zip"|str(tmp_path / "navier_stokes_output.zip")|g' tests/io/test_upload_to_dropbox.py
+# sed -i 's|os.path.exists("navier_stokes_output.zip")|True|g' src/io/uploader.py
