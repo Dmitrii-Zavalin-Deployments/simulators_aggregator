@@ -57,9 +57,8 @@ def test_cloud_uploader_single_upload_success(tmp_path):
 def test_cloud_uploader_chunked_session_dispatch_for_large_payload(tmp_path):
     """
     Narrative: When payload size S exceeds threshold limit 
-        L_single = 150,286,400 bytes,
-    dispatch logic must split stream into 8MB chunks using 
-    upload_session_start, sequential append_v2 calls, and session_finish.
+        L_single, dispatch logic must split stream into chunks using 
+        upload_session_start, sequential append_v2 calls, and session_finish.
     """
     mock_tm = MagicMock(spec=TokenManager)
     mock_tm.refresh_access_token.return_value = "fake_access_token"
@@ -74,12 +73,14 @@ def test_cloud_uploader_chunked_session_dispatch_for_large_payload(tmp_path):
 
         uploader = CloudUploader(mock_tm, "token", tmp_path / "chunk_test.log")
         
-        # Override class attribute safely via class scope with restoration
+        # Override class attributes safely via class scope with restoration
         original_limit = CloudUploader.SINGLE_UPLOAD_LIMIT
+        original_chunk = CloudUploader.CHUNK_SIZE
         CloudUploader.SINGLE_UPLOAD_LIMIT = 10  # 10 bytes threshold
+        CloudUploader.CHUNK_SIZE = 5           # 5 bytes chunk size to force multi-chunk append
         try:
             local_file = tmp_path / "large_archive.zip"
-            large_binary_data = b"0123456789012345678904321"
+            large_binary_data = b"0123456789012345678904321"  # 25 bytes
             local_file.write_bytes(large_binary_data)
 
             uploader.upload(local_file, "/archive_vault")
@@ -89,6 +90,7 @@ def test_cloud_uploader_chunked_session_dispatch_for_large_payload(tmp_path):
             mock_dbx.files_upload_session_finish.assert_called_once()
         finally:
             CloudUploader.SINGLE_UPLOAD_LIMIT = original_limit
+            CloudUploader.CHUNK_SIZE = original_chunk
 
 
 def test_cloud_uploader_file_not_found_fails_fast(tmp_path):

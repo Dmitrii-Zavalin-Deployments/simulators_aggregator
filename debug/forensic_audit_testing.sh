@@ -1,32 +1,36 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# src/debug/forensic_audit.sh - Post-Test & Lint Forensic Audit & Repair
-# ==============================================================================
+set -Eeuo pipefail
 
-set +e
-log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1"; }
+echo "=========================================="
+echo " [2/4] DIAGNOSTIC: Search Chunk & Session References"
+echo "=========================================="
+grep -rn "files_upload_session_append_v2" src/ tests/ || true
+grep -rn "chunk_size" src/io/ || grep -rn "chunk" src/io/ || true
 
-log "🔍 --- STARTING FORENSIC LINT & CODE AUDIT ---"
+echo "=========================================="
+echo " [3/4] SMOKING-GUN AUDIT: Test File"
+echo "=========================================="
+cat -n tests/io/test_upload_to_dropbox.py
 
-
-
-log "📜 2. Smoking-gun source audit: Inspecting test file patch context (tests/io/test_upload_to_dropbox.py)..."
-if [ -f "tests/io/test_upload_to_dropbox.py" ]; then
-    cat -n tests/io/test_upload_to_dropbox.py | grep -E "mock_path_cls|parse_args|CloudUploader" -C 5 || cat -n tests/io/test_upload_to_dropbox.py | head -n 160 | tail -n 30
-else
-    log "⚠️ test_upload_to_dropbox.py not found in expected path."
+echo "=========================================="
+echo " [4/4] SMOKING-GUN AUDIT: Implementation File"
+echo "=========================================="
+IMPL_FILE=$(grep -rnl "files_upload_session_append_v2" src/ | head -n 1)
+if [[ -z "$IMPL_FILE" ]]; then
+  # Fallback guess if mock string isn't literal in src/ yet
+  IMPL_FILE="src/io/cloud_uploader.py"
 fi
 
-log "📂 3. Repository workspace status..."
-git status
+if [[ -f "$IMPL_FILE" ]]; then
+  echo "Auditing implementation: $IMPL_FILE"
+  cat -n "$IMPL_FILE"
+else
+  ls -la src/io/ || true
+fi
 
-# ==============================================================================
-# 🛠️ AUTOMATED REPAIR INJECTIONS (Commented out with # per policy)
-# Root Cause: Ruff F841 local variable `mock_path_cls` assigned but never used.
-# Uncomment the # sed lines below to automate the removal of the unused patch argument.
-# ==============================================================================
-
-# sed -i '/patch("src.io.upload_to_dropbox.Path") as mock_path_cls:/d' tests/io/test_upload_to_dropbox.py
-# sed -i '/patch("src.io.upload_to_dropbox.CloudUploader") as MockUploader,/s/,/ /' tests/io/test_upload_to_dropbox.py
-
-log "✅ --- FORENSIC AUDIT COMPLETE ---"
+echo "=========================================="
+echo " AUTOMATED REPAIR CANDIDATES (COMMENTED) "
+echo "=========================================="
+# sed -i 's/payload_size < chunk_threshold/payload_size <= chunk_threshold/g' "$IMPL_FILE"
+# sed -i 's/if len(payload) > self.chunk_size:/if len(payload) >= self.chunk_size:/g' "$IMPL_FILE"
+# sed -i 's/return self.client.files_upload(/# return self.client.files_upload(/g' "$IMPL_FILE"
