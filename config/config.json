@@ -2,6 +2,6 @@
   "max_runtime_seconds": 450,
   "upload_criteria": {
     "max_size_mb": 1024,
-    "allowed_extensions": [".h5", ".json", ".yaml", ".csv", ".txt"]
+    "allowed_extensions": [".json", ".zip", ".step", ".mp4"]
   }
 }
