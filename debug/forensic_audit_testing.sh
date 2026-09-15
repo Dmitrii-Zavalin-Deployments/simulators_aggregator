@@ -1,43 +1,32 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
+# ==============================================================================
+# src/debug/forensic_audit.sh - Post-Test & Lint Forensic Audit & Repair
+# ==============================================================================
 
-echo "=========================================="
-echo " DIAGNOSTIC: Workspace & File Presence"
-echo "=========================================="
-pwd
-ls -la
-find . -maxdepth 3 -type f \(-name "*.zip" -o -name "*navier*"\) 2>/dev/null || true
+set +e
+log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1"; }
 
-echo "=========================================="
-echo " DIAGNOSTIC: Cross-references in Codebase"
-echo "=========================================="
-grep -rn "navier_stokes_output.zip" tests/ src/ 2>/dev/null || true
+log "🔍 --- STARTING FORENSIC LINT & CODE AUDIT ---"
 
-echo "=========================================="
-echo " SMOKING-GUN AUDIT: Test Definition"
-echo "=========================================="
-TEST_FILE=$(grep -rn "def test_cloud_uploader_success" tests/ 2>/dev/null | cut -d: -f1 | head -n 1)
-if [[ -n "$TEST_FILE" ]]; then
-    echo "Auditing test file: $TEST_FILE"
-    cat -n "\(Test_File" 2>/dev/null || cat -n "\)TEST_FILE"
+
+
+log "📜 2. Smoking-gun source audit: Inspecting test file patch context (tests/io/test_upload_to_dropbox.py)..."
+if [ -f "tests/io/test_upload_to_dropbox.py" ]; then
+    cat -n tests/io/test_upload_to_dropbox.py | grep -E "mock_path_cls|parse_args|CloudUploader" -C 5 || cat -n tests/io/test_upload_to_dropbox.py | head -n 160 | tail -n 30
 else
-    echo "Test definition not found via grep."
+    log "⚠️ test_upload_to_dropbox.py not found in expected path."
 fi
 
-echo "=========================================="
-echo " SMOKING-GUN AUDIT: Uploader Implementation"
-echo "=========================================="
-SRC_FILE=$(grep -rn "class " src/ 2>/dev/null | grep -iE "uploader|dropbox" | cut -d: -f1 | head -n 1)
-if [[ -n "$SRC_FILE" ]]; then
-    echo "Auditing source file: $SRC_FILE"
-    cat -n "$SRC_FILE"
-else
-    ls -la src/io/ 2>/dev/null || ls -la src/ 2>/dev/null
-fi
+log "📂 3. Repository workspace status..."
+git status
 
-echo "=========================================="
-echo " AUTOMATED REPAIR CANDIDATES (COMMENTED)"
-echo "=========================================="
-# sed -i '/def test_cloud_uploader_success/a \    import pathlib; pathlib.Path("navier_stokes_output.zip").write_bytes(b"PK\\x03\\x04test")' tests/io/test_upload_to_dropbox.py
-# sed -i 's|"navier_stokes_output.zip"|str(tmp_path / "navier_stokes_output.zip")|g' tests/io/test_upload_to_dropbox.py
-# sed -i 's|os.path.exists("navier_stokes_output.zip")|True|g' src/io/uploader.py
+# ==============================================================================
+# 🛠️ AUTOMATED REPAIR INJECTIONS (Commented out with # per policy)
+# Root Cause: Ruff F841 local variable `mock_path_cls` assigned but never used.
+# Uncomment the # sed lines below to automate the removal of the unused patch argument.
+# ==============================================================================
+
+# sed -i '/patch("src.io.upload_to_dropbox.Path") as mock_path_cls:/d' tests/io/test_upload_to_dropbox.py
+# sed -i '/patch("src.io.upload_to_dropbox.CloudUploader") as MockUploader,/s/,/ /' tests/io/test_upload_to_dropbox.py
+
+log "✅ --- FORENSIC AUDIT COMPLETE ---"

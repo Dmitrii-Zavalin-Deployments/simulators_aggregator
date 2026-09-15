@@ -143,8 +143,7 @@ def test_main_success_flow(monkeypatch, tmp_path):
     monkeypatch.setenv("DROPBOX_REFRESH_TOKEN", "token")
 
     with patch("src.io.upload_to_dropbox.argparse.ArgumentParser.parse_args") as mock_args, \
-         patch("src.io.upload_to_dropbox.CloudUploader") as MockUploader, \
-         patch("src.io.upload_to_dropbox.Path") as mock_path_cls:
+         patch("src.io.upload_to_dropbox.CloudUploader") as MockUploader:
         
         mock_args.return_value = MagicMock(folder="target", filename="data.zip")
         instance = MockUploader.return_value
