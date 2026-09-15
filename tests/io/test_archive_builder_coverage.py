@@ -7,7 +7,7 @@ source directory validation, and clean CLI exception handling under failure mode
 """
 
 import json
-from pathlib import Path
+
 import pytest
 
 from src.io.archive_builder import ArchiveBuilder, main
