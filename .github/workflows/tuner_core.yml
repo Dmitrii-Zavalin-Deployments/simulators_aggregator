@@ -643,8 +643,8 @@ jobs:
         shell: bash -el {0}
         run: |
           if [ -d "${{ env.WORKSPACE_DIR }}" ]; then
-            echo "📦 Packing active state folder..."
-            
+            echo "📦 Packing active state folder with pre-flight criteria gate..."
+
             # Defensive check and cleanup for the phantom 'config' directory
             CONFIG_DIR="${{ env.WORKSPACE_DIR }}/config"
             if [ -d "$CONFIG_DIR" ]; then
@@ -658,11 +658,16 @@ jobs:
             else
               echo "ℹ️ No phantom 'config' directory detected. Proceeding."
             fi
-            
-            cd data/testing-input-output/
-            zip -r "${{ env.TUNER_STATE_ARCHIVE }}" "tuning_${{ github.ref_name }}"
-            cd ../..
-            
+
+            SOURCE_DIR="data/testing-input-output/tuning_${{ github.ref_name }}"
+            OUTPUT_ZIP="data/testing-input-output/${{ env.TUNER_STATE_ARCHIVE }}"
+
+            echo "🚀 Executing ArchiveBuilder pre-flight inspection and compression..."
+            python3 src/io/archive_builder.py \
+              --source "$SOURCE_DIR" \
+              --output "$OUTPUT_ZIP" \
+              --config "config/config.json"
+
             echo "📤 Uploading updated transaction state to Dropbox..."
             python3 src/io/upload_to_dropbox.py \
               --folder "${{ env.DROPBOX_FOLDER }}" \
