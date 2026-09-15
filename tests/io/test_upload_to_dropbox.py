@@ -38,7 +38,8 @@ def test_cloud_uploader_success(mock_dbx_class, tmp_path):
     
     # We mock the file system interaction to verify the upload operation.
     with patch.object(Path, "exists", return_value=True), \
-        patch("builtins.open", mock_open(read_data=binary_data)):
+         patch.object(Path, "stat", return_value=type("stat_mock", (), {"st_size": len(binary_data)})), \
+         patch("builtins.open", mock_open(read_data=binary_data)):
         uploader.upload(local_file, dirty_folder_input)
             
     # Forensic Audit:
@@ -53,7 +54,7 @@ def test_cloud_uploader_success(mock_dbx_class, tmp_path):
     assert args[0] == binary_data
     
     # 4. Assert that the path was successfully normalized:
-    assert args[1] == "/simulators/navier_stokes_output.zip"
+    assert args == "/simulators/navier_stokes_output.zip"
     
     # 5. Verify compliance with Rule 8 (Overwrite mode):
     assert kwargs['mode'] == dropbox.files.WriteMode.overwrite
