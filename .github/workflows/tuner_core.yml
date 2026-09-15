@@ -430,10 +430,16 @@ jobs:
             --folder "${{ env.DROPBOX_FOLDER }}" \
             --filename "${{ env.TUNER_STATE_ARCHIVE }}"
           
-          # Dynamically create the branch-specific staging directory and extract archive contents into it
-          TARGET_DIR="data/testing-input-output/tuning_${{ github.ref_name }}"
+          # Define clear local variables
+          ARCHIVE_NAME="${{ env.TUNER_STATE_ARCHIVE }}"
+          BRANCH_NAME="${{ github.ref_name }}"
+          
+          ZIP_FILE="data/testing-input-output/$ARCHIVE_NAME"
+          TARGET_DIR="data/testing-input-output/tuning_$BRANCH_NAME"
+          
+          # Ensure target directory exists and unpack
           mkdir -p "$TARGET_DIR"
-          unzip -o "data/testing-input-output/\({{ env.TUNER_STATE_ARCHIVE }}" -d "\)TARGET_DIR/"
+          unzip -o "$ZIP_FILE" -d "$TARGET_DIR/"
           
           echo "✅ Successfully unpacked state archive into: $TARGET_DIR"
 
