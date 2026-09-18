@@ -9,6 +9,7 @@ type checking, exception re-raising, and inner file size exclusion logic.
 import json
 from pathlib import Path
 from unittest.mock import patch
+
 import pytest
 
 from src.io.archive_builder import ArchiveBuilder, main
