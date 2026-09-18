@@ -25,7 +25,7 @@ def test_archive_builder_filters_and_passes_under_limit(tmp_path):
     config_file = config_dir / "config.json"
     config_file.write_text(json.dumps({
         "upload_criteria": {
-            "max_size_mb": 10,
+            "max_full_size_mb": 10,
             "allowed_extensions": [".h5", ".json"]
         }
     }))
@@ -60,7 +60,7 @@ def test_archive_builder_filters_and_passes_under_limit(tmp_path):
 
 def test_archive_builder_raises_error_on_size_breach(tmp_path):
     """
-    Narrative: If the compiled archive exceeds the configured max_size_mb ceiling, 
+    Narrative: If the compiled archive exceeds the configured max_full_size_mb ceiling, 
     the ArchiveBuilder must purge the incomplete archive and raise a ValueError.
     """
     config_dir = tmp_path / "config"
@@ -68,7 +68,7 @@ def test_archive_builder_raises_error_on_size_breach(tmp_path):
     config_file = config_dir / "config.json"
     config_file.write_text(json.dumps({
         "upload_criteria": {
-            "max_size_mb": 0.00001,
+            "max_full_size_mb": 0.00001,
             "allowed_extensions": [".h5"]
         }
     }))
@@ -97,7 +97,7 @@ def test_archive_builder_main_cli_execution(tmp_path):
     config_file = tmp_path / "config.json"
     config_file.write_text(json.dumps({
         "upload_criteria": {
-            "max_size_mb": 50,
+            "max_full_size_mb": 50,
             "allowed_extensions": [".txt"]
         }
     }))

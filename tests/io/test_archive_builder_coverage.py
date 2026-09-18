@@ -59,7 +59,7 @@ def test_inspect_and_build_source_not_found(tmp_path):
     config_file = tmp_path / "config.json"
     config_file.write_text(json.dumps({
         "upload_criteria": {
-            "max_size_mb": 100,
+            "max_full_size_mb": 100,
             "allowed_extensions": [".txt"]
         }
     }), encoding="utf-8")

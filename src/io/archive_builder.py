@@ -27,9 +27,9 @@ class ArchiveBuilder:
             with open(self.config_path, "r", encoding="utf-8") as f:
                 config_data = json.load(f)
             criteria = config_data.get("upload_criteria", {})
-            max_size_mb = criteria.get("max_size_mb", 2048)
+            max_full_size_mb = criteria.get("max_full_size_mb", 2048)
             extensions = criteria.get("allowed_extensions", [".h5", ".json", ".yaml", ".csv", ".txt"])
-            return max_size_mb * 1024 * 1024, [ext.lower() for ext in extensions]
+            return max_full_size_mb * 1024 * 1024, [ext.lower() for ext in extensions]
         except (json.JSONDecodeError, KeyError, TypeError, OSError) as e:
             self.logger.error(f"Failed to parse config criteria: {e}. Falling back to defaults.")
             return 2048 * 1024 * 1024, [".h5", ".json", ".yaml", ".csv", ".txt"]
