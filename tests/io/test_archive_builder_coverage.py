@@ -7,6 +7,7 @@ source directory verification, and clean CLI exception handling under failure mo
 """
 
 import json
+
 import pytest
 
 from src.io.archive_builder import ArchiveBuilder, main
