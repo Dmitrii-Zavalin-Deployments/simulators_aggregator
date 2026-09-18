@@ -68,6 +68,8 @@ class ArchiveBuilder:
             return int(max_full_mb * 1024 * 1024), inner_bytes, [str(ext).lower() for ext in extensions]
 
         except (json.JSONDecodeError, OSError) as e:
+            if isinstance(e, FileNotFoundError):
+                raise
             raise ValueError(f"Failed to parse configuration file {self.config_path}: {e}")
 
     def inspect_and_build(self, source_dir: Path, output_zip_path: Path) -> Path:
