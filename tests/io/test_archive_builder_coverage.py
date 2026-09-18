@@ -9,7 +9,6 @@ type checking, exception re-raising, and inner file size exclusion logic.
 import json
 from pathlib import Path
 from unittest.mock import patch
-
 import pytest
 
 from src.io.archive_builder import ArchiveBuilder, main
@@ -187,12 +186,14 @@ def test_file_not_found_reraise(tmp_path):
 
     builder = ArchiveBuilder(config_path=config_file)
 
-    # We mock Path.exists to return True so it passes pre-flight existence checks,
-    # but open() raises FileNotFoundError.
-    with patch.object(Path, "exists", return_value=True), \
-         patch("builtins.open", side_effect=FileNotFoundError("Config file vanished")):
-        with pytest.raises(FileNotFoundError, match="Config file vanished"):
-            builder._load_criteria()
+    # We mock Path.exists to return True and open to raise FileNotFoundError,
+    # combined into a single with statement using parentheses to satisfy SIM117.
+    with (
+        patch.object(Path, "exists", return_value=True),
+        patch("builtins.open", side_effect=FileNotFoundError("Config file vanished")),
+        pytest.raises(FileNotFoundError, match="Config file vanished"),
+    ):
+        builder._load_criteria()
 
 
 def test_inner_file_size_exceeded_exclusion(tmp_path):
