@@ -34,7 +34,7 @@ class ArchiveBuilder:
                 config_data = json.load(f)
             
             if not isinstance(config_data, dict):
-                raise ValueError("Configuration root must be a JSON object.")
+                raise TypeError("Configuration root must be a JSON object.")
 
             criteria = config_data.get("upload_criteria")
             if not isinstance(criteria, dict):
