@@ -7,6 +7,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 ---
 
 ### 🧮 Performance Audit:
+
 ### Audit: 2026-09-19 17:19:54 UTC
 - **Pipeline:** `pipeline6_a184a86.json`
 - **Branch:** `pipeline6_a184a86`
@@ -15,17 +16,6 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 7616 of 14400 seconds (success)
 - **CPU Load:** `100%`
 - **Memory Usage:** `10618/15989MB`
-### Audit: 2026-09-19 15:10:43 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pipeline6_a184a86`
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
-
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 
 ### Audit: 2026-09-19 15:10:43 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
@@ -39,6 +29,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1095/15989MB`
+
 ### Audit: 2026-09-19 17:20:09 UTC
 - **Pipeline:** `pipeline3_5e8f52e.json`
 - **Branch:** `pipeline3_5e8f52e`
