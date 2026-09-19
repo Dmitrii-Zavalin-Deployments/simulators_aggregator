@@ -7,6 +7,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 ---
 
 ### 🧮 Performance Audit:
+
 ### Audit: 2026-09-19 13:13:17 UTC
 - **Pipeline:** `pipeline2_c60cd89.json`
 - **Branch:** `pipeline2_c60cd89`
@@ -15,6 +16,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 7814 of 14400 seconds (success)
 - **CPU Load:** `100%`
 - **Memory Usage:** `10619/15989MB`
+
 ### Audit: 2026-09-19 12:30:21 UTC
 - **Pipeline:** `pipeline2_c60cd89.json`
 - **Branch:** `pipeline2_c60cd89`
@@ -23,25 +25,10 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 14400 seconds (skipped/error)
 - **CPU Load:** `46.3%`
 - **Memory Usage:** `1308/15989MB`
-### Audit: 2026-09-19 12:00:18 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pipeline2_c60cd89`
 
 ### Audit: 2026-09-19 12:00:18 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `pipeline2_c60cd89`
-
-### Audit: 2026-09-19 11:00:18 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pipeline2_c60cd89`
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
-
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 
 ### Audit: 2026-09-19 11:00:18 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
@@ -55,6 +42,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1037/15988MB`
+
 ### Audit: 2026-09-19 13:19:54 UTC
 - **Pipeline:** `pipeline4_2ad8b70.json`
 - **Branch:** `pipeline4_2ad8b70`
