@@ -1,7 +1,7 @@
 {
   "max_runtime_seconds": 14400,
   "upload_criteria": {
-    "max_full_size_mb": 200,
+    "max_full_size_mb": 300,
     "max_inner_file_size_mb": 100,
     "allowed_extensions": [".json", ".zip", ".step", ".mp4"]
   }
