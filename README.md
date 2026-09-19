@@ -7,6 +7,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 ---
 
 ### 🧮 Performance Audit:
+
 ### Audit: 2026-09-19 09:03:47 UTC
 - **Pipeline:** `pipeline3_fd8ba42.json`
 - **Branch:** `pipeline3_fd8ba42`
@@ -15,17 +16,6 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1110/15989MB`
-### Audit: 2026-09-19 09:00:28 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pipeline3_fd8ba42`
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
-
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 
 ### Audit: 2026-09-19 09:00:28 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
@@ -39,17 +29,6 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1185/15988MB`
-### Audit: 2026-09-19 08:00:28 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pipeline3_fd8ba42`
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
-
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 
 ### Audit: 2026-09-19 08:00:28 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
@@ -63,6 +42,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 7488 of 14400 seconds (success)
 - **CPU Load:** `100%`
 - **Memory Usage:** `10617/15989MB`
+
 ### Audit: 2026-09-19 03:09:15 UTC
 - **Pipeline:** `pipeline3_fd8ba42.json`
 - **Branch:** `pipeline3_fd8ba42`
@@ -71,6 +51,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 7560 of 14400 seconds (success)
 - **CPU Load:** `100%`
 - **Memory Usage:** `10619/15989MB`
+
 ### Audit: 2026-09-19 03:02:49 UTC
 - **Pipeline:** `pipeline3_fd8ba42.json`
 - **Branch:** `pipeline3_fd8ba42`
@@ -79,17 +60,6 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 14400 seconds (success)
 - **CPU Load:** `%`
 - **Memory Usage:** `13/15989MB`
-### Audit: 2026-09-19 03:00:26 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pipeline3_fd8ba42`
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
-
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 
 ### Audit: 2026-09-19 03:00:26 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
@@ -103,9 +73,6 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 7525 of 14400 seconds (success)
 - **CPU Load:** `100%`
 - **Memory Usage:** `10615/15989MB`
-### Audit: 2026-09-19 02:00:26 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pipeline3_fd8ba42`
 
 ### Audit: 2026-09-19 02:00:26 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
@@ -114,22 +81,6 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 ### Audit: 2026-09-19 01:00:26 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
 - **Branch:** `pipeline3_fd8ba42`
-
-### Audit: 2026-09-19 01:00:26 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pipeline3_fd8ba42`
-
-### Audit: 2026-09-19 00:00:25 UTC
-- **Pipeline:** `"trigger the tuning job from the localhost"`
-- **Branch:** `pipeline3_fd8ba42`
-Tunes the aggregated simulators pipelines, tracking execution telemetry, resource utilization, and runtime performance history.
-
-### 📚 Resources & Documentation
-- **Tutorial/Book:** ***currently in development***
-
----
-
-### 🧮 Performance Audit:
 
 ### Audit: 2026-09-19 00:00:25 UTC
 - **Pipeline:** `"trigger the tuning job from the localhost"`
@@ -143,6 +94,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1131/15989MB`
+
 ### Audit: 2026-09-18 23:52:13 UTC
 - **Pipeline:** `pipeline1_173e44b.json`
 - **Branch:** `main`
@@ -151,6 +103,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1094/15989MB`
+
 ### Audit: 2026-09-18 21:55:36 UTC
 - **Pipeline:** `pipeline_53818d8.json`
 - **Branch:** `main`
@@ -159,6 +112,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1220/15989MB`
+
 ### Audit: 2026-09-18 11:14:48 UTC
 - **Pipeline:** `pipeline_53818d8.json`
 - **Branch:** `main`
@@ -167,6 +121,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 450 seconds (failed)
 - **CPU Load:** `%`
 - **Memory Usage:** `14/15989MB`
+
 ### Audit: 2026-09-18 10:50:46 UTC
 - **Pipeline:** `pipeline_53818d8.json`
 - **Branch:** `main`
@@ -175,6 +130,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1336/15989MB`
+
 ### Audit: 2026-09-18 08:44:39 UTC
 - **Pipeline:** `pipeline_53818d8.json`
 - **Branch:** `main`
@@ -183,6 +139,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1296/15988MB`
+
 ### Audit: 2026-09-17 16:56:54 UTC
 - **Pipeline:** `pipeline_53818d8.json`
 - **Branch:** `main`
@@ -191,6 +148,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 41 of 450 seconds (failed)
 - **CPU Load:** `52.4%`
 - **Memory Usage:** `1765/15988MB`
+
 ### Audit: 2026-09-17 16:39:21 UTC
 - **Pipeline:** `pipeline_53818d8.json`
 - **Branch:** `main`
@@ -199,6 +157,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1224/15989MB`
+
 ### Audit: 2026-09-17 14:39:55 UTC
 - **Pipeline:** `main_pipeline_53818d8.json`
 - **Branch:** `main`
@@ -207,6 +166,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 39 of 450 seconds (failed)
 - **CPU Load:** `52.4%`
 - **Memory Usage:** `1765/15989MB`
+
 ### Audit: 2026-09-17 14:33:07 UTC
 - **Pipeline:** `main_pipeline_53818d8.json`
 - **Branch:** `main`
@@ -215,6 +175,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.3%`
 - **Memory Usage:** `1208/15989MB`
+
 ### Audit: 2026-09-17 14:28:14 UTC
 - **Pipeline:** `main_pipeline_53818d8.json`
 - **Branch:** `main`
@@ -223,6 +184,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1131/15989MB`
+
 ### Audit: 2026-09-17 12:43:29 UTC
 - **Pipeline:** `pipeline_53818d8.json`
 - **Branch:** `main`
@@ -231,6 +193,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1095/15989MB`
+
 ### Audit: 2026-09-17 12:38:41 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
 - **Branch:** `main`
@@ -239,6 +202,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1228/15989MB`
+
 ### Audit: 2026-09-16 23:46:15 UTC
 - **Pipeline:** `main_branch_pipeline_partial_02580ad.json`
 - **Branch:** `main`
@@ -247,6 +211,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 230 of 450 seconds (success)
 - **CPU Load:** `76.8%`
 - **Memory Usage:** `2229/15989MB`
+
 ### Audit: 2026-09-16 23:39:12 UTC
 - **Pipeline:** `main_branch_pipeline_partial_02580ad.json`
 - **Branch:** `main`
@@ -255,6 +220,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1057/15989MB`
+
 ### Audit: 2026-09-16 23:15:09 UTC
 - **Pipeline:** `main_branch_pipeline_partial_02580ad.json`
 - **Branch:** `main`
@@ -263,6 +229,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 200 of 450 seconds (success)
 - **CPU Load:** `52.4%`
 - **Memory Usage:** `1813/15988MB`
+
 ### Audit: 2026-09-16 23:06:52 UTC
 - **Pipeline:** `main_branch_pipeline_partial_02580ad.json`
 - **Branch:** `main`
@@ -271,6 +238,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1066/15989MB`
+
 ### Audit: 2026-09-16 15:19:11 UTC
 - **Pipeline:** `main_branch_pipeline_partial_02580ad.json`
 - **Branch:** `main`
@@ -279,6 +247,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 185 of 450 seconds (success)
 - **CPU Load:** `32.5%`
 - **Memory Usage:** `125/15989MB`
+
 ### Audit: 2026-09-16 15:12:12 UTC
 - **Pipeline:** `main_branch_pipeline_partial_02580ad.json`
 - **Branch:** `main`
@@ -287,6 +256,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.3%`
 - **Memory Usage:** `1058/15989MB`
+
 ### Audit: 2026-09-16 15:03:15 UTC
 - **Pipeline:** `main_branch_pipeline_partial_02580ad.json`
 - **Branch:** `main`
@@ -295,6 +265,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 209 of 450 seconds (success)
 - **CPU Load:** `35.7%`
 - **Memory Usage:** `125/15989MB`
+
 ### Audit: 2026-09-16 14:56:39 UTC
 - **Pipeline:** `main_branch_pipeline_partial_02580ad.json`
 - **Branch:** `main`
@@ -303,6 +274,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1138/15989MB`
+
 ### Audit: 2026-09-16 14:53:30 UTC
 - **Pipeline:** `main_branch_pipeline_partial_2b205df.json`
 - **Branch:** `main`
@@ -311,6 +283,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 450 seconds (success)
 - **CPU Load:** `%`
 - **Memory Usage:** `13/15993MB`
+
 ### Audit: 2026-09-16 14:38:30 UTC
 - **Pipeline:** `main_branch_pipeline_partial_2b205df.json`
 - **Branch:** `main`
@@ -319,6 +292,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 200 of 450 seconds (failed)
 - **CPU Load:** `38.1%`
 - **Memory Usage:** `124/15989MB`
+
 ### Audit: 2026-09-16 14:29:41 UTC
 - **Pipeline:** `main_branch_pipeline_partial_2b205df.json`
 - **Branch:** `main`
@@ -327,6 +301,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1115/15988MB`
+
 ### Audit: 2026-09-16 13:47:44 UTC
 - **Pipeline:** `main_branch_pipeline_partial_2b205df.json`
 - **Branch:** `main`
@@ -335,6 +310,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 226 of 450 seconds (failed)
 - **CPU Load:** `42.8%`
 - **Memory Usage:** `125/15989MB`
+
 ### Audit: 2026-09-16 13:39:54 UTC
 - **Pipeline:** `main_branch_pipeline_partial_2b205df.json`
 - **Branch:** `main`
@@ -343,6 +319,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1046/15993MB`
+
 ### Audit: 2026-09-16 13:35:44 UTC
 - **Pipeline:** `main_branch_pipeline_partial_2b205df.json`
 - **Branch:** `main`
@@ -351,6 +328,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 450 seconds (success)
 - **CPU Load:** `%`
 - **Memory Usage:** `13/15989MB`
+
 ### Audit: 2026-09-16 13:32:36 UTC
 - **Pipeline:** `main_branch_pipeline_partial_2b205df.json`
 - **Branch:** `main`
@@ -359,6 +337,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1125/15988MB`
+
 ### Audit: 2026-09-16 12:56:28 UTC
 - **Pipeline:** `main_branch_pipeline_partial_2b205df.json`
 - **Branch:** `main`
@@ -367,6 +346,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1062/15989MB`
+
 ### Audit: 2026-09-16 12:53:12 UTC
 - **Pipeline:** `main_branch_pipeline_partial_2b205df.json`
 - **Branch:** `main`
@@ -375,6 +355,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 450 seconds (success)
 - **CPU Load:** `%`
 - **Memory Usage:** `14/15989MB`
+
 ### Audit: 2026-09-16 12:50:31 UTC
 - **Pipeline:** `main_branch_pipeline_partial_2b205df.json`
 - **Branch:** `main`
@@ -383,6 +364,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1130/15988MB`
+
 ### Audit: 2026-09-16 12:44:18 UTC
 - **Pipeline:** `main_branch_pipeline_8d9f730.json`
 - **Branch:** `main`
@@ -391,6 +373,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 450 seconds (success)
 - **CPU Load:** `%`
 - **Memory Usage:** `14/15989MB`
+
 ### Audit: 2026-09-16 11:48:59 UTC
 - **Pipeline:** `main_branch_pipeline_8d9f730.json`
 - **Branch:** `main`
@@ -399,6 +382,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `88.4%`
 - **Memory Usage:** `295/15989MB`
+
 ### Audit: 2026-09-16 11:38:09 UTC
 - **Pipeline:** `main_branch_pipeline_8d9f730.json`
 - **Branch:** `main`
@@ -407,6 +391,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `4.6%`
 - **Memory Usage:** `1060/15988MB`
+
 ### Audit: 2026-09-16 10:23:02 UTC
 - **Pipeline:** `main_branch_pipeline_8d9f730.json`
 - **Branch:** `main`
@@ -415,6 +400,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 202 of 450 seconds (failed)
 - **CPU Load:** `40.5%`
 - **Memory Usage:** `295/15989MB`
+
 ### Audit: 2026-09-16 10:16:09 UTC
 - **Pipeline:** `main_branch_pipeline_8d9f730.json`
 - **Branch:** `main`
@@ -423,6 +409,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1125/15988MB`
+
 ### Audit: 2026-09-16 10:13:08 UTC
 - **Pipeline:** `main_branch_pipeline_8d9f730.json`
 - **Branch:** `main`
@@ -431,6 +418,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 450 seconds (success)
 - **CPU Load:** `%`
 - **Memory Usage:** `13/15993MB`
+
 ### Audit: 2026-09-16 09:35:00 UTC
 - **Pipeline:** `main_branch_pipeline_8d9f730.json`
 - **Branch:** `main`
@@ -439,6 +427,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 205 of 450 seconds (failed)
 - **CPU Load:** `41.5%`
 - **Memory Usage:** `295/15989MB`
+
 ### Audit: 2026-09-16 09:28:20 UTC
 - **Pipeline:** `main_branch_pipeline_8d9f730.json`
 - **Branch:** `main`
@@ -447,6 +436,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1112/15989MB`
+
 ### Audit: 2026-09-16 08:54:02 UTC
 - **Pipeline:** `main_branch_pipeline_5a27ddb.json`
 - **Branch:** `main`
@@ -455,6 +445,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 450 seconds (success)
 - **CPU Load:** `%`
 - **Memory Usage:** `13/15988MB`
+
 ### Audit: 2026-09-15 15:21:33 UTC
 - **Pipeline:** `main_branch_pipeline_5a27ddb.json`
 - **Branch:** `main`
@@ -463,6 +454,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 203 of 450 seconds (failed)
 - **CPU Load:** `36.6%`
 - **Memory Usage:** `295/15989MB`
+
 ### Audit: 2026-09-15 15:08:41 UTC
 - **Pipeline:** `main_branch_pipeline_5a27ddb.json`
 - **Branch:** `main`
@@ -471,6 +463,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1049/15989MB`
+
 ### Audit: 2026-09-15 15:03:47 UTC
 - **Pipeline:** `main_branch_pipeline_5a27ddb.json`
 - **Branch:** `main`
@@ -479,6 +472,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1077/15988MB`
+
 ### Audit: 2026-09-15 14:51:16 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
 - **Branch:** `main`
@@ -487,6 +481,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `4.6%`
 - **Memory Usage:** `1282/15989MB`
+
 ### Audit: 2026-09-15 13:14:10 UTC
 - **Pipeline:** `main_branch_pipeline_4df0f77.json`
 - **Branch:** `main`
@@ -495,6 +490,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 450 seconds (success)
 - **CPU Load:** `%`
 - **Memory Usage:** `13/15989MB`
+
 ### Audit: 2026-09-15 12:49:01 UTC
 - **Pipeline:** `main_branch_pipeline_4df0f77.json`
 - **Branch:** `main`
@@ -503,6 +499,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 199 of 450 seconds (success)
 - **CPU Load:** `39.5%`
 - **Memory Usage:** `124/15993MB`
+
 ### Audit: 2026-09-15 12:42:01 UTC
 - **Pipeline:** `main_branch_pipeline_4df0f77.json`
 - **Branch:** `main`
@@ -511,6 +508,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1076/15989MB`
+
 ### Audit: 2026-09-15 12:29:43 UTC
 - **Pipeline:** `main_branch_pipeline_4df0f77.json`
 - **Branch:** `main`
@@ -519,6 +517,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 211 of 450 seconds (success)
 - **CPU Load:** `100%`
 - **Memory Usage:** `124/15993MB`
+
 ### Audit: 2026-09-15 11:22:33 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
 - **Branch:** `main`
@@ -527,6 +526,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.9%`
 - **Memory Usage:** `1416/15988MB`
+
 ### Audit: 2026-09-15 11:17:21 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
 - **Branch:** `main`
@@ -535,6 +535,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.3%`
 - **Memory Usage:** `1332/15989MB`
+
 ### Audit: 2026-09-15 11:15:04 UTC
 - **Pipeline:** `main_branch_pipeline_4df0f77.json`
 - **Branch:** `main`
@@ -543,6 +544,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1098/15989MB`
+
 ### Audit: 2026-09-15 11:06:23 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
 - **Branch:** `main`
@@ -551,6 +553,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 450 seconds (failed)
 - **CPU Load:** `%`
 - **Memory Usage:** `14/15989MB`
+
 ### Audit: 2026-09-15 11:03:38 UTC
 - **Pipeline:** `main_branch_pipeline_4df0f77.json`
 - **Branch:** `main`
@@ -559,6 +562,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1109/15989MB`
+
 ### Audit: 2026-09-15 10:58:46 UTC
 - **Pipeline:** `main_branch_pipeline_4df0f77.json`
 - **Branch:** `main`
@@ -567,6 +571,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1132/15989MB`
+
 ### Audit: 2026-09-15 10:52:58 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
 - **Branch:** `main`
@@ -575,6 +580,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 1 of 450 seconds (failed)
 - **CPU Load:** `%`
 - **Memory Usage:** `14/15989MB`
+
 ### Audit: 2026-09-15 10:44:51 UTC
 - **Pipeline:** `main_branch_pipeline_4df0f77.json`
 - **Branch:** `main`
@@ -583,6 +589,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1113/15989MB`
+
 ### Audit: 2026-09-15 09:40:04 UTC
 - **Pipeline:** `main_branch_pipeline_4df0f77.json`
 - **Branch:** `main`
@@ -591,6 +598,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 196 of 450 seconds (success)
 - **CPU Load:** `38.1%`
 - **Memory Usage:** `124/15989MB`
+
 ### Audit: 2026-09-15 09:31:44 UTC
 - **Pipeline:** `main_branch_pipeline_4df0f77.json`
 - **Branch:** `main`
@@ -599,6 +607,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1097/15989MB`
+
 ### Audit: 2026-09-15 00:07:47 UTC
 - **Pipeline:** `main_branch_pipeline_4df0f77.json`
 - **Branch:** `main`
@@ -607,6 +616,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 158 of 450 seconds (success)
 - **CPU Load:** `35.7%`
 - **Memory Usage:** `126/15988MB`
+
 ### Audit: 2026-09-15 00:02:00 UTC
 - **Pipeline:** `main_branch_pipeline_4df0f77.json`
 - **Branch:** `main`
@@ -615,6 +625,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1046/15989MB`
+
 ### Audit: 2026-09-14 23:57:59 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
 - **Branch:** `main`
@@ -623,6 +634,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `4.6%`
 - **Memory Usage:** `1278/15993MB`
+
 ### Audit: 2026-09-14 22:56:23 UTC
 - **Pipeline:** `main_branch_pipeline_94aaf85.json`
 - **Branch:** `main`
@@ -631,6 +643,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 8 of 450 seconds (success)
 - **CPU Load:** `29.3%`
 - **Memory Usage:** `52/15993MB`
+
 ### Audit: 2026-09-14 22:52:00 UTC
 - **Pipeline:** `main_branch_pipeline_94aaf85.json`
 - **Branch:** `main`
@@ -639,6 +652,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1071/15989MB`
+
 ### Audit: 2026-09-14 15:08:52 UTC
 - **Pipeline:** `main_branch_pipeline_94aaf85.json`
 - **Branch:** `main`
@@ -647,6 +661,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 10 of 450 seconds (success)
 - **CPU Load:** `31.7%`
 - **Memory Usage:** `52/15989MB`
+
 ### Audit: 2026-09-14 14:59:16 UTC
 - **Pipeline:** `main_branch_pipeline_94aaf85.json`
 - **Branch:** `main`
@@ -655,6 +670,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1113/15989MB`
+
 ### Audit: 2026-09-14 13:46:55 UTC
 - **Pipeline:** `main_branch_pipeline_94aaf85.json`
 - **Branch:** `main`
@@ -663,6 +679,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 8 of 450 seconds (success)
 - **CPU Load:** `29.3%`
 - **Memory Usage:** `52/15989MB`
+
 ### Audit: 2026-09-14 13:44:04 UTC
 - **Pipeline:** `main_branch_pipeline_94aaf85.json`
 - **Branch:** `main`
@@ -671,6 +688,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.3%`
 - **Memory Usage:** `986/15989MB`
+
 ### Audit: 2026-09-14 13:23:19 UTC
 - **Pipeline:** `main_branch_pipeline_94aaf85.json`
 - **Branch:** `main`
@@ -679,6 +697,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 10 of 450 seconds (failed)
 - **CPU Load:** `26.9%`
 - **Memory Usage:** `32/15989MB`
+
 ### Audit: 2026-09-14 13:20:10 UTC
 - **Pipeline:** `main_branch_pipeline_94aaf85.json`
 - **Branch:** `main`
@@ -687,6 +706,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1065/15993MB`
+
 ### Audit: 2026-09-14 13:04:12 UTC
 - **Pipeline:** `main_branch_pipeline_416ef23.json`
 - **Branch:** `main`
@@ -695,6 +715,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 8 of 450 seconds (failed)
 - **CPU Load:** `29.3%`
 - **Memory Usage:** `32/15989MB`
+
 ### Audit: 2026-09-14 13:00:52 UTC
 - **Pipeline:** `main_branch_pipeline_416ef23.json`
 - **Branch:** `main`
@@ -703,6 +724,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `4.6%`
 - **Memory Usage:** `1085/15989MB`
+
 ### Audit: 2026-09-14 12:46:28 UTC
 - **Pipeline:** `main_branch_pipeline_94aaf85.json`
 - **Branch:** `main`
@@ -711,6 +733,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1134/15989MB`
+
 ### Audit: 2026-09-14 12:37:25 UTC
 - **Pipeline:** `main_branch_pipeline_94aaf85.json`
 - **Branch:** `main`
@@ -719,6 +742,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `4.6%`
 - **Memory Usage:** `1096/15989MB`
+
 ### Audit: 2026-09-14 12:15:16 UTC
 - **Pipeline:** `main_branch_pipeline_3c08bc3.json`
 - **Branch:** `main`
@@ -727,6 +751,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 66 of 450 seconds (success)
 - **CPU Load:** `95.5%`
 - **Memory Usage:** `713/15989MB`
+
 ### Audit: 2026-08-03 18:52:44 UTC
 - **Pipeline:** `main_branch_pipeline_3c08bc3.json`
 - **Branch:** `main`
@@ -735,6 +760,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 80 of 450 seconds (success)
 - **CPU Load:** `100%`
 - **Memory Usage:** `711/15989MB`
+
 ### Audit: 2026-08-03 18:46:25 UTC
 - **Pipeline:** `main_branch_pipeline_3c08bc3.json`
 - **Branch:** `main`
@@ -743,6 +769,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1220/15988MB`
+
 ### Audit: 2026-08-03 18:37:24 UTC
 - **Pipeline:** `main_branch_pipeline_ea6ace6.json`
 - **Branch:** `main`
@@ -751,6 +778,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 450 of 450 seconds (timeout)
 - **CPU Load:** `100%`
 - **Memory Usage:** `121/15989MB`
+
 ### Audit: 2026-08-03 18:25:30 UTC
 - **Pipeline:** `main_branch_pipeline_ea6ace6.json`
 - **Branch:** `main`
@@ -759,6 +787,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.3%`
 - **Memory Usage:** `1280/15989MB`
+
 ### Audit: 2026-08-03 16:35:12 UTC
 - **Pipeline:** `main_branch_pipeline_ea6ace6.json`
 - **Branch:** `main`
@@ -767,6 +796,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 18 of 450 seconds (success)
 - **CPU Load:** `89.1%`
 - **Memory Usage:** `237/15989MB`
+
 ### Audit: 2026-08-03 16:18:29 UTC
 - **Pipeline:** `main_branch_pipeline_ea6ace6.json`
 - **Branch:** `main`
@@ -775,6 +805,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `4.6%`
 - **Memory Usage:** `1150/15989MB`
+
 ### Audit: 2026-08-03 16:08:07 UTC
 - **Pipeline:** `main_branch_pipeline_e5a6bd7.json`
 - **Branch:** `main`
@@ -783,6 +814,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 15 of 450 seconds (success)
 - **CPU Load:** `53.7%`
 - **Memory Usage:** `239/15989MB`
+
 ### Audit: 2026-08-03 16:02:24 UTC
 - **Pipeline:** `main_branch_pipeline_e5a6bd7.json`
 - **Branch:** `main`
@@ -791,6 +823,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 26 of 450 seconds (success)
 - **CPU Load:** `50%`
 - **Memory Usage:** `242/15989MB`
+
 ### Audit: 2026-08-03 15:51:46 UTC
 - **Pipeline:** `main_branch_pipeline_e5a6bd7.json`
 - **Branch:** `main`
@@ -799,6 +832,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.3%`
 - **Memory Usage:** `1117/15989MB`
+
 ### Audit: 2026-08-03 15:41:43 UTC
 - **Pipeline:** `main_branch_pipeline_5e41037.json`
 - **Branch:** `main`
@@ -807,6 +841,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.4%`
 - **Memory Usage:** `1201/15989MB`
+
 ### Audit: 2026-08-03 15:30:49 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
 - **Branch:** `main`
@@ -815,6 +850,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `16.3%`
 - **Memory Usage:** `1467/15989MB`
+
 ### Audit: 2026-08-03 14:48:23 UTC
 - **Pipeline:** `main_branch_pipeline_5e41037.json`
 - **Branch:** `main`
@@ -823,6 +859,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 11 of 450 seconds (failed)
 - **CPU Load:** `34.2%`
 - **Memory Usage:** `239/15989MB`
+
 ### Audit: 2026-08-03 13:53:21 UTC
 - **Pipeline:** `main_branch_pipeline_5e41037.json`
 - **Branch:** `main`
@@ -831,6 +868,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 9 of 450 seconds (failed)
 - **CPU Load:** `54.8%`
 - **Memory Usage:** `242/15988MB`
+
 ### Audit: 2026-08-03 13:51:10 UTC
 - **Pipeline:** `main_branch_pipeline_5e41037.json`
 - **Branch:** `main`
@@ -839,6 +877,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 9 of 450 seconds (failed)
 - **CPU Load:** `43.9%`
 - **Memory Usage:** `247/15989MB`
+
 ### Audit: 2026-08-03 12:49:04 UTC
 - **Pipeline:** `main_branch_pipeline_5e41037.json`
 - **Branch:** `main`
@@ -847,6 +886,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 12 of 450 seconds (failed)
 - **CPU Load:** `30.2%`
 - **Memory Usage:** `236/15989MB`
+
 ### Audit: 2026-08-03 11:54:40 UTC
 - **Pipeline:** `main_branch_pipeline_5e41037.json`
 - **Branch:** `main`
@@ -855,6 +895,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1207/15988MB`
+
 ### Audit: 2026-08-02 22:12:59 UTC
 - **Pipeline:** `main_branch_pipeline_aedc2bd.json`
 - **Branch:** `main`
@@ -863,6 +904,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 7 of 450 seconds (success)
 - **CPU Load:** `26.2%`
 - **Memory Usage:** `332/15989MB`
+
 ### Audit: 2026-08-02 22:08:48 UTC
 - **Pipeline:** `main_branch_pipeline_aedc2bd.json`
 - **Branch:** `main`
@@ -871,6 +913,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.3%`
 - **Memory Usage:** `1277/15989MB`
+
 ### Audit: 2026-08-02 20:55:28 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
 - **Branch:** `main`
@@ -879,6 +922,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `6.3%`
 - **Memory Usage:** `1221/15993MB`
+
 ### Audit: 2026-08-02 19:05:01 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
 - **Branch:** `main`
@@ -887,6 +931,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.3%`
 - **Memory Usage:** `1227/15989MB`
+
 ### Audit: 2026-08-02 18:54:42 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
 - **Branch:** `main`
@@ -895,6 +940,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1329/15989MB`
+
 ### Audit: 2026-08-02 13:34:48 UTC
 - **Pipeline:** `Assemble & Tuning (Disconnected)`
 - **Branch:** `main`
@@ -903,6 +949,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `2.1%`
 - **Memory Usage:** `1405/15989MB`
+
 ### Audit: 2026-08-02 12:31:46 UTC
 - **Pipeline:** `main_branch_pipeline_aedc2bd.json`
 - **Branch:** `main`
@@ -911,6 +958,7 @@ Tunes the aggregated simulators pipelines, tracking execution telemetry, resourc
 - **Modules Runtime:** Used 0 of 0 seconds (skipped/error)
 - **CPU Load:** `0%`
 - **Memory Usage:** `1126/15989MB`
+
 ### Audit: 2026-07-25 07:03:58 UTC
 - **Pipeline:** `pre_navier_stokes_solver10_3616c82.json`
 - **Branch:** `pre_navier_stokes_solver10_3616c82`
